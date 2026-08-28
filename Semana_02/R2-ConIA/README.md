@@ -19,8 +19,9 @@ Este programa simula la gestión y facturación de un carrito de compras para un
 
 ## 3. Captura de la Consola
 
-![Captura del resultado final](![img.png](img.png))
+![Captura del resultado 1](img.png)
 
-![Captura del resultado final](![img_1.png](img_1.png))
+![Captura del resultado 2](img_1.png)
 
-![Captura del resultado final](![img_2.png](img_2.png))
+![Captura del resultado 3](img_2.png)
+
