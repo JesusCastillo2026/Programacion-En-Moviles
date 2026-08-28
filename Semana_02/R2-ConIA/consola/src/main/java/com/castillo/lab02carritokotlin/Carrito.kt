@@ -1,92 +1,156 @@
 package com.castillo.lab02carritokotlin
 
-data class Producto(
-    val nombre: String,
-    val precio: Double,
-    var cantidad: Int
+import java.util.Locale
+
+// 1. ABSTRACCIÓN: Clase base con contrato general
+abstract class Producto(
+    private val codigo: String,
+    private val nombre: String,
+    private var precioBase: Double,
+    private var stock: Int
+) {
+    // 2. ENCAPSULAMIENTO: Acceso seguro a atributos protegidos
+    fun getCodigo(): String = codigo
+    fun getNombre(): String = nombre
+    fun getPrecioBase(): Double = precioBase
+    fun getStock(): Int = stock
+
+    fun reducirStock(cantidad: Int): Boolean {
+        return if (stock >= cantidad) {
+            stock -= cantidad
+            true
+        } else {
+            false
+        }
+    }
+
+    // 3. POLIMORFISMO: Métodos abstractos con comportamiento según la subclase
+    abstract fun calcularTotalItem(cantidad: Int): Double
+    abstract fun obtenerDetalleTipo(): String
+}
+
+// 4. HERENCIA: ProductoFisico extiende Producto
+class ProductoFisico(
+    codigo: String,
+    nombre: String,
+    precioBase: Double,
+    stock: Int,
+    private val costoEnvio: Double
+) : Producto(codigo, nombre, precioBase, stock) {
+
+    override fun calcularTotalItem(cantidad: Int): Double {
+        return (getPrecioBase() * cantidad) + costoEnvio
+    }
+
+    override fun obtenerDetalleTipo(): String {
+        return "FISICO (Envio: S/ ${String.format(Locale.US, "%.2f", costoEnvio)})"
+    }
+}
+
+// 4. HERENCIA: ProductoDigital extiende Producto
+class ProductoDigital(
+    codigo: String,
+    nombre: String,
+    precioBase: Double,
+    stock: Int,
+    private val linkDescarga: String
+) : Producto(codigo, nombre, precioBase, stock) {
+
+    override fun calcularTotalItem(cantidad: Int): Double {
+        return getPrecioBase() * cantidad
+    }
+
+    override fun obtenerDetalleTipo(): String {
+        return "DIGITAL (Descarga: $linkDescarga)"
+    }
+}
+
+data class ItemCarrito(
+    val producto: Producto,
+    val cantidad: Int
 )
 
-fun calcularSubtotal(productos: List<Producto>): Double {
-    var subtotal = 0.00
-    for (p in productos) {
-        subtotal += p.precio * p.cantidad
+class CarritoDeCompras(private val cliente: String) {
+    private val items = mutableListOf<ItemCarrito>()
+
+    fun agregarProducto(producto: Producto, cantidad: Int) {
+        if (producto.reducirStock(cantidad)) {
+            items.add(ItemCarrito(producto, cantidad))
+        } else {
+            println("Stock insuficiente para: ${producto.getNombre()} (Disponibles: ${producto.getStock()})")
+        }
     }
-    return subtotal
-}
 
-fun calcularIGV(subtotal: Double): Double {
-    return subtotal * 0.18
-}
-
-fun calcularTotal(subtotal: Double, igv: Double): Double {
-    return subtotal + igv
-}
-
-fun mostrarDetalle(productos: List<Producto>) {
-    println("--------- DETALLE DEL CARRITO --------")
-    var i = 1
-    for (p in productos) {
-        val importe = p.precio * p.cantidad
-        println(String.format("%d. %-20s x%d S/ %8.2f", i, p.nombre, p.cantidad, importe))
-        i++
+    fun calcularSubtotal(): Double {
+        var subtotal = 0.00
+        for (item in items) {
+            subtotal += item.producto.calcularTotalItem(item.cantidad)
+        }
+        return subtotal
     }
-    println("--------------------------------------")
-}
 
-fun calcularDescuento(total: Double): Double {
-    return when {
-        total > 5000.00 -> total * 0.10
-        total > 3000.00 -> total * 0.05
-        else -> 0.00
+    fun calcularDescuento(total: Double): Double {
+        return when {
+            total > 5000.00 -> total * 0.10
+            total > 3000.00 -> total * 0.05
+            else -> 0.00
+        }
+    }
+
+    fun generarReporte() {
+        println("=========================================")
+        println("       CARRITO POO - TIENDA TECSUP       ")
+        println("=========================================")
+        println("Cliente: $cliente\n")
+        println("--------- DETALLE DE PRODUCTOS ----------")
+
+        var i = 1
+        for (item in items) {
+            val totalLinea = item.producto.calcularTotalItem(item.cantidad)
+            println(
+                String.format(
+                    Locale.US,
+                    "%d. [%s] %-20s x%d S/ %8.2f",
+                    i,
+                    item.producto.getCodigo(),
+                    item.producto.getNombre(),
+                    item.cantidad,
+                    totalLinea
+                )
+            )
+            println("   Detalle: ${item.producto.obtenerDetalleTipo()} | Stock restante: ${item.producto.getStock()}")
+            i++
+        }
+        println("-----------------------------------------")
+
+        val subtotal = calcularSubtotal()
+        val igv = subtotal * 0.18
+        val totalBruto = subtotal + igv
+        val descuento = calcularDescuento(totalBruto)
+        val totalPagar = totalBruto - descuento
+
+        println(String.format(Locale.US, "Subtotal              : S/ %8.2f", subtotal))
+        println(String.format(Locale.US, "IGV (18%%)             : S/ %8.2f", igv))
+        println(String.format(Locale.US, "Total Bruto           : S/ %8.2f", totalBruto))
+        if (descuento > 0.00) {
+            println(String.format(Locale.US, "Descuento Aplicado    : S/ %8.2f", descuento))
+        }
+        println(String.format(Locale.US, "TOTAL A PAGAR         : S/ %8.2f", totalPagar))
     }
 }
 
 fun main() {
-    println("=========================================")
-    println("  CARRITO DE COMPRAS - TIENDA TECSUP  ")
-    println("=========================================")
+    val carrito = CarritoDeCompras("Jesus Castillo")
 
-    val nombreCliente = "Jesus Castillo"
-    val carrito = mutableListOf<Producto>()
+    val laptop = ProductoFisico("TEC-01", "Laptop Gamer Victus", 3200.00, 5, 35.00)
+    val mouse = ProductoFisico("TEC-02", "Mouse Inalambrico", 85.00, 12, 10.00)
+    val winLicense = ProductoDigital("LIC-01", "Licencia Windows 11", 150.00, 50, "https://tecsup.edu.pe/keys/win")
+    val kotlinCourse = ProductoDigital("CUR-01", "Curso Kotlin Online", 60.00, 100, "https://tecsup.edu.pe/campus/kt")
 
-    println("Cliente: $nombreCliente")
-    println()
+    carrito.agregarProducto(laptop, 1)
+    carrito.agregarProducto(mouse, 2)
+    carrito.agregarProducto(winLicense, 1)
+    carrito.agregarProducto(kotlinCourse, 1)
 
-    carrito.add(Producto("Laptop HP", 2500.00, 1))
-    carrito.add(Producto("Mouse Logitech", 45.50, 2))
-    carrito.add(Producto("Audifonos Sony", 120.00, 1))
-    carrito.add(Producto("USB Kingston 64GB", 25.00, 3))
-
-    for (producto in carrito) {
-        println("Producto agregado: ${producto.nombre}")
-    }
-    println()
-
-    mostrarDetalle(carrito)
-
-    val subtotal = calcularSubtotal(carrito)
-    val igv = calcularIGV(subtotal)
-    val total = calcularTotal(subtotal, igv)
-
-    println("Cantidad de productos : ${carrito.size}")
-    println(String.format("Subtotal              : S/ %8.2f", subtotal))
-    println(String.format("IGV (18%%)             : S/ %8.2f", igv))
-    println(String.format("TOTAL A PAGAR         : S/ %8.2f", total))
-    println()
-
-    val masCaro = carrito.maxByOrNull { it.precio }
-    if (masCaro != null) {
-        println("Producto mas caro: ${masCaro.nombre} (S/${String.format("%.2f", masCaro.precio)})")
-    }
-
-    val descuento = calcularDescuento(total)
-    if (descuento > 0.00) {
-        val porcentajeTexto = if (total > 5000.00) "10%" else "5%"
-        println("Descuento aplicado: $porcentajeTexto por compra mayor a S/ 3000")
-        val totalConDescuento = total - descuento
-        println(String.format("TOTAL CON DESCUENTO   : S/%8.2f", totalConDescuento))
-    }
-
-    println()
-    println("Gracias por su compra, $nombreCliente!")
+    carrito.generarReporte()
 }
