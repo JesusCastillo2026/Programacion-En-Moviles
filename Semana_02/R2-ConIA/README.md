@@ -17,6 +17,9 @@ Este programa simula la gestión y facturación de un carrito de compras para un
 * Se usa **`val`** en `nombre` y `precio` porque son características fijas del producto. No deben cambiar accidentalmente mientras el cliente realiza la compra.
 * Se usa **`var`** en `stock` y `cantidad` porque son valores dinámicos que aumentan o disminuyen constantemente a medida que el usuario agrega o quita productos de su carrito.
 
+## Prompt Utilizado
+Consulta el prompt y las instrucciones del asistente en [PROMPT.md](PROMPT.md).
+
 ## 3. Captura de la Consola
 
 ![Captura del resultado 1](img.png)
