@@ -2,14 +2,12 @@ package com.castillo.lab02carritokotlin
 
 import java.util.Locale
 
-// 1. ABSTRACCIÓN
 abstract class Producto(
     private val codigo: String,
     private val nombre: String,
     private var precioBase: Double,
     private var stock: Int
 ) {
-    // 2. ENCAPSULAMIENTO
     fun getCodigo(): String = codigo
     fun getNombre(): String = nombre
     fun getPrecioBase(): Double = precioBase
@@ -28,12 +26,10 @@ abstract class Producto(
         stock += cantidad
     }
 
-    // 3. POLIMORFISMO
     abstract fun calcularTotalItem(cantidad: Int): Double
     abstract fun obtenerDetalleTipo(): String
 }
 
-// 4. HERENCIA: ProductoFisico
 class ProductoFisico(
     codigo: String,
     nombre: String,
@@ -51,7 +47,6 @@ class ProductoFisico(
     }
 }
 
-// 4. HERENCIA: ProductoDigital
 class ProductoDigital(
     codigo: String,
     nombre: String,
@@ -74,7 +69,6 @@ data class ItemCarrito(
     val cantidad: Int
 )
 
-// Función del reto adicional para buscar sobre una lista de productos
 fun buscarProducto(productos: List<Producto>, nombre: String): Producto? {
     return productos.find { it.getNombre().equals(nombre, ignoreCase = true) }
 }
@@ -86,11 +80,10 @@ class CarritoDeCompras(private val cliente: String) {
         if (producto.reducirStock(cantidad)) {
             items.add(ItemCarrito(producto, cantidad))
         } else {
-            println("Stock insuficiente para: ${producto.getNombre()} (Disponibles: ${producto.getStock()})")
+            println("Stock insuficiente para: ${producto.getNombre()}")
         }
     }
 
-    // Reto adicional: Eliminación con removeIf y reposición de stock
     fun eliminarProductoPorNombre(nombre: String): Boolean {
         val item = items.find { it.producto.getNombre().equals(nombre, ignoreCase = true) }
         return if (item != null) {
@@ -147,6 +140,13 @@ class CarritoDeCompras(private val cliente: String) {
         val subtotal = calcularSubtotal()
         val igv = subtotal * 0.18
         val totalBruto = subtotal + igv
+
+        val masCaro = items.maxByOrNull { it.producto.getPrecioBase() }?.producto
+        if (masCaro != null) {
+            println(String.format(Locale.US, "Producto mas caro     : %s (S/ %.2f)", masCaro.getNombre(), masCaro.getPrecioBase()))
+            println("-----------------------------------------")
+        }
+
         val descuento = calcularDescuento(totalBruto)
         val totalPagar = totalBruto - descuento
 
@@ -182,7 +182,6 @@ fun main() {
     println("            RETO ADICIONAL               ")
     println("=========================================")
 
-    // 1. Demostración de búsqueda con find
     val nombreABuscar = "Mouse Inalambrico"
     val buscado = buscarProducto(catalogo, nombreABuscar)
     if (buscado != null) {
@@ -191,7 +190,6 @@ fun main() {
         println("Producto '$nombreABuscar' no encontrado.")
     }
 
-    // 2. Demostración de eliminación con removeIf
     val productoAEliminar = "Mouse Inalambrico"
     println("\nEliminando '$productoAEliminar' del carrito con removeIf...")
     val eliminado = carrito.eliminarProductoPorNombre(productoAEliminar)
