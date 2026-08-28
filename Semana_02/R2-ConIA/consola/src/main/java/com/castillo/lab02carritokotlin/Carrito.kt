@@ -7,7 +7,7 @@ data class Producto(
 )
 
 fun calcularSubtotal(productos: List<Producto>): Double {
-    var subtotal = 0.0
+    var subtotal = 0.00
     for (p in productos) {
         subtotal += p.precio * p.cantidad
     }
@@ -31,6 +31,14 @@ fun mostrarDetalle(productos: List<Producto>) {
         i++
     }
     println("--------------------------------------")
+}
+
+fun calcularDescuento(total: Double): Double {
+    return when {
+        total > 5000.00 -> total * 0.10
+        total > 3000.00 -> total * 0.05
+        else -> 0.00
+    }
 }
 
 fun main() {
@@ -64,4 +72,21 @@ fun main() {
     println(String.format("Subtotal              : S/ %8.2f", subtotal))
     println(String.format("IGV (18%%)             : S/ %8.2f", igv))
     println(String.format("TOTAL A PAGAR         : S/ %8.2f", total))
+    println()
+
+    val masCaro = carrito.maxByOrNull { it.precio }
+    if (masCaro != null) {
+        println("Producto mas caro: ${masCaro.nombre} (S/${String.format("%.2f", masCaro.precio)})")
+    }
+
+    val descuento = calcularDescuento(total)
+    if (descuento > 0.00) {
+        val porcentajeTexto = if (total > 5000.00) "10%" else "5%"
+        println("Descuento aplicado: $porcentajeTexto por compra mayor a S/ 3000")
+        val totalConDescuento = total - descuento
+        println(String.format("TOTAL CON DESCUENTO   : S/%8.2f", totalConDescuento))
+    }
+
+    println()
+    println("Gracias por su compra, $nombreCliente!")
 }
