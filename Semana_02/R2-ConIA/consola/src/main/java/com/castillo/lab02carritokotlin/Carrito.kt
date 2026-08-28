@@ -2,14 +2,14 @@ package com.castillo.lab02carritokotlin
 
 import java.util.Locale
 
-// 1. ABSTRACCIÓN: Clase base con contrato general
+// 1. ABSTRACCIÓN
 abstract class Producto(
     private val codigo: String,
     private val nombre: String,
     private var precioBase: Double,
     private var stock: Int
 ) {
-    // 2. ENCAPSULAMIENTO: Acceso seguro a atributos protegidos
+    // 2. ENCAPSULAMIENTO
     fun getCodigo(): String = codigo
     fun getNombre(): String = nombre
     fun getPrecioBase(): Double = precioBase
@@ -24,12 +24,16 @@ abstract class Producto(
         }
     }
 
-    // 3. POLIMORFISMO: Métodos abstractos con comportamiento según la subclase
+    fun reponerStock(cantidad: Int) {
+        stock += cantidad
+    }
+
+    // 3. POLIMORFISMO
     abstract fun calcularTotalItem(cantidad: Int): Double
     abstract fun obtenerDetalleTipo(): String
 }
 
-// 4. HERENCIA: ProductoFisico extiende Producto
+// 4. HERENCIA: ProductoFisico
 class ProductoFisico(
     codigo: String,
     nombre: String,
@@ -47,7 +51,7 @@ class ProductoFisico(
     }
 }
 
-// 4. HERENCIA: ProductoDigital extiende Producto
+// 4. HERENCIA: ProductoDigital
 class ProductoDigital(
     codigo: String,
     nombre: String,
@@ -70,6 +74,11 @@ data class ItemCarrito(
     val cantidad: Int
 )
 
+// Función del reto adicional para buscar sobre una lista de productos
+fun buscarProducto(productos: List<Producto>, nombre: String): Producto? {
+    return productos.find { it.getNombre().equals(nombre, ignoreCase = true) }
+}
+
 class CarritoDeCompras(private val cliente: String) {
     private val items = mutableListOf<ItemCarrito>()
 
@@ -78,6 +87,18 @@ class CarritoDeCompras(private val cliente: String) {
             items.add(ItemCarrito(producto, cantidad))
         } else {
             println("Stock insuficiente para: ${producto.getNombre()} (Disponibles: ${producto.getStock()})")
+        }
+    }
+
+    // Reto adicional: Eliminación con removeIf y reposición de stock
+    fun eliminarProductoPorNombre(nombre: String): Boolean {
+        val item = items.find { it.producto.getNombre().equals(nombre, ignoreCase = true) }
+        return if (item != null) {
+            item.producto.reponerStock(item.cantidad)
+            items.removeIf { it.producto.getNombre().equals(nombre, ignoreCase = true) }
+            true
+        } else {
+            false
         }
     }
 
@@ -129,6 +150,7 @@ class CarritoDeCompras(private val cliente: String) {
         val descuento = calcularDescuento(totalBruto)
         val totalPagar = totalBruto - descuento
 
+        println("Cantidad de productos : ${items.size}")
         println(String.format(Locale.US, "Subtotal              : S/ %8.2f", subtotal))
         println(String.format(Locale.US, "IGV (18%%)             : S/ %8.2f", igv))
         println(String.format(Locale.US, "Total Bruto           : S/ %8.2f", totalBruto))
@@ -142,15 +164,42 @@ class CarritoDeCompras(private val cliente: String) {
 fun main() {
     val carrito = CarritoDeCompras("Jesus Castillo")
 
-    val laptop = ProductoFisico("TEC-01", "Laptop Gamer Victus", 3200.00, 5, 35.00)
-    val mouse = ProductoFisico("TEC-02", "Mouse Inalambrico", 85.00, 12, 10.00)
-    val winLicense = ProductoDigital("LIC-01", "Licencia Windows 11", 150.00, 50, "https://tecsup.edu.pe/keys/win")
-    val kotlinCourse = ProductoDigital("CUR-01", "Curso Kotlin Online", 60.00, 100, "https://tecsup.edu.pe/campus/kt")
+    val catalogo = listOf(
+        ProductoFisico("TEC-01", "Laptop Gamer Victus", 3200.00, 5, 35.00),
+        ProductoFisico("TEC-02", "Mouse Inalambrico", 85.00, 12, 10.00),
+        ProductoDigital("LIC-01", "Licencia Windows 11", 150.00, 50, "https://tecsup.edu.pe/keys/win"),
+        ProductoDigital("CUR-01", "Curso Kotlin Online", 60.00, 100, "https://tecsup.edu.pe/campus/kt")
+    )
 
-    carrito.agregarProducto(laptop, 1)
-    carrito.agregarProducto(mouse, 2)
-    carrito.agregarProducto(winLicense, 1)
-    carrito.agregarProducto(kotlinCourse, 1)
+    for (p in catalogo) {
+        carrito.agregarProducto(p, 1)
+    }
 
+    println("ESTADO INICIAL DEL CARRITO:")
+    carrito.generarReporte()
+
+    println("\n=========================================")
+    println("            RETO ADICIONAL               ")
+    println("=========================================")
+
+    // 1. Demostración de búsqueda con find
+    val nombreABuscar = "Mouse Inalambrico"
+    val buscado = buscarProducto(catalogo, nombreABuscar)
+    if (buscado != null) {
+        println("Producto encontrado: [${buscado.getCodigo()}] ${buscado.getNombre()} (Precio: S/ ${String.format(Locale.US, "%.2f", buscado.getPrecioBase())})")
+    } else {
+        println("Producto '$nombreABuscar' no encontrado.")
+    }
+
+    // 2. Demostración de eliminación con removeIf
+    val productoAEliminar = "Mouse Inalambrico"
+    println("\nEliminando '$productoAEliminar' del carrito con removeIf...")
+    val eliminado = carrito.eliminarProductoPorNombre(productoAEliminar)
+
+    if (eliminado) {
+        println("Producto eliminado correctamente y stock restablecido.")
+    }
+
+    println("\nESTADO ACTUALIZADO TRAS ELIMINAR:")
     carrito.generarReporte()
 }
