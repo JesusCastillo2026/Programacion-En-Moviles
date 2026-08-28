@@ -34,4 +34,5 @@ Porque el carrito requiere operaciones de modificación dinámica en tiempo de e
 ---
 
 ## 3. Salida por Consola
-*![Captura de pantalla 2026-08-28 095053.png](../../../../OneDrive/Im%C3%A1genes/Screenshots/Captura%20de%20pantalla%202026-08-28%20095053.png)*
+*<img width="515" height="722" alt="image" src="https://github.com/user-attachments/assets/e9980502-f314-4e02-899b-468ff680bae7" />
+*
