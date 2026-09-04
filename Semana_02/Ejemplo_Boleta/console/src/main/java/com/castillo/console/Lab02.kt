@@ -12,6 +12,7 @@ fun main() {
           Moto          |  S/  2.00/h  | * De 1 a 2 horas : Tarifa Normal (0%)   
           Auto          |  S/  4.00/h  | * De 3 a 5 horas : +20% de recargo      
           Camioneta     |  S/ 10.00/h  | * Mas de 5 horas : +50% de recargo      
+          Trailer       |  S/ 20.00/h  |                                         
         ----------------+--------------+-----------------------------------------
           * Cliente frecuente       : 10% de descuento sobre el importe total.   
           * Tiempo minimo a cobrar  : 1 hora por vehiculo.                       
@@ -45,7 +46,7 @@ fun main() {
         var tipo = ""
         var tarifaBase = 0.0
         while (true) {
-            print("> Tipo (Moto, Auto, Camioneta): ")
+            print("> Tipo (Moto, Auto, Camioneta, Trailer): ")
             val inputTipo = readln().trim().lowercase()
             when (inputTipo) {
                 "moto" -> {
@@ -63,7 +64,12 @@ fun main() {
                     tarifaBase = 10.0
                     break
                 }
-                else -> println("  [!] Tipo invalido. Verifique su escritura e ingrese Moto, Auto o Camioneta.")
+                "trailer" -> {
+                    tipo = "Trailer"
+                    tarifaBase = 20.0
+                    break
+                }
+                else -> println("  [!] Tipo invalido. Verifique su escritura e ingrese Moto, Auto, Camioneta o Trailer.")
             }
         }
 
