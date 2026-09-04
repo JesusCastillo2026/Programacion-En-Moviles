@@ -54,21 +54,25 @@ fun main() {
                     tarifaBase = 2.0
                     break
                 }
+
                 "auto", "carro" -> {
                     tipo = "Auto"
                     tarifaBase = 4.0
                     break
                 }
+
                 "camioneta" -> {
                     tipo = "Camioneta"
                     tarifaBase = 10.0
                     break
                 }
+
                 "trailer" -> {
                     tipo = "Trailer"
                     tarifaBase = 20.0
                     break
                 }
+
                 else -> println("  [!] Tipo invalido. Verifique su escritura e ingrese Moto, Auto, Camioneta o Trailer.")
             }
         }
@@ -158,6 +162,12 @@ fun main() {
     }
 
     println("::::::::::::::::::::::::::::::::::::::::::::::::::")
-    println(String.format(Locale.US, "  >>> RECAUDACION TOTAL DEL DIA: S/ %.2f <<<", recaudacionTotal))
+    println(
+        String.format(
+            Locale.US,
+            "  >>> RECAUDACION TOTAL DEL DIA: S/ %.2f <<<",
+            recaudacionTotal
+        )
+    )
     println("::::::::::::::::::::::::::::::::::::::::::::::::::")
 }
