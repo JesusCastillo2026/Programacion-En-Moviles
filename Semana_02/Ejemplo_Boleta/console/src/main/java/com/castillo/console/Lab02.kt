@@ -45,20 +45,28 @@ fun main() {
         println("   NUEVO INGRESO (ESPACIOS DISPONIBLES: $espaciosDisponibles)   ")
         println("--------------------------------------------")
 
-        print("> Placa (o escriba SALIR/CERRAR para terminar): ")
-        val inputPlaca = readln().trim()
+        var placa = ""
+        while (true) {
+            print("> Placa (exactamente 6 caracteres, o SALIR/CERRAR): ")
+            val inputPlaca = readln().trim()
 
-        if (inputPlaca.lowercase() in listOf("salir", "cerrar")) {
+            if (inputPlaca.lowercase() in listOf("salir", "cerrar")) {
+                placa = inputPlaca
+                break
+            }
+
+            if (inputPlaca.length == 6) {
+                placa = inputPlaca.uppercase()
+                break
+            } else {
+                println("  [!] Entrada invalida. La placa debe tener exactamente 6 caracteres (ej. ABC123).")
+            }
+        }
+
+        if (placa.lowercase() in listOf("salir", "cerrar")) {
             println("\n  [!] Cerrando caja por instruccion del operador...")
             break
         }
-
-        if (inputPlaca.isEmpty()) {
-            println("  [!] Debe ingresar una placa valida.")
-            continue
-        }
-
-        val placa = inputPlaca
 
         var tipo = ""
         var tarifaBase = 0.0
@@ -92,13 +100,13 @@ fun main() {
 
         var horas = 0
         while (true) {
-            print("> Horas de estadia (minimo 1): ")
+            print("> Horas de estadia (1 a 24): ")
             val inputHoras = readln().toIntOrNull()
-            if (inputHoras != null && inputHoras >= 1) {
+            if (inputHoras != null && inputHoras in 1..24) {
                 horas = inputHoras
                 break
             }
-            println("  [!] Ningun vehiculo puede registrar menos de 1 hora.")
+            println("  [!] Entrada invalida. El tiempo debe estar entre 1 y 24 horas.")
         }
 
         print("> Cliente: ")
