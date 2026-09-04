@@ -11,8 +11,8 @@ fun main() {
         ----------------+--------------+-----------------------------------------
           Moto          |  S/  2.00/h  | * De 1 a 2 horas : Tarifa Normal (0%)   
           Auto          |  S/  4.00/h  | * De 3 a 5 horas : +20% de recargo      
-          Camioneta     |  S/ 10.00/h  | * Mas de 5 horas : +50% de recargo      
-          Trailer       |  S/ 20.00/h  |                                         
+          Camioneta     |  S/ 10.00/h  | * De 6 a 10 horas: +40% de recargo      
+          Trailer       |  S/ 20.00/h  | * Mas de 10 horas: +50% de recargo      
         ----------------+--------------+-----------------------------------------
           * Cliente frecuente       : 10% de descuento sobre el importe total.   
           * Tiempo minimo a cobrar  : 1 hora por vehiculo.                       
@@ -37,7 +37,7 @@ fun main() {
 
     for (i in 1..cantidad) {
         println("\n--------------------------------------------")
-        println("       REGISTRO VEHICULO #$i DE $cantidad         ")
+        println("       REGISTRO VEHICULO Nro $i DE $cantidad         ")
         println("--------------------------------------------")
 
         print("> Placa: ")
@@ -54,25 +54,21 @@ fun main() {
                     tarifaBase = 2.0
                     break
                 }
-
                 "auto", "carro" -> {
                     tipo = "Auto"
                     tarifaBase = 4.0
                     break
                 }
-
                 "camioneta" -> {
                     tipo = "Camioneta"
                     tarifaBase = 10.0
                     break
                 }
-
                 "trailer" -> {
                     tipo = "Trailer"
                     tarifaBase = 20.0
                     break
                 }
-
                 else -> println("  [!] Tipo invalido. Verifique su escritura e ingrese Moto, Auto, Camioneta o Trailer.")
             }
         }
@@ -128,6 +124,9 @@ fun main() {
             } else if (h <= 5) {
                 recargoPct = "20%"
                 importeHora = tarifaBase * 1.20
+            } else if (h <= 10) {
+                recargoPct = "40%"
+                importeHora = tarifaBase * 1.40
             } else {
                 recargoPct = "50%"
                 importeHora = tarifaBase * 1.50
@@ -162,12 +161,6 @@ fun main() {
     }
 
     println("::::::::::::::::::::::::::::::::::::::::::::::::::")
-    println(
-        String.format(
-            Locale.US,
-            "  >>> RECAUDACION TOTAL DEL DIA: S/ %.2f <<<",
-            recaudacionTotal
-        )
-    )
+    println(String.format(Locale.US, "  >>> RECAUDACION TOTAL DEL DIA: S/ %.2f <<<", recaudacionTotal))
     println("::::::::::::::::::::::::::::::::::::::::::::::::::")
 }
