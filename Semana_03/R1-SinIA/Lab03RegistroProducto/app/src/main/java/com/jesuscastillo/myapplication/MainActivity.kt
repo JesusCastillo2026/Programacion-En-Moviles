@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -22,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jesuscastillo.myapplication.ui.theme.MyApplicationTheme
 
@@ -85,6 +89,40 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
                 label = { Text("Cantidad") },
                 modifier = Modifier.weight(1f)
             )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = { mostrarResumen = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("AGREGAR PRODUCTO")
+        }
+
+        if (mostrarResumen) {
+            Spacer(modifier = Modifier.height(24.dp))
+            val precioNum = precio.toDoubleOrNull() ?: 0.0
+            val cantidadNum = cantidad.toIntOrNull() ?: 0
+            val importe = precioNum * cantidadNum
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(text = nombre, style = MaterialTheme.typography.titleLarge)
+                    Text(text = "Precio: S/ " + String.format("%.2f", precioNum))
+                    Text(text = "Cantidad: " + cantidadNum)
+                    Text(
+                        text = "Importe total: S/ " + String.format("%.2f", importe),
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
         }
     }
 }
