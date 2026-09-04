@@ -3,6 +3,17 @@ package com.castillo.myapplication
 import java.util.Locale
 
 fun main() {
+    var capacidadMaxima = 0
+    while (true) {
+        print("> Ingrese la capacidad maxima del estacionamiento: ")
+        val input = readln().toIntOrNull()
+        if (input != null && input > 0) {
+            capacidadMaxima = input
+            break
+        }
+        println("  [!] Entrada invalida. Debe ser un numero entero mayor a 0.")
+    }
+
     val tablaTarifas = """
         =========================================================================
                           SISTEMA DE CONTROL DE ESTACIONAMIENTO                  
@@ -17,7 +28,7 @@ fun main() {
           * Cliente frecuente       : 10% de descuento adicional.                
           * Descuento por volumen   : 20% si el monto supera los S/ 500.00.      
           * Impuestos               : Se agregara el 18% de IGV a la operacion.  
-          * Aforo maximo            : 30 vehiculos.                       
+          * Aforo maximo            : $capacidadMaxima vehiculos.                       
         =========================================================================
     """.trimIndent()
 
@@ -27,8 +38,8 @@ fun main() {
     var vehiculosRegistrados = 0
     var recaudacionTotal = 0.0
 
-    while (vehiculosRegistrados < 30) {
-        val espaciosDisponibles = 30 - vehiculosRegistrados
+    while (vehiculosRegistrados < capacidadMaxima) {
+        val espaciosDisponibles = capacidadMaxima - vehiculosRegistrados
 
         println("\n--------------------------------------------")
         println("   NUEVO INGRESO (ESPACIOS DISPONIBLES: $espaciosDisponibles)   ")
@@ -178,8 +189,8 @@ fun main() {
         recaudacionTotal += totalPagar
         vehiculosRegistrados++
 
-        if (vehiculosRegistrados == 30) {
-            println("  [!] AFORO MAXIMO ALCANZADO. NO HAY ESPACIOS DISPONIBLES.")
+        if (vehiculosRegistrados == capacidadMaxima) {
+            println("  [!] AFORO MAXIMO ALCANZADO ($capacidadMaxima/$capacidadMaxima). NO HAY ESPACIOS DISPONIBLES.")
         }
     }
 
