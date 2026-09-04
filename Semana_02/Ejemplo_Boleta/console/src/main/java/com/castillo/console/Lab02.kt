@@ -3,73 +3,155 @@ package com.castillo.myapplication
 import java.util.Locale
 
 fun main() {
-    var cantidad = 0
+    val tablaTarifas = """
+        =========================================================================
+                          SISTEMA DE CONTROL DE ESTACIONAMIENTO                  
+        ----------------+--------------+-----------------------------------------
+          TIPO VEHICULO | TARIFA BASE  |         CONDICIONES Y RECARGOS          
+        ----------------+--------------+-----------------------------------------
+          Moto          |  S/  2.00/h  | * De 1 a 2 horas : Tarifa Normal (0%)   
+          Auto          |  S/  4.00/h  | * De 3 a 5 horas : +20% de recargo      
+          Camioneta     |  S/ 10.00/h  | * Mas de 5 horas : +50% de recargo      
+        ----------------+--------------+-----------------------------------------
+          * Cliente frecuente       : 10% de descuento sobre el importe total.   
+          * Tiempo minimo a cobrar  : 1 hora por vehiculo.                       
+        =========================================================================
+    """.trimIndent()
 
+    println(tablaTarifas)
+    println()
+
+    var cantidad = 0
     while (true) {
-        println("Ingrese la cantidad de vehiculos a registrar (maximo 30):")
-        cantidad = readln().toInt()
-        if (cantidad in 1..30) {
+        print("> Ingrese la cantidad de vehiculos a registrar (maximo 30): ")
+        val input = readln().toIntOrNull()
+        if (input != null && input in 1..30) {
+            cantidad = input
             break
         }
+        println("  [!] Entrada invalida. Debe ser un numero entero entre 1 y 30.")
     }
 
     var recaudacionTotal = 0.0
 
     for (i in 1..cantidad) {
-        println("Ingrese la placa del vehiculo:")
-        val placa = readln()
+        println("\n--------------------------------------------")
+        println("       REGISTRO VEHICULO #$i DE $cantidad         ")
+        println("--------------------------------------------")
 
-        println("Ingrese el tipo de vehiculo (Moto, Auto, Camioneta):")
-        val tipo = readln()
+        print("> Placa: ")
+        val placa = readln().trim()
 
-        println("Ingrese el nombre del cliente:")
-        val nombre = readln()
+        var tipo = ""
+        var tarifaBase = 0.0
+        while (true) {
+            print("> Tipo (Moto, Auto, Camioneta): ")
+            val inputTipo = readln().trim().lowercase()
+            when (inputTipo) {
+                "moto" -> {
+                    tipo = "Moto"
+                    tarifaBase = 2.0
+                    break
+                }
+                "auto", "carro" -> {
+                    tipo = "Auto"
+                    tarifaBase = 4.0
+                    break
+                }
+                "camioneta" -> {
+                    tipo = "Camioneta"
+                    tarifaBase = 10.0
+                    break
+                }
+                else -> println("  [!] Tipo invalido. Verifique su escritura e ingrese Moto, Auto o Camioneta.")
+            }
+        }
 
         var horas = 0
         while (true) {
-            println("Ingrese las horas de estadia (minimo 1):")
-            horas = readln().toInt()
-            if (horas >= 1) {
+            print("> Horas de estadia (minimo 1): ")
+            val inputHoras = readln().toIntOrNull()
+            if (inputHoras != null && inputHoras >= 1) {
+                horas = inputHoras
                 break
             }
+            println("  [!] Ningun vehiculo puede registrar menos de 1 hora.")
         }
 
-        println("¿Es cliente frecuente? (true/false):")
-        val frecuente = readln().toBoolean()
+        print("> Cliente: ")
+        val cliente = readln().trim()
 
-        var tarifa = 0.0
-        if (tipo == "Moto") {
-            tarifa = 2.00
-        } else if (tipo == "Auto") {
-            tarifa = 4.00
-        } else if (tipo == "Camioneta") {
-            tarifa = 10.00
-        }
-
-        var total = 0.0
-        for (h in 1..horas) {
-            if (h <= 2) {
-                total += tarifa
-            } else if (h <= 4) {
-                total += tarifa * 1.20
-            } else {
-                total += tarifa * 1.50
+        var frecuente = false
+        while (true) {
+            print("> Es Cliente Frecuente? (S/N): ")
+            val inputFrec = readln().trim().lowercase()
+            if (inputFrec in listOf("s", "si", "true", "y", "yes")) {
+                frecuente = true
+                break
+            } else if (inputFrec in listOf("n", "no", "false")) {
+                frecuente = false
+                break
             }
+            println("  [!] Opcion invalida. Ingrese S (Si) o N (No).")
         }
 
+        println("\n==========================================")
+        println("               BOLETA DE PAGO             ")
+        println("==========================================")
+        println(" Cliente : $cliente")
+        println(" Placa   : $placa")
+        println(" Tipo    : $tipo")
+        println(" Horas   : $horas")
+        println(String.format(Locale.US, " TARIFA BASICA: S/ %.2f", tarifaBase))
+        println("------------------------------------------")
+        println(String.format(" %-6s | %-8s | %-7s | %-8s", "Hora", "Tarifa", "Recargo", "Importe"))
+        println("--------+----------+---------+------------")
+
+        var subtotal = 0.0
+        for (h in 1..horas) {
+            val recargoPct: String
+            val importeHora: Double
+
+            if (h <= 2) {
+                recargoPct = "0%"
+                importeHora = tarifaBase
+            } else if (h <= 5) {
+                recargoPct = "20%"
+                importeHora = tarifaBase * 1.20
+            } else {
+                recargoPct = "50%"
+                importeHora = tarifaBase * 1.50
+            }
+
+            subtotal += importeHora
+            println(
+                String.format(
+                    Locale.US,
+                    " %-6d | %-8.2f | %-7s | %-8.2f",
+                    h,
+                    tarifaBase,
+                    recargoPct,
+                    importeHora
+                )
+            )
+        }
+
+        println("------------------------------------------")
+        var totalPagar = subtotal
         if (frecuente) {
-            total -= (total * 0.10)
+            val descuento = subtotal * 0.10
+            totalPagar -= descuento
+            println(String.format(Locale.US, " Subtotal:               S/ %8.2f", subtotal))
+            println(String.format(Locale.US, " Descuento Frec. (10%%): -S/ %8.2f", descuento))
         }
 
-        recaudacionTotal += total
+        println(String.format(Locale.US, " TOTAL A PAGAR:          S/ %8.2f", totalPagar))
+        println("==========================================\n")
 
-        val totalFormateado = String.format(Locale.US, "%.2f", total)
-        println("Cliente: $nombre")
-        println("Placa: $placa")
-        println("Total a pagar: $totalFormateado")
-        println("-------------------------")
+        recaudacionTotal += totalPagar
     }
 
-    val recaudacionFormateada = String.format(Locale.US, "%.2f", recaudacionTotal)
-    println("Recaudacion total del dia: $recaudacionFormateada")
+    println("::::::::::::::::::::::::::::::::::::::::::::::::::")
+    println(String.format(Locale.US, "  >>> RECAUDACION TOTAL DEL DIA: S/ %.2f <<<", recaudacionTotal))
+    println("::::::::::::::::::::::::::::::::::::::::::::::::::")
 }
