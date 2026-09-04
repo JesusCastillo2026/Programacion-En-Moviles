@@ -14,7 +14,8 @@ fun main() {
           Camioneta     |  S/ 10.00/h  | * De 6 a 10 horas: +40% de recargo      
           Trailer       |  S/ 20.00/h  | * Mas de 10 horas: +50% de recargo      
         ----------------+--------------+-----------------------------------------
-          * Cliente frecuente       : 10% de descuento sobre el importe total.   
+          * Cliente frecuente       : 10% de descuento.                          
+          * Impuestos               : Se agregara el 18% de IGV a la operacion.  
           * Tiempo minimo a cobrar  : 1 hora por vehiculo.                       
         =========================================================================
     """.trimIndent()
@@ -146,14 +147,20 @@ fun main() {
         }
 
         println("------------------------------------------")
-        var totalPagar = subtotal
+        var baseImponible = subtotal
+
+        println(String.format(Locale.US, " Subtotal:               S/ %8.2f", subtotal))
+
         if (frecuente) {
             val descuento = subtotal * 0.10
-            totalPagar -= descuento
-            println(String.format(Locale.US, " Subtotal:               S/ %8.2f", subtotal))
+            baseImponible -= descuento
             println(String.format(Locale.US, " Descuento Frec. (10%%): -S/ %8.2f", descuento))
         }
 
+        val igv = baseImponible * 0.18
+        val totalPagar = baseImponible + igv
+
+        println(String.format(Locale.US, " IGV (18%%):              S/ %8.2f", igv))
         println(String.format(Locale.US, " TOTAL A PAGAR:          S/ %8.2f", totalPagar))
         println("==========================================\n")
 
