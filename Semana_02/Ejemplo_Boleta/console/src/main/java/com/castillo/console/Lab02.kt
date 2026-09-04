@@ -15,6 +15,7 @@ fun main() {
           Trailer       |  S/ 20.00/h  | * Mas de 10 horas: +50% de recargo      
         ----------------+--------------+-----------------------------------------
           * Cliente frecuente       : 10% de descuento.                          
+          * Descuento por volumen   : 20% extra si el monto supera los S/ 500.00.
           * Impuestos               : Se agregara el 18% de IGV a la operacion.  
           * Tiempo minimo a cobrar  : 1 hora por vehiculo.                       
         =========================================================================
@@ -152,9 +153,15 @@ fun main() {
         println(String.format(Locale.US, " Subtotal:               S/ %8.2f", subtotal))
 
         if (frecuente) {
-            val descuento = subtotal * 0.10
-            baseImponible -= descuento
-            println(String.format(Locale.US, " Descuento Frec. (10%%): -S/ %8.2f", descuento))
+            val descuentoFrecuente = subtotal * 0.10
+            baseImponible -= descuentoFrecuente
+            println(String.format(Locale.US, " Descuento Frec. (10%%): -S/ %8.2f", descuentoFrecuente))
+        }
+
+        if (baseImponible > 500.0) {
+            val descuentoVolumen = baseImponible * 0.20
+            baseImponible -= descuentoVolumen
+            println(String.format(Locale.US, " Descuento >S/500 (20%%):-S/ %8.2f", descuentoVolumen))
         }
 
         val igv = baseImponible * 0.18
