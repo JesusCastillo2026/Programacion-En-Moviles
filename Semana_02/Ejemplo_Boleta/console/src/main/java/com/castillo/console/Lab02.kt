@@ -17,33 +17,37 @@ fun main() {
           * Cliente frecuente       : 10% de descuento adicional.                
           * Descuento por volumen   : 20% si el monto supera los S/ 500.00.      
           * Impuestos               : Se agregara el 18% de IGV a la operacion.  
-          * Tiempo minimo a cobrar  : 1 hora por vehiculo.                       
+          * Aforo maximo            : 30 vehiculos.                       
         =========================================================================
     """.trimIndent()
 
     println(tablaTarifas)
     println()
 
-    var cantidad = 0
-    while (true) {
-        print("> Ingrese la cantidad de vehiculos a registrar (maximo 30): ")
-        val input = readln().toIntOrNull()
-        if (input != null && input in 1..30) {
-            cantidad = input
-            break
-        }
-        println("  [!] Entrada invalida. Debe ser un numero entero entre 1 y 30.")
-    }
-
+    var vehiculosRegistrados = 0
     var recaudacionTotal = 0.0
 
-    for (i in 1..cantidad) {
+    while (vehiculosRegistrados < 30) {
+        val espaciosDisponibles = 30 - vehiculosRegistrados
+
         println("\n--------------------------------------------")
-        println("       REGISTRO VEHICULO Nro $i DE $cantidad         ")
+        println("   NUEVO INGRESO (ESPACIOS DISPONIBLES: $espaciosDisponibles)   ")
         println("--------------------------------------------")
 
-        print("> Placa: ")
-        val placa = readln().trim()
+        print("> Placa (o escriba SALIR/CERRAR para terminar): ")
+        val inputPlaca = readln().trim()
+
+        if (inputPlaca.lowercase() in listOf("salir", "cerrar")) {
+            println("\n  [!] Cerrando caja por instruccion del operador...")
+            break
+        }
+
+        if (inputPlaca.isEmpty()) {
+            println("  [!] Debe ingresar una placa valida.")
+            continue
+        }
+
+        val placa = inputPlaca
 
         var tipo = ""
         var tarifaBase = 0.0
@@ -152,14 +156,12 @@ fun main() {
 
         println(String.format(Locale.US, " Subtotal:               S/ %8.2f", subtotal))
 
-        // 1. Primero se evalúa el descuento por volumen (> 500)
         if (subtotal > 500.0) {
             val descuentoVolumen = subtotal * 0.20
             baseImponible -= descuentoVolumen
             println(String.format(Locale.US, " Descuento >S/500 (20%%):-S/ %8.2f", descuentoVolumen))
         }
 
-        // 2. Después se aplica el descuento de cliente frecuente (10%) sobre el saldo resultante
         if (frecuente) {
             val descuentoFrecuente = baseImponible * 0.10
             baseImponible -= descuentoFrecuente
@@ -174,9 +176,17 @@ fun main() {
         println("==========================================\n")
 
         recaudacionTotal += totalPagar
+        vehiculosRegistrados++
+
+        if (vehiculosRegistrados == 30) {
+            println("  [!] AFORO MAXIMO ALCANZADO. NO HAY ESPACIOS DISPONIBLES.")
+        }
     }
 
     println("::::::::::::::::::::::::::::::::::::::::::::::::::")
-    println(String.format(Locale.US, "  >>> RECAUDACION TOTAL DEL DIA: S/ %.2f <<<", recaudacionTotal))
+    println("              RESUMEN DE CAJA FINAL               ")
+    println("::::::::::::::::::::::::::::::::::::::::::::::::::")
+    println("  Vehiculos atendidos: $vehiculosRegistrados")
+    println(String.format(Locale.US, "  RECAUDACION TOTAL: S/ %.2f", recaudacionTotal))
     println("::::::::::::::::::::::::::::::::::::::::::::::::::")
 }
