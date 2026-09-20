@@ -15,13 +15,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -56,9 +59,45 @@ fun PantallaCarrito() {
 
     val productos = remember { mutableStateListOf<Producto>() }
 
+    // Estado para controlar qué producto se va a eliminar con el diálogo
+    var productoAEliminar by remember { mutableStateOf<Producto?>(null) }
+
+    // Cálculos con IGV y Descuento escalonado con when (Lab 02)
     val subtotal = productos.sumOf { it.precio * it.cantidad }
     val igv = subtotal * 0.18
-    val total = subtotal + igv
+    val totalBruto = subtotal + igv
+
+    val descuento = when {
+        totalBruto > 5000.00 -> totalBruto * 0.10
+        totalBruto > 3000.00 -> totalBruto * 0.05
+        else -> 0.00
+    }
+    val totalFinal = totalBruto - descuento
+
+    // Reto 1: AlertDialog de confirmación de borrado
+    if (productoAEliminar != null) {
+        AlertDialog(
+            onDismissRequest = { productoAEliminar = null },
+            title = { Text("Confirmar eliminación") },
+            text = { Text("¿Eliminar este producto (${productoAEliminar?.nombre}) del carrito?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        productoAEliminar?.let { productos.remove(it) }
+                        productoAEliminar = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { productoAEliminar = null }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -147,7 +186,7 @@ fun PantallaCarrito() {
                 items(productos) { producto ->
                     TarjetaProducto(
                         producto = producto,
-                        onEliminar = { productos.remove(producto) }
+                        onEliminar = { productoAEliminar = producto }
                     )
                 }
             }
@@ -155,6 +194,7 @@ fun PantallaCarrito() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Panel de totales con descuento condicional
         Surface(
             modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.surfaceVariant,
@@ -172,11 +212,25 @@ fun PantallaCarrito() {
                     Text("IGV (18%)")
                     Text(String.format(Locale.US, "S/ %.2f", igv))
                 }
+
+                // Reto 2: Mostrar descuento solo cuando corresponda
+                if (descuento > 0.00) {
+                    val porcentaje = if (totalBruto > 5000.00) "10%" else "5%"
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("Descuento ($porcentaje)", color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
+                        Text(
+                            text = String.format(Locale.US, "-S/ %.2f", descuento),
+                            color = Color(0xFF2E7D32),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("TOTAL", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
                     Text(
-                        text = String.format(Locale.US, "S/ %.2f", total),
+                        text = String.format(Locale.US, "S/ %.2f", totalFinal),
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary

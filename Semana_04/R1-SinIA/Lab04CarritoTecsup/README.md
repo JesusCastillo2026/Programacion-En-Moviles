@@ -15,6 +15,7 @@ Aplicación móvil construida en Android con Jetpack Compose para gestionar un c
 ## 2. Capturas de Pantalla
 ### Carrito con Productos
 ![Carrito con Productos](captura1.png)
+![Carrito con Productos + Descuento](captura2.png)
 * **Estado Vacío:** Caja centrada con mensaje cuando no hay productos y montos en S/ 0.00.
 * **Carrito con Productos:** Lista con tarjetas, botón de eliminar y totales calculados.
 
