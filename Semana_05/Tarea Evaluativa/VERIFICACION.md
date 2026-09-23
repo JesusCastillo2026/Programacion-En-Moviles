@@ -19,7 +19,8 @@ No se ejecutaron pruebas manuales en un emulador: el cliente adb quedó bloquead
 
 ## Cumplimiento que requiere al alumno
 
-- La primera fase de la guía exige trabajo sin IA. Ambas versiones aquí fueron preparadas con IA.
+- La rama `main` contiene la fase base en `SinIA` y la rama `mejora-ia` contiene las mejoras en `ConIA`.
 - La guía exige commits distribuidos en más de un día. Esta sesión registra fechas reales de un solo día.
 - La entrega puntual y la sustentación oral dependen de la asignación y del alumno.
 - Las reservas permanecen en memoria, tal como se documenta; no hay almacenamiento persistente.
+
