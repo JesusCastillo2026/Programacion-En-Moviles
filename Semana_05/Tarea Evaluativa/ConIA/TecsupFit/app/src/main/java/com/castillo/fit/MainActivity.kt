@@ -28,6 +28,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReservationApp() {
+    // El estado se eleva al contenedor común. No se utiliza ViewModel ni MVVM.
     val nav = rememberNavController()
     val bookings = remember { mutableStateListOf<Booking>().apply {addAll(initialBookings())} }
     val entry by nav.currentBackStackEntryAsState()
@@ -37,6 +38,7 @@ fun ReservationApp() {
     val sections = listOf("home" to "Inicio", "bookings" to if(clinic) "Mis citas" else "Reservas",
         "extra" to if(clinic) "Historial médico" else "Rutinas", "profile" to "Perfil")
     fun goTo(destination: String) {
+        // Evita apilar varias instancias de una pestaña y vuelve a la raíz del flujo.
         nav.navigate(destination) {
             popUpTo("home") {saveState=true}
             launchSingleTop=true
@@ -110,6 +112,7 @@ fun ReservationApp() {
             }
         }
     }
+    // Drawer es el contenedor del Scaffold; bottomBar pertenece al propio Scaffold.
     if(clinic) ModalNavigationDrawer(drawerState=drawer,drawerContent={
         ModalDrawerSheet {
             Column(Modifier.padding(24.dp)) {Text(person,fontWeight=FontWeight.Bold); Text("Paciente")}
@@ -123,4 +126,3 @@ fun ReservationApp() {
         }
     },content=body) else body()
 }
-

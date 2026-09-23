@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun HomeScreen(onDetail: (Int) -> Unit) {
+    // Búsqueda y categoría se combinan; tocar el filtro activo permite quitarlo.
     var filter by rememberSaveable { mutableStateOf("") }
     var query by rememberSaveable { mutableStateOf("") }
     val filters = if(clinic) listOf("Cardiología", "Pediatría", "Dermatología") else listOf("Hoy", "Esta semana")
@@ -48,4 +49,3 @@ fun HomeScreen(onDetail: (Int) -> Unit) {
         if(visible.isEmpty()) item { EmptyMessage("Sin resultados", "Prueba otra búsqueda o categoría.") }
     }
 }
-
