@@ -21,11 +21,22 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.castillo.campusnav.R
 
-/** Solo el registro propio usa la foto proporcionada; el resto utiliza iniciales. */
+/** Cada perfil del directorio muestra un avatar propio; el registro del estudiante usa la foto proporcionada. */
 @Composable
 fun Avatar(name: String, own: Boolean, size: Dp = 52.dp) {
-    if (own) {
-        Image(painterResource(R.drawable.jesus_castillo), contentDescription = "Foto de Jesus Castillo Sumire",
+    val image = when {
+        own -> R.drawable.jesus_castillo
+        name.startsWith("María") -> R.drawable.avatar_maria
+        name.startsWith("Carlos") -> R.drawable.avatar_carlos
+        name.startsWith("Ana") -> R.drawable.avatar_ana
+        name.startsWith("Luis") -> R.drawable.avatar_luis
+        name.startsWith("Valeria") -> R.drawable.avatar_valeria
+        name.startsWith("Diego") -> R.drawable.avatar_diego
+        name.startsWith("Camila") -> R.drawable.avatar_camila
+        else -> null
+    }
+    if (image != null) {
+        Image(painterResource(image), contentDescription = "Avatar de $name",
             contentScale = ContentScale.Crop, modifier = Modifier.size(size).clip(CircleShape))
     } else {
         Box(Modifier.size(size).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
