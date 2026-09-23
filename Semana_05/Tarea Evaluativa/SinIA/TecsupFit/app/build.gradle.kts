@@ -2,6 +2,7 @@ plugins { id("com.android.application"); id("org.jetbrains.kotlin.plugin.compose
 android {
     namespace = "com.castillo.fit"
     compileSdk = 37
+    buildToolsVersion = "37.0.0"
     defaultConfig {
         applicationId = "com.castillo.fit.base"
         minSdk = 26
@@ -21,4 +22,3 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.9.7")
     testImplementation("junit:junit:4.13.2")
 }
-
