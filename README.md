@@ -8,7 +8,7 @@ Repositorio de trabajos y laboratorios del curso de Programación en Móviles.
 |---|---|---|
 | 01 | Android Studio, Git y GitHub | Creación del primer proyecto Android y flujo básico de control de versiones. |
 | 02 | Kotlin: programación estructurada y POO | Carrito de compras, colecciones, funciones, clases, herencia y polimorfismo. |
-| 03 | Jetpack Compose, estado y validación | Registro de productos con campos de texto, `remember`, cálculo de importes, validación de datos y limpieza del formulario. Incluye `R1-SinIA` y `R2-ConIA`. |
+| 03 | Jetpack Compose, estado y controles interactivos | Registro de productos, validación de datos y tarea de Registro de Notas con `Slider`, `Switch`, `Checkbox`, promedio ponderado y observaciones por rango. Incluye `R1-SinIA`, `R2-ConIA` y `Tarea`. |
 | 04 | Listas y formularios en Compose | Carrito TECSUP con `LazyColumn`, eliminación de productos, IGV y totales reactivos. |
 | 05 | Navegación en aplicaciones Compose | Aplicaciones de Clínica Salud+ y TECSUP Fit con pantallas, rutas y navegación entre detalles. |
 | 06 | Pendiente de desarrollo | Carpeta preparada para el siguiente laboratorio. |
