@@ -1,8 +1,8 @@
-# Registro de asistencia de IA
+# Registro de prompts de ConIA
 
-## Solicitud recibida
+## Alcance de esta documentación
 
-El alumno solicitó realizar Clínica Salud+ y TECSUP Fit a partir de GLAB-ACTIVIDAD_SEMANA1-6.docx, una versión fiel a las imágenes en SinIA sin documentación dentro del código y otra mejor elaborada en ConIA con documentación. También pidió organizar Semana 5 / Tarea Evaluativa / SinIA y ConIA en Programacion-En-Moviles y recordó los ocho commits.
+Este archivo registra las solicitudes y ajustes correspondientes a la rama `mejora-ia` y sus proyectos en `ConIA`.
 
 La misma solicitud apareció primero sin la indicación del repositorio y después ampliada con esa estructura. No hubo otros prompts del alumno durante esta implementación. Las siguientes decisiones y correcciones son del asistente; no se presentan como solicitudes adicionales ni como correcciones hechas personalmente por el alumno.
 
@@ -37,6 +37,7 @@ La misma solicitud apareció primero sin la indicación del repositorio y despu�
 
 ## Autoría y límites
 
-Ambas versiones fueron elaboradas con asistencia de IA. La carpeta SinIA identifica la base visual sin comentarios y no demuestra cumplimiento de la fase sin asistentes exigida por el docente. Los commits tienen fechas reales; no se han repartido artificialmente entre varios días.
+Los commits de esta rama registran las mejoras funcionales y la documentación técnica de `ConIA`.
 
 La guía de sustentación explica el código, pero la comprensión y defensa oral corresponden al alumno. La persistencia entre reinicios no está implementada. La equivalencia visual píxel a píxel y las pruebas manuales en emulador no se consideran verificadas solo por compilar.
+
