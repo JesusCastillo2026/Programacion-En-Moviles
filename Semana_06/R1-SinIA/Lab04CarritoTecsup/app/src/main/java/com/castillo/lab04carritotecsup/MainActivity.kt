@@ -3,55 +3,11 @@ package com.castillo.lab04carritotecsup
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -71,70 +27,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AppNavegacion() {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-
-    var rutaActual by remember { mutableStateOf("inicio") }
-
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet {
-                Spacer(Modifier.height(16.dp))
-
-                NavigationDrawerItem(
-                    label = { Text("Inicio") },
-                    selected = rutaActual == "inicio",
-                    onClick = { rutaActual = "inicio"; scope.launch { drawerState.close() } }
-                )
-                NavigationDrawerItem(
-                    label = { Text("Mis pedidos") },
-                    selected = rutaActual == "pedidos",
-                    onClick = { rutaActual = "pedidos"; scope.launch { drawerState.close() } }
-                )
-                NavigationDrawerItem(
-                    label = { Text("Favoritos") },
-                    selected = rutaActual == "favoritos",
-                    onClick = { rutaActual = "favoritos"; scope.launch { drawerState.close() } }
-                )
-                NavigationDrawerItem(
-                    label = { Text("Perfil") },
-                    selected = rutaActual == "perfil",
-                    onClick = { rutaActual = "perfil"; scope.launch { drawerState.close() } }
-                )
-            }
-        }
-    ) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("TECSUP Store") },
-                    navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Text("☰", style = MaterialTheme.typography.titleLarge)
-                        }
-                    }
-                )
-            }
-        ) { paddingValues ->
-            Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
-                if (rutaActual == "inicio") {
-                    PantallaCarrito()
-                } else {
-                    Text(
-                        text = "Pantalla de $rutaActual en construcción",
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-            }
-        }
-    }
-}
-
-// 1. ENVOLTURA PRINCIPAL CON MENÚ LATERAL
+// 1. Envoltura principal con Menú Lateral (Navigation Drawer)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavegacion() {
@@ -160,7 +53,7 @@ fun AppNavegacion() {
                     title = { Text("TECSUP Store") },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menú")
+                            Text("☰", style = MaterialTheme.typography.titleLarge)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -182,13 +75,12 @@ fun AppNavegacion() {
     }
 }
 
-// 2. CONTENIDO DEL NAVIGATION DRAWER
+// 2. Contenido del panel lateral (ModalDrawerSheet)
 @Composable
 fun AppDrawer(rutaActual: String, onNavegar: (String) -> Unit) {
     ModalDrawerSheet {
         Spacer(Modifier.height(16.dp))
 
-        // ENCABEZADO PERSONALIZADO AÑADIDO
         Text(
             text = "MR Maria Rojas\nmaria@tecsup.edu.pe",
             modifier = Modifier.padding(16.dp),
@@ -200,26 +92,27 @@ fun AppDrawer(rutaActual: String, onNavegar: (String) -> Unit) {
         NavigationDrawerItem(
             label = { Text("Inicio") },
             selected = rutaActual == "inicio",
-            onClick = { rutaActual = "inicio"; scope.launch { drawerState.close() } }
+            onClick = { onNavegar("inicio") }
         )
         NavigationDrawerItem(
             label = { Text("Mis pedidos") },
             selected = rutaActual == "pedidos",
-            onClick = { rutaActual = "pedidos"; scope.launch { drawerState.close() } }
+            onClick = { onNavegar("pedidos") }
         )
         NavigationDrawerItem(
             label = { Text("Favoritos") },
             selected = rutaActual == "favoritos",
-            onClick = { rutaActual = "favoritos"; scope.launch { drawerState.close() } }
+            onClick = { onNavegar("favoritos") }
         )
         NavigationDrawerItem(
             label = { Text("Perfil") },
             selected = rutaActual == "perfil",
-            onClick = { rutaActual = "perfil"; scope.launch { drawerState.close() } }
+            onClick = { onNavegar("perfil") }
         )
     }
+}
 
-// 3. PANTALLA PRINCIPAL DE LA TIENDA
+// 3. Pantalla principal de la tienda
 @Composable
 fun PantallaCarrito(modifier: Modifier = Modifier) {
     var nombre by remember { mutableStateOf("") }
@@ -227,10 +120,6 @@ fun PantallaCarrito(modifier: Modifier = Modifier) {
     var cantidad by remember { mutableStateOf("") }
 
     val productos = remember { mutableStateListOf<Producto>() }
-
-    val subtotal = productos.sumOf { it.precio * it.cantidad }
-    val igv = subtotal * 0.18
-    val total = subtotal + igv
 
     Column(
         modifier = modifier
@@ -278,30 +167,20 @@ fun PantallaCarrito(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (productos.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("No hay productos disponibles", color = Color.Gray)
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(productos) { producto ->
-                    TarjetaProducto(producto = producto)
-                }
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(productos) { producto ->
+                TarjetaProducto(producto = producto)
             }
         }
     }
 }
 
-
-
+// 4. Tarjeta de producto con menú de 3 puntos (DropdownMenu)
 @Composable
-fun TarjetaProducto(producto: Producto, onEliminar: () -> Unit) {
+fun TarjetaProducto(producto: Producto) {
     var expanded by remember { mutableStateOf(false) }
 
     Card(modifier = Modifier.fillMaxWidth()) {
@@ -354,3 +233,7 @@ fun TarjetaProducto(producto: Producto, onEliminar: () -> Unit) {
                         leadingIcon = { Text("⚠", color = MaterialTheme.colorScheme.error) }
                     )
                 }
+            }
+        }
+    }
+}
