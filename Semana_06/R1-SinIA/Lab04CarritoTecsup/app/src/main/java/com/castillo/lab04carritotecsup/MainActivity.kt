@@ -188,43 +188,36 @@ fun AppDrawer(rutaActual: String, onNavegar: (String) -> Unit) {
     ModalDrawerSheet {
         Spacer(Modifier.height(16.dp))
 
+        // ENCABEZADO PERSONALIZADO AÑADIDO
         Text(
             text = "MR Maria Rojas\nmaria@tecsup.edu.pe",
             modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
         )
-        HorizontalDivider()
+        HorizontalDivider(modifier = Modifier.padding(bottom = 8.dp))
 
         NavigationDrawerItem(
             label = { Text("Inicio") },
             selected = rutaActual == "inicio",
-            onClick = { onNavegar("inicio") },
-            icon = { Icon(Icons.Default.Home, contentDescription = null) },
-            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            onClick = { rutaActual = "inicio"; scope.launch { drawerState.close() } }
         )
         NavigationDrawerItem(
             label = { Text("Mis pedidos") },
             selected = rutaActual == "pedidos",
-            onClick = { onNavegar("pedidos") },
-            icon = { Icon(Icons.Default.ShoppingCart, contentDescription = null) },
-            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            onClick = { rutaActual = "pedidos"; scope.launch { drawerState.close() } }
         )
         NavigationDrawerItem(
             label = { Text("Favoritos") },
             selected = rutaActual == "favoritos",
-            onClick = { onNavegar("favoritos") },
-            icon = { Icon(Icons.Default.Favorite, contentDescription = null) },
-            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            onClick = { rutaActual = "favoritos"; scope.launch { drawerState.close() } }
         )
         NavigationDrawerItem(
             label = { Text("Perfil") },
             selected = rutaActual == "perfil",
-            onClick = { onNavegar("perfil") },
-            icon = { Icon(Icons.Default.Person, contentDescription = null) },
-            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            onClick = { rutaActual = "perfil"; scope.launch { drawerState.close() } }
         )
     }
-}
 
 // 3. PANTALLA PRINCIPAL DE LA TIENDA
 @Composable
