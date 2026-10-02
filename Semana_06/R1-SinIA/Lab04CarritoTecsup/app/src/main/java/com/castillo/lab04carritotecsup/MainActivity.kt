@@ -283,15 +283,18 @@ fun TarjetaProducto(producto: Producto, onEliminar: () -> Unit) {
                 ) {
                     DropdownMenuItem(
                         text = { Text("Favoritos") },
-                        onClick = { expanded = false }
+                        onClick = { expanded = false },
+                        leadingIcon = { Text("❤", color = MaterialTheme.colorScheme.primary) }
                     )
                     DropdownMenuItem(
                         text = { Text("Compartir") },
-                        onClick = { expanded = false }
+                        onClick = { expanded = false },
+                        leadingIcon = { Text("↗") }
                     )
+                    HorizontalDivider()
                     DropdownMenuItem(
                         text = { Text("Reportar") },
-                        onClick = { expanded = false }
+                        onClick = { expanded = false },
+                        leadingIcon = { Text("⚠", color = MaterialTheme.colorScheme.error) }
                     )
                 }
-            }
