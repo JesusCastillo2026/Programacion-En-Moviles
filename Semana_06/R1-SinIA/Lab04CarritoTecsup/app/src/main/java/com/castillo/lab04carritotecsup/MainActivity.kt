@@ -77,15 +77,34 @@ fun AppNavegacion() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    var rutaActual by remember { mutableStateOf("inicio") }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
                 Spacer(Modifier.height(16.dp))
-                Text("Inicio", modifier = Modifier.padding(16.dp))
-                Text("Mis pedidos", modifier = Modifier.padding(16.dp))
-                Text("Favoritos", modifier = Modifier.padding(16.dp))
-                Text("Perfil", modifier = Modifier.padding(16.dp))
+
+                NavigationDrawerItem(
+                    label = { Text("Inicio") },
+                    selected = rutaActual == "inicio",
+                    onClick = { rutaActual = "inicio"; scope.launch { drawerState.close() } }
+                )
+                NavigationDrawerItem(
+                    label = { Text("Mis pedidos") },
+                    selected = rutaActual == "pedidos",
+                    onClick = { rutaActual = "pedidos"; scope.launch { drawerState.close() } }
+                )
+                NavigationDrawerItem(
+                    label = { Text("Favoritos") },
+                    selected = rutaActual == "favoritos",
+                    onClick = { rutaActual = "favoritos"; scope.launch { drawerState.close() } }
+                )
+                NavigationDrawerItem(
+                    label = { Text("Perfil") },
+                    selected = rutaActual == "perfil",
+                    onClick = { rutaActual = "perfil"; scope.launch { drawerState.close() } }
+                )
             }
         }
     ) {
@@ -95,14 +114,21 @@ fun AppNavegacion() {
                     title = { Text("TECSUP Store") },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Text("☰", style = MaterialTheme.typography.titleLarge) // Icono menú
+                            Text("☰", style = MaterialTheme.typography.titleLarge)
                         }
                     }
                 )
             }
         ) { paddingValues ->
-            Box(modifier = Modifier.padding(paddingValues)) {
-                PantallaCarrito()
+            Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+                if (rutaActual == "inicio") {
+                    PantallaCarrito()
+                } else {
+                    Text(
+                        text = "Pantalla de $rutaActual en construcción",
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
             }
         }
     }
