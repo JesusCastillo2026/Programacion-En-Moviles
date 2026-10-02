@@ -71,6 +71,43 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppNavegacion() {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Spacer(Modifier.height(16.dp))
+                Text("Inicio", modifier = Modifier.padding(16.dp))
+                Text("Mis pedidos", modifier = Modifier.padding(16.dp))
+                Text("Favoritos", modifier = Modifier.padding(16.dp))
+                Text("Perfil", modifier = Modifier.padding(16.dp))
+            }
+        }
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("TECSUP Store") },
+                    navigationIcon = {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Text("☰", style = MaterialTheme.typography.titleLarge) // Icono menú
+                        }
+                    }
+                )
+            }
+        ) { paddingValues ->
+            Box(modifier = Modifier.padding(paddingValues)) {
+                PantallaCarrito()
+            }
+        }
+    }
+}
+
 // 1. ENVOLTURA PRINCIPAL CON MENÚ LATERAL
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
