@@ -22,7 +22,7 @@ import java.util.Locale
 fun FechaHoraScreen(medicoId: Int, onContinuar: (String, String) -> Unit) {
     val medico = Repositorio.obtenerMedico(medicoId)
     val dias = remember { (1L..5L).map { LocalDate.now().plusDays(it) } }
-    val formato = remember { DateTimeFormatter.ofPattern("EEE dd/MM", Locale("es", "PE")) }
+    val formato = remember { DateTimeFormatter.ofPattern("EEE dd/MM", Locale.forLanguageTag("es-PE")) }
     var fecha by rememberSaveable(medicoId) { mutableStateOf("") }
     var hora by rememberSaveable(medicoId) { mutableStateOf("") }
     val horarios = Repositorio.horariosDisponibles(medicoId, fecha)
