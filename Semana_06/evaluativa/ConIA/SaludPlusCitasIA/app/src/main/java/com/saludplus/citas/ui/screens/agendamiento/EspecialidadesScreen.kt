@@ -13,6 +13,7 @@ import com.saludplus.citas.ui.components.EstadoVacio
 import com.saludplus.citas.ui.components.TarjetaEspecialidad
 import com.saludplus.citas.ui.components.TituloSeccion
 
+/** Filtra especialidades en tiempo real mientras cambia el texto de búsqueda. */
 @Composable
 fun EspecialidadesScreen(onElegir: (Int) -> Unit) {
     var busqueda by rememberSaveable { mutableStateOf("") }

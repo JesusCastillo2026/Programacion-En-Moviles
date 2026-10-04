@@ -10,6 +10,7 @@ import com.saludplus.citas.ui.components.BotonPrincipal
 import com.saludplus.citas.ui.components.EstadoVacio
 import com.saludplus.citas.ui.components.TituloSeccion
 
+/** Permite revisar y cancelar una cita propia con confirmación previa. */
 @Composable
 fun DetalleCitaScreen(citaId: Int, onVolver: () -> Unit) {
     val cita = Repositorio.obtenerCita(citaId)

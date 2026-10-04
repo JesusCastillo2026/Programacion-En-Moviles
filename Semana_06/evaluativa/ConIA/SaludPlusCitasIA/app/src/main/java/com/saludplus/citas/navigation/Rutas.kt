@@ -1,5 +1,6 @@
 package com.saludplus.citas.navigation
 
+/** Nombres de destino y constructores de rutas con parámetros. */
 object Rutas {
     const val SPLASH = "splash"
     const val REGISTRO = "registro"

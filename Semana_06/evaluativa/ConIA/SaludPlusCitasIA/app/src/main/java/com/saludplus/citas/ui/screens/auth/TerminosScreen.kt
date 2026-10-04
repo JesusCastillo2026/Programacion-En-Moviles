@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.saludplus.citas.ui.components.TituloSeccion
 
+/** Explica el alcance académico y el uso temporal de los datos. */
 @Composable
 fun TerminosScreen(onVolver: () -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),

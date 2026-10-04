@@ -9,6 +9,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.saludplus.citas.ui.components.BotonPrincipal
 
+/** Entrada a la app: ofrece registro e inicio de sesión. */
 @Composable
 fun SplashScreen(onRegistro: () -> Unit, onLogin: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center,

@@ -33,6 +33,7 @@ import com.saludplus.citas.ui.screens.notificaciones.NotificacionesScreen
 import com.saludplus.citas.ui.screens.perfil.PerfilScreen
 import com.saludplus.citas.ui.screens.resultados.ResultadosScreen
 
+/** Conecta las 15 pantallas, el menú inferior y los parámetros del agendamiento. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation() {
@@ -57,6 +58,7 @@ fun AppNavigation() {
         Rutas.NOTIFICACIONES -> "Notificaciones"
         else -> ""
     }
+    // Los destinos principales conservan su estado al alternar entre pestañas.
     fun goTab(destination: String) {
         nav.navigate(destination) {
             popUpTo(Rutas.INICIO) { saveState = true }
@@ -86,6 +88,7 @@ fun AppNavigation() {
             }
         }
     ) { padding ->
+        // Registro e inicio de sesión limpian el historial de acceso al llegar a Inicio.
         NavHost(nav, startDestination = Rutas.SPLASH, modifier = Modifier.padding(padding)) {
             composable(Rutas.SPLASH) {
                 SplashScreen(onRegistro = { nav.navigate(Rutas.REGISTRO) },
@@ -111,6 +114,7 @@ fun AppNavigation() {
             composable(Rutas.ESPECIALIDADES) {
                 EspecialidadesScreen(onElegir = { nav.navigate(Rutas.medicos(it)) })
             }
+            // Cada paso obtiene el ID o la selección recibidos en la ruta anterior.
             composable(Rutas.MEDICOS, arguments = listOf(navArgument("especialidadId") {
                 type = NavType.IntType
             })) {
@@ -135,6 +139,7 @@ fun AppNavigation() {
                     fecha = it.arguments?.getString("fecha").orEmpty(),
                     hora = it.arguments?.getString("hora").orEmpty(),
                     onConfirmar = { citaId ->
+                        // popUpTo elimina el flujo de reserva para que Atrás no repita la confirmación.
                         nav.navigate(Rutas.exitosa(citaId)) {
                             popUpTo(Rutas.INICIO)
                         }

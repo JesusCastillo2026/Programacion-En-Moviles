@@ -11,6 +11,7 @@ import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.EstadoVacio
 import com.saludplus.citas.ui.components.TituloSeccion
 
+/** Construye avisos a partir de las citas existentes del paciente. */
 @Composable
 fun NotificacionesScreen(onDetalle: (Int) -> Unit) {
     val usuario = Repositorio.usuarioActual

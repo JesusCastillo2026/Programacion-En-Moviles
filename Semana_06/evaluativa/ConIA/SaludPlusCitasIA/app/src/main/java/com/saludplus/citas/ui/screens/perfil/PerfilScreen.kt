@@ -9,6 +9,7 @@ import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BotonPrincipal
 import com.saludplus.citas.ui.components.TituloSeccion
 
+/** Muestra datos de sesión y permite cerrarla. */
 @Composable
 fun PerfilScreen(onCerrarSesion: () -> Unit, onTerminos: () -> Unit) {
     val usuario = Repositorio.usuarioActual

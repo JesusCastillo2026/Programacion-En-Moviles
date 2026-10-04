@@ -9,7 +9,9 @@ import com.saludplus.citas.data.model.Especialidad
 import com.saludplus.citas.data.model.Medico
 import com.saludplus.citas.data.model.Usuario
 
+/** Fuente única de datos de la app: comparte listas reactivas entre todas las pantallas. */
 object Repositorio {
+    // Las listas viven solo en memoria; Compose observa los cambios de usuarios y citas.
     val usuarios = mutableStateListOf<Usuario>()
     val especialidades = mutableStateListOf(
         Especialidad(1, "Cardiología", "Cuidado de tu corazón", "♥"),
@@ -32,6 +34,7 @@ object Repositorio {
     var usuarioActual by mutableStateOf<Usuario?>(null)
         private set
 
+    /** Valida el formulario, evita correos repetidos e inicia la sesión al registrar. */
     fun registrarUsuario(nombre: String, correo: String, clave: String): Usuario? {
         val correoLimpio = correo.trim().lowercase()
         if (nombre.isBlank() || !correoLimpio.contains("@") || clave.length < 6 ||
@@ -42,29 +45,37 @@ object Repositorio {
         return usuario
     }
 
+    /** Localiza al usuario con credenciales coincidentes y actualiza la sesión compartida. */
     fun iniciarSesion(correo: String, clave: String): Usuario? {
         val usuario = usuarios.find { it.correo == correo.trim().lowercase() && it.clave == clave }
         usuarioActual = usuario
         return usuario
     }
 
+    /** Cierra la sesión sin borrar los datos temporales de esta ejecución. */
     fun cerrarSesion() { usuarioActual = null }
 
+    /** La búsqueda filtra al escribir, sin mantener una segunda lista. */
     fun buscarEspecialidades(texto: String): List<Especialidad> =
         especialidades.filter { it.nombre.contains(texto.trim(), ignoreCase = true) }
 
+    /** Selección breve para el carrusel de Inicio. */
     fun especialidadesDestacadas(): List<Especialidad> = especialidades.take(4)
+    /** Resolución de identificadores recibidos por navegación. */
     fun obtenerEspecialidad(id: Int): Especialidad? = especialidades.find { it.id == id }
     fun obtenerMedico(id: Int): Medico? = medicos.find { it.id == id }
     fun obtenerCita(id: Int): Cita? = citas.find { it.id == id }
 
+    /** Lista los profesionales de la especialidad con mejor valoración primero. */
     fun medicosPorEspecialidad(especialidadId: Int): List<Medico> =
         medicos.filter { it.especialidadId == especialidadId }.sortedByDescending { it.calificacion }
 
+    /** Búsqueda global de médicos, útil para ampliar el catálogo. */
     fun buscarMedicos(texto: String): List<Medico> =
         medicos.filter { it.nombre.contains(texto.trim(), ignoreCase = true) }
             .sortedByDescending { it.calificacion }
 
+    /** Resta de los horarios base las horas ya reservadas para médico y fecha. */
     fun horariosDisponibles(medicoId: Int, fecha: String): List<String> {
         val ocupados = citas.filter {
             it.medicoId == medicoId && it.fecha == fecha && it.estado == "Confirmada"
@@ -72,6 +83,7 @@ object Repositorio {
         return horariosBase.filter { it !in ocupados }
     }
 
+    /** Vuelve a comprobar el turno al confirmar y evita reservas duplicadas. */
     fun agendarCita(medicoId: Int, fecha: String, hora: String): Cita? {
         val usuario = usuarioActual ?: return null
         val medico = obtenerMedico(medicoId) ?: return null
@@ -82,10 +94,12 @@ object Repositorio {
         return cita
     }
 
+    /** Separa las citas por paciente y las ordena de la más reciente a la más antigua. */
     fun citasDelUsuario(usuarioId: Int): List<Cita> =
         citas.filter { it.usuarioId == usuarioId }.sortedWith(
             compareByDescending<Cita> { it.fecha }.thenByDescending { it.hora })
 
+    /** Solo el titular puede retirar su cita; al hacerlo libera el horario. */
     fun cancelarCita(citaId: Int): Boolean {
         val usuario = usuarioActual ?: return false
         return citas.removeIf { it.id == citaId && it.usuarioId == usuario.id }

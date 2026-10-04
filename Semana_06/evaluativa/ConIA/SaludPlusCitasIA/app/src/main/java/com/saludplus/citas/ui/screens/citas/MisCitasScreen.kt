@@ -12,6 +12,7 @@ import com.saludplus.citas.ui.components.EstadoVacio
 import com.saludplus.citas.ui.components.TarjetaCita
 import com.saludplus.citas.ui.components.TituloSeccion
 
+/** Presenta únicamente las citas del paciente que inició sesión. */
 @Composable
 fun MisCitasScreen(onDetalle: (Int) -> Unit) {
     val usuario = Repositorio.usuarioActual

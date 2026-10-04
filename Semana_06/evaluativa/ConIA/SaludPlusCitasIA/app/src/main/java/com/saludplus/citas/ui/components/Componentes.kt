@@ -17,17 +17,20 @@ import com.saludplus.citas.data.model.Medico
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.theme.AzulClaro
 
+/** Botón consistente para las acciones principales del flujo. */
 @Composable
 fun BotonPrincipal(texto: String, habilitado: Boolean = true, onClick: () -> Unit) {
     Button(onClick = onClick, enabled = habilitado, modifier = Modifier.fillMaxWidth().height(52.dp),
         shape = RoundedCornerShape(14.dp)) { Text(texto, fontWeight = FontWeight.Bold) }
 }
 
+/** Encabezado reutilizado en pantallas de catálogo, cita y perfil. */
 @Composable
 fun TituloSeccion(texto: String) {
     Text(texto, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
 }
 
+/** Mensaje central para listas sin contenido o búsquedas sin coincidencias. */
 @Composable
 fun EstadoVacio(titulo: String, detalle: String) {
     Column(Modifier.fillMaxWidth().padding(28.dp), horizontalAlignment = Alignment.CenterHorizontally,
@@ -37,10 +40,12 @@ fun EstadoVacio(titulo: String, detalle: String) {
     }
 }
 
+/** Tarjeta de especialidad que entrega su identificador al navegar. */
 @Composable
 fun TarjetaEspecialidad(especialidad: Especialidad, onClick: () -> Unit) {
     Card(onClick = onClick, modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(18.dp), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             Box(Modifier.size(48.dp).background(AzulClaro, CircleShape), contentAlignment = Alignment.Center) {
@@ -55,10 +60,12 @@ fun TarjetaEspecialidad(especialidad: Especialidad, onClick: () -> Unit) {
     }
 }
 
+/** Resumen del médico con experiencia y calificación para comparar opciones. */
 @Composable
 fun TarjetaMedico(medico: Medico, onClick: () -> Unit) {
     Card(onClick = onClick, modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(18.dp), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             Box(Modifier.size(48.dp).background(AzulClaro, CircleShape), contentAlignment = Alignment.Center) {
@@ -73,11 +80,13 @@ fun TarjetaMedico(medico: Medico, onClick: () -> Unit) {
     }
 }
 
+/** Cita compartida entre Mis citas y otras listas del paciente. */
 @Composable
 fun TarjetaCita(cita: Cita, onClick: () -> Unit) {
     val medico = Repositorio.obtenerMedico(cita.medicoId)
     Card(onClick = onClick, modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(18.dp), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(medico?.nombre ?: "Médico", fontWeight = FontWeight.Bold)
             Text("${cita.fecha} · ${cita.hora}")

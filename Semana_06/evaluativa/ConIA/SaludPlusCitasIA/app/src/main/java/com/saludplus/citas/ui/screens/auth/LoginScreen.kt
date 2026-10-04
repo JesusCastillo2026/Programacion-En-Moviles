@@ -1,15 +1,19 @@
 package com.saludplus.citas.ui.screens.auth
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BotonPrincipal
 import com.saludplus.citas.ui.components.TituloSeccion
 
+/** Comprueba las credenciales contra el repositorio y abre la sesión. */
 @Composable
 fun LoginScreen(onSuccess: () -> Unit, onRegistro: () -> Unit) {
     var correo by rememberSaveable { mutableStateOf("") }
@@ -24,7 +28,9 @@ fun LoginScreen(onSuccess: () -> Unit, onRegistro: () -> Unit) {
             modifier = Modifier.fillMaxWidth(), singleLine = true)
         Spacer(Modifier.height(12.dp))
         OutlinedTextField(clave, { clave = it }, label = { Text("Contraseña") },
-            modifier = Modifier.fillMaxWidth(), singleLine = true)
+            modifier = Modifier.fillMaxWidth(), singleLine = true,
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password))
         if (error.isNotBlank()) Text(error, color = MaterialTheme.colorScheme.error)
         Spacer(Modifier.height(20.dp))
         BotonPrincipal("Ingresar") {

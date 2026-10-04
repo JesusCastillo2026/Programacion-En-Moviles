@@ -12,6 +12,7 @@ import com.saludplus.citas.ui.components.EstadoVacio
 import com.saludplus.citas.ui.components.TarjetaMedico
 import com.saludplus.citas.ui.components.TituloSeccion
 
+/** Muestra los médicos de la especialidad recibida por navegación. */
 @Composable
 fun MedicosScreen(especialidadId: Int, onElegir: (Int) -> Unit) {
     val especialidad = Repositorio.obtenerEspecialidad(especialidadId)

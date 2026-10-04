@@ -11,6 +11,7 @@ import com.saludplus.citas.ui.components.TituloSeccion
 
 data class ResultadoEjemplo(val nombre: String, val fecha: String, val estado: String)
 
+/** Enseña resultados ficticios para demostrar la navegación del módulo. */
 @Composable
 fun ResultadosScreen() {
     val resultados = listOf(

@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BotonPrincipal
 
+/** Confirma la reserva y ofrece accesos a citas e inicio. */
 @Composable
 fun CitaExitosaScreen(citaId: Int, onCitas: () -> Unit, onInicio: () -> Unit) {
     val cita = Repositorio.obtenerCita(citaId)

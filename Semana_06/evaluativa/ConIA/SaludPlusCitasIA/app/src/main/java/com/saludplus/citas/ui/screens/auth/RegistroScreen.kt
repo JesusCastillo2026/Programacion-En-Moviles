@@ -1,17 +1,21 @@
 package com.saludplus.citas.ui.screens.auth
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BotonPrincipal
 import com.saludplus.citas.ui.components.TituloSeccion
 
+/** Formulario con validaciones antes de guardar un nuevo paciente en memoria. */
 @Composable
 fun RegistroScreen(onSuccess: () -> Unit, onLogin: () -> Unit, onTerminos: () -> Unit) {
     var nombre by rememberSaveable { mutableStateOf("") }
@@ -30,9 +34,13 @@ fun RegistroScreen(onSuccess: () -> Unit, onLogin: () -> Unit, onTerminos: () ->
         OutlinedTextField(correo, { correo = it }, label = { Text("Correo electrónico") },
             modifier = Modifier.fillMaxWidth(), singleLine = true)
         OutlinedTextField(clave, { clave = it }, label = { Text("Contraseña") },
-            modifier = Modifier.fillMaxWidth(), singleLine = true)
+            modifier = Modifier.fillMaxWidth(), singleLine = true,
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password))
         OutlinedTextField(confirmar, { confirmar = it }, label = { Text("Confirmar contraseña") },
-            modifier = Modifier.fillMaxWidth(), singleLine = true)
+            modifier = Modifier.fillMaxWidth(), singleLine = true,
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password))
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
             Checkbox(checked = acepta, onCheckedChange = { acepta = it })
             Text("Acepto los términos y condiciones")
@@ -40,6 +48,7 @@ fun RegistroScreen(onSuccess: () -> Unit, onLogin: () -> Unit, onTerminos: () ->
         TextButton(onClick = onTerminos) { Text("Leer términos") }
         if (error.isNotBlank()) Text(error, color = MaterialTheme.colorScheme.error)
         BotonPrincipal("Registrarme") {
+            // Validamos primero el formulario; solo después agregamos el usuario al repositorio.
             error = when {
                 nombre.isBlank() -> "Ingresa tu nombre."
                 !correo.contains("@") -> "Ingresa un correo válido."
