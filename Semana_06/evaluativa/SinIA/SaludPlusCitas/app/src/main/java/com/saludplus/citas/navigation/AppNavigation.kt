@@ -166,7 +166,7 @@ fun AppNavigation() {
             composable(Rutas.NOTIFICACIONES) {
                 NotificacionesScreen(onDetalle = { nav.navigate(Rutas.detalle(it)) })
             }
-            composable(Rutas.TERMINOS) { TerminosScreen() }
+            composable(Rutas.TERMINOS) { TerminosScreen(onVolver = { nav.popBackStack() }) }
         }
     }
 }
