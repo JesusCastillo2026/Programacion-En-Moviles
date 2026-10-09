@@ -75,3 +75,13 @@ Este registro corresponde a la implementación de la rama `mejora-ia`. Las solic
 **Qué se corrigió:** Cada sede ofrece solo las especialidades y médicos asignados allí. El repositorio rechaza reservas sin sede o con un médico que no atiende en ella. La sede se muestra en la confirmación, comprobante, lista y detalle de citas. Se mantuvo la barra inferior de cuatro destinos; Mis citas sigue allí.
 
 **Prompts visuales (herramienta integrada de generación de imágenes):** Se solicitaron tres retratos fotográficos cuadrados de profesionales ficticios peruanos para el directorio: una cardióloga de unos 40 años con cabello oscuro rizado y uniforme verde azulado; un traumatólogo de unos 45 años con cabello corto y barba; una oftalmóloga de unos 50 años con cabello recogido y blusa lavanda. Los tres prompts pidieron cabeza y hombros, bata blanca, consultorio desenfocado, luz natural, una sola persona y ausencia de texto o logotipos. Se guardaron como `doctor_m5.png`, `doctor_m6.png` y `doctor_m7.png` junto a los cuatro retratos preexistentes.
+
+## 9. Verificación y registro del cambio de sedes y doctores
+
+**Prompt del encargo (extracto):** «al momento de registrarme no debe mandarme al apartado de citas (home), quiero que me mande al inicio de nuevo para que me pida logearme; en el inicio ya no saldrá el apartado de citas, ahora saldrá SEDES [...] también añadirás un apartado que diga doctores en donde se podrá visualizar por categoría los doctores con sus respectivas fotos; el proceso ahora es elegir un local para poder pedir una cita».
+
+**Respuesta resumida:** Se completó el registro seguido de inicio de sesión manual, la portada con sedes y el directorio de profesionales con búsqueda, filtros por especialidad y retratos. La reserva ahora inicia con la selección de una sede y muestra el local elegido hasta el comprobante y el detalle de la cita.
+
+**Qué se corrigió:** Se añadió validación de sede y de la relación entre sede, especialidad y médico en el repositorio; al cambiar la sede se limpian los pasos posteriores de la reserva. Las sedes y citas de demostración permanecen en memoria. Los retratos nuevos son ilustraciones generadas de profesionales ficticios.
+
+**Verificación:** Compilación Debug correcta, 21 pruebas unitarias aprobadas y recorrido manual en emulador desde el registro hasta el comprobante de una cita que muestra la sede seleccionada.
