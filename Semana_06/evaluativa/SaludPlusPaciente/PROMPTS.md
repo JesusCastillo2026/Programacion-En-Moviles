@@ -85,3 +85,11 @@ Este registro corresponde a la implementación de la rama `mejora-ia`. Las solic
 **Qué se corrigió:** Se añadió validación de sede y de la relación entre sede, especialidad y médico en el repositorio; al cambiar la sede se limpian los pasos posteriores de la reserva. Las sedes y citas de demostración permanecen en memoria. Los retratos nuevos son ilustraciones generadas de profesionales ficticios.
 
 **Verificación:** Compilación Debug correcta, 21 pruebas unitarias aprobadas y recorrido manual en emulador desde el registro hasta el comprobante de una cita que muestra la sede seleccionada.
+
+## 10. Días de atención por profesional
+
+**Prompt del encargo (extracto):** «añadas en el apartado en citas qué días están disponibles ya que no tiene sentido que todos los días estén disponibles».
+
+**Respuesta resumida:** Se asignó a cada profesional un calendario semanal de atención y el selector de fecha ahora enseña únicamente días futuros con turnos libres para ese médico. El repositorio vuelve a validar el día al consultar horarios y al confirmar la reserva.
+
+**Qué se corrigió:** Antes se presentaban todos los días hábiles para todos los médicos. Se añadieron reglas de días por profesional y un mensaje cuando no hay disponibilidad esa semana. Los horarios de atención son datos de demostración del proyecto; no representan un calendario real confirmado por la clínica.

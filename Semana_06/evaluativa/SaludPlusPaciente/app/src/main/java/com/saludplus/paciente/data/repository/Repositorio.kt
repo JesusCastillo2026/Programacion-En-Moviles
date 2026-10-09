@@ -15,6 +15,8 @@ import com.saludplus.paciente.data.model.Usuario
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.DayOfWeek
+import java.time.temporal.TemporalAdjusters
 import java.util.UUID
 
 object Repositorio {
@@ -45,13 +47,13 @@ object Repositorio {
     )
 
     val medicos = listOf(
-        Medico("m1", "Dra. Ana Torres", "cardio", "Cardiología", 12, 4.9, 0, setOf("sjl", "molina")),
-        Medico("m2", "Dra. Valeria Ríos", "pediatria", "Pediatría", 9, 4.8, 1, setOf("sjl", "santa-anita")),
-        Medico("m3", "Dr. Luis Vega", "derma", "Dermatología", 15, 4.7, 2, setOf("molina", "santa-anita")),
-        Medico("m4", "Dra. Rosa Díaz", "gineco", "Ginecología", 11, 4.9, 3, setOf("sjl", "san-borja")),
-        Medico("m5", "Dra. Camila Paredes", "cardio", "Cardiología", 7, 4.6, 4, setOf("santa-anita", "san-borja")),
-        Medico("m6", "Dr. Marco Salazar", "trauma", "Traumatología", 14, 4.8, 5, setOf("molina", "san-borja")),
-        Medico("m7", "Dra. Elena Campos", "oftalmo", "Oftalmología", 10, 4.7, 6, setOf("sjl", "san-borja"))
+        Medico("m1", "Dra. Ana Torres", "cardio", "Cardiología", 12, 4.9, 0, setOf("sjl", "molina"), setOf(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.FRIDAY)),
+        Medico("m2", "Dra. Valeria Ríos", "pediatria", "Pediatría", 9, 4.8, 1, setOf("sjl", "santa-anita"), setOf(DayOfWeek.TUESDAY, DayOfWeek.THURSDAY)),
+        Medico("m3", "Dr. Luis Vega", "derma", "Dermatología", 15, 4.7, 2, setOf("molina", "santa-anita"), setOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY)),
+        Medico("m4", "Dra. Rosa Díaz", "gineco", "Ginecología", 11, 4.9, 3, setOf("sjl", "san-borja"), setOf(DayOfWeek.TUESDAY, DayOfWeek.FRIDAY)),
+        Medico("m5", "Dra. Camila Paredes", "cardio", "Cardiología", 7, 4.6, 4, setOf("santa-anita", "san-borja"), setOf(DayOfWeek.MONDAY, DayOfWeek.THURSDAY)),
+        Medico("m6", "Dr. Marco Salazar", "trauma", "Traumatología", 14, 4.8, 5, setOf("molina", "san-borja"), setOf(DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY)),
+        Medico("m7", "Dra. Elena Campos", "oftalmo", "Oftalmología", 10, 4.7, 6, setOf("sjl", "san-borja"), setOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY))
     )
 
     private val horariosBase = listOf(
@@ -133,7 +135,7 @@ object Repositorio {
                             ahora: LocalDateTime = RelojClinica.ahora()): List<String> {
         val medico = obtenerMedico(medicoId)
         if (obtenerSede(sedeId) == null || medico == null || sedeId !in medico.sedesIds ||
-            !Validaciones.fechaReservable(fecha, ahora.toLocalDate())) return emptyList()
+            !Validaciones.fechaReservable(fecha, ahora.toLocalDate()) || fecha.dayOfWeek !in medico.diasAtencion) return emptyList()
         val ocupados = citas.filter {
             it.medicoId == medicoId && it.fecha == fecha && it.estado == EstadoCita.PROGRAMADA
         }.map { it.hora }.toSet()
@@ -154,6 +156,7 @@ object Repositorio {
         if (fecha == null) return ErrorReserva.FECHA_INVALIDA
         if (fecha.isBefore(ahora.toLocalDate())) return ErrorReserva.FECHA_PASADA
         if (fecha.dayOfWeek.value > 5) return ErrorReserva.FIN_DE_SEMANA
+        if (fecha.dayOfWeek !in medico.diasAtencion) return ErrorReserva.MEDICO_NO_ATIENDE_ESE_DIA
         if (hora !in horariosBase) return ErrorReserva.HORA_INVALIDA
         if (!LocalDateTime.of(fecha, LocalTime.parse(hora)).isAfter(ahora)) return ErrorReserva.HORA_PASADA
         if (citas.any {
@@ -214,6 +217,24 @@ object Repositorio {
             fecha = fecha.plusDays(1)
         }
         return resultado
+    }
+
+    /** Devuelve solo días de atención futura del médico que aún tengan al menos un turno libre. */
+    fun diasDisponibles(
+        sedeId: String,
+        medicoId: String,
+        inicioSemana: LocalDate,
+        ahora: LocalDateTime = RelojClinica.ahora()
+    ): List<LocalDate> {
+        val medico = obtenerMedico(medicoId) ?: return emptyList()
+        if (obtenerSede(sedeId) == null || sedeId !in medico.sedesIds) return emptyList()
+        val lunes = inicioSemana.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        return (0L..4L)
+            .map(lunes::plusDays)
+            .filter { fecha ->
+                !fecha.isBefore(ahora.toLocalDate()) && fecha.dayOfWeek in medico.diasAtencion &&
+                    horariosDisponibles(sedeId, medicoId, fecha, ahora).isNotEmpty()
+            }
     }
 
     internal fun restablecerParaPruebas() {

@@ -44,7 +44,7 @@ fun FechaHoraScreen(
     val hoy = ahora.toLocalDate()
     val semanaActual = hoy.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
     val inicioSemana = runCatching { LocalDate.parse(borrador.semana) }.getOrDefault(semanaActual).coerceAtLeast(semanaActual)
-    val dias = remember(inicioSemana, hoy) { Repositorio.cincoDiasHabiles(inicioSemana) }
+    val dias = Repositorio.diasDisponibles(sedeId, medicoId, inicioSemana, ahora)
     val fecha = runCatching { LocalDate.parse(borrador.fecha) }.getOrNull()
     val horarios = fecha?.let { Repositorio.horariosDisponibles(sedeId, medicoId, it, ahora) }.orEmpty()
     val locale = Locale.forLanguageTag("es-PE")
@@ -73,7 +73,7 @@ fun FechaHoraScreen(
             }
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    val mes = dias.first().format(DateTimeFormatter.ofPattern("MMMM yyyy", locale))
+                    val mes = inicioSemana.format(DateTimeFormatter.ofPattern("MMMM yyyy", locale))
                     Text(mes.replaceFirstChar { it.uppercase(locale) }, Modifier.weight(1f), fontWeight = FontWeight.Bold)
                     IconButton(onClick = { borrador.cambiarSemana(inicioSemana.minusWeeks(1).toString()) },
                         enabled = inicioSemana.isAfter(semanaActual)) {
@@ -85,22 +85,34 @@ fun FechaHoraScreen(
                 }
             }
             item(span = { GridItemSpan(maxLineSpan) }) {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(dias, key = { it.toString() }) { dia ->
-                        val elegido = dia == fecha
-                        Surface(
-                            color = if (elegido) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                            shape = RoundedCornerShape(16.dp),
-                            modifier = Modifier.widthIn(min = maxOf(64.dp, 50.dp * fontScale))
-                                .selectable(selected = elegido, role = Role.RadioButton,
-                                    onClick = { borrador.elegirFecha(dia.toString()) })
-                                .semantics { contentDescription = dia.format(DateTimeFormatter.ofPattern("EEEE d 'de' MMMM yyyy", locale)) }
-                        ) {
-                            Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(dia.format(DateTimeFormatter.ofPattern("EEE", locale)), style = MaterialTheme.typography.labelLarge)
-                                Text(dia.dayOfMonth.toString(), style = MaterialTheme.typography.titleLarge)
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Días con disponibilidad", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Mostramos únicamente los días de atención de este profesional con turnos libres.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (dias.isNotEmpty()) {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            items(dias, key = { it.toString() }) { dia ->
+                                val elegido = dia == fecha
+                                Surface(
+                                    color = if (elegido) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(16.dp),
+                                    modifier = Modifier.widthIn(min = maxOf(64.dp, 50.dp * fontScale))
+                                        .selectable(selected = elegido, role = Role.RadioButton,
+                                            onClick = { borrador.elegirFecha(dia.toString()) })
+                                        .semantics { contentDescription = dia.format(DateTimeFormatter.ofPattern("EEEE d 'de' MMMM yyyy", locale)) }
+                                ) {
+                                    Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(dia.format(DateTimeFormatter.ofPattern("EEE", locale)), style = MaterialTheme.typography.labelLarge)
+                                        Text(dia.dayOfMonth.toString(), style = MaterialTheme.typography.titleLarge)
+                                    }
+                                }
                             }
                         }
+                    } else {
+                        Text("No hay días con turnos libres esta semana.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
