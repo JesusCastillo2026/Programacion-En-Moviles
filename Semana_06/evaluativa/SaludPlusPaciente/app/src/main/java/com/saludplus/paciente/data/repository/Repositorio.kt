@@ -9,6 +9,7 @@ import com.saludplus.paciente.data.model.Especialidad
 import com.saludplus.paciente.data.model.EstadoCita
 import com.saludplus.paciente.data.model.ErrorReserva
 import com.saludplus.paciente.data.model.Medico
+import com.saludplus.paciente.data.model.RelojClinica
 import com.saludplus.paciente.data.model.Usuario
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -95,8 +96,8 @@ object Repositorio {
     /** Resuelve el profesional que se transfirió entre destinos de navegación. */
     fun obtenerMedico(id: String): Medico? = medicos.find { it.id == id }
 
-    /** Recupera los datos de una cita para su vista de detalle. */
-    fun obtenerCita(id: String): Cita? = citas.find { it.id == id }
+    /** Solo expone citas de la cuenta activa, incluso si se conoce un ID ajeno. */
+    fun obtenerCita(id: String): Cita? = citas.find { it.id == id && it.usuarioId == usuarioActual?.id }
 
     /** Ordena profesionales por calificación dentro de la especialidad seleccionada. */
     fun medicosPorEspecialidad(especialidadId: String): List<Medico> =
@@ -110,25 +111,29 @@ object Repositorio {
         }
     }
 
-    /** Oculta turnos ya reservados para el mismo profesional y fecha. */
-    fun horariosDisponibles(medicoId: String, fecha: LocalDate): List<String> {
-        if (obtenerMedico(medicoId) == null || !Validaciones.fechaReservable(fecha)) return emptyList()
+    /** Oculta turnos ocupados y, si es hoy, los que ya comenzaron. */
+    fun horariosDisponibles(medicoId: String, fecha: LocalDate, ahora: LocalDateTime = RelojClinica.ahora()): List<String> {
+        if (obtenerMedico(medicoId) == null || !Validaciones.fechaReservable(fecha, ahora.toLocalDate())) return emptyList()
         val ocupados = citas.filter {
             it.medicoId == medicoId && it.fecha == fecha && it.estado == EstadoCita.PROGRAMADA
         }.map { it.hora }.toSet()
-        return horariosBase.filterNot { it in ocupados }
+        return horariosBase.filter { hora ->
+            hora !in ocupados && LocalDateTime.of(fecha, LocalTime.parse(hora)).isAfter(ahora)
+        }
     }
 
     /** Misma comprobación para la pantalla y para guardar: devuelve la causa concreta del rechazo. */
-    fun validarReserva(especialidadId: String, medicoId: String, fecha: LocalDate?, hora: String): ErrorReserva? {
+    fun validarReserva(especialidadId: String, medicoId: String, fecha: LocalDate?, hora: String,
+                      ahora: LocalDateTime = RelojClinica.ahora()): ErrorReserva? {
         if (usuarioActual == null) return ErrorReserva.SIN_SESION
         if (obtenerEspecialidad(especialidadId) == null) return ErrorReserva.ESPECIALIDAD_INVALIDA
         val medico = obtenerMedico(medicoId) ?: return ErrorReserva.MEDICO_INVALIDO
         if (medico.especialidadId != especialidadId) return ErrorReserva.ESPECIALIDAD_NO_COINCIDE
         if (fecha == null) return ErrorReserva.FECHA_INVALIDA
-        if (fecha.isBefore(LocalDate.now())) return ErrorReserva.FECHA_PASADA
+        if (fecha.isBefore(ahora.toLocalDate())) return ErrorReserva.FECHA_PASADA
         if (fecha.dayOfWeek.value > 5) return ErrorReserva.FIN_DE_SEMANA
         if (hora !in horariosBase) return ErrorReserva.HORA_INVALIDA
+        if (!LocalDateTime.of(fecha, LocalTime.parse(hora)).isAfter(ahora)) return ErrorReserva.HORA_PASADA
         if (citas.any {
             it.medicoId == medicoId && it.fecha == fecha && it.hora == hora &&
                 it.estado == EstadoCita.PROGRAMADA
@@ -150,18 +155,34 @@ object Repositorio {
         citas.filter { it.usuarioId == usuarioId }.sortedWith(compareBy<Cita> { it.fecha }.thenBy { it.hora })
 
     /** Devuelve la cita futura más cercana del paciente actual, descartando horas ya transcurridas. */
-    fun proximaCitaDelUsuario(ahora: LocalDateTime = LocalDateTime.now()): Cita? =
+    fun proximaCitaDelUsuario(ahora: LocalDateTime = RelojClinica.ahora()): Cita? =
         citasDelUsuario().firstOrNull {
             it.estado == EstadoCita.PROGRAMADA &&
                 !LocalDateTime.of(it.fecha, LocalTime.parse(it.hora)).isBefore(ahora)
         }
 
-    /** Quita la cita local y devuelve si encontró algún elemento para cancelar. */
-    fun cancelarCita(citaId: String): Boolean = citas.removeAll { it.id == citaId }
+    /** Una cita vencida o de otra cuenta no puede cancelarse. */
+    fun puedeCancelarCita(cita: Cita, ahora: LocalDateTime = RelojClinica.ahora()): Boolean =
+        cita.usuarioId == usuarioActual?.id && cita.estado == EstadoCita.PROGRAMADA &&
+            LocalDateTime.of(cita.fecha, LocalTime.parse(cita.hora)).isAfter(ahora)
+
+    /** Una fecha vencida no equivale a atención completada; se muestra sin inventar ese resultado. */
+    fun estadoVisible(cita: Cita, ahora: LocalDateTime = RelojClinica.ahora()): String = when {
+        cita.estado == EstadoCita.COMPLETADA -> "Completada"
+        !LocalDateTime.of(cita.fecha, LocalTime.parse(cita.hora)).isAfter(ahora) -> "Fecha transcurrida"
+        else -> "Programada"
+    }
+
+    /** Libera un turno futuro solo si pertenece al paciente actual. */
+    fun cancelarCita(citaId: String): Boolean {
+        val cita = obtenerCita(citaId) ?: return false
+        if (!puedeCancelarCita(cita)) return false
+        return citas.remove(cita)
+    }
 
     /** Devuelve los cinco días hábiles de la semana solicitada, sin ofrecer fechas pasadas. */
     fun cincoDiasHabiles(inicioSemana: LocalDate): List<LocalDate> {
-        val hoy = LocalDate.now()
+        val hoy = RelojClinica.hoy()
         var fecha = if (inicioSemana.isBefore(hoy)) hoy else inicioSemana
         if (fecha.dayOfWeek.value > 5) fecha = fecha.plusDays((8 - fecha.dayOfWeek.value).toLong())
         val resultado = mutableListOf<LocalDate>()

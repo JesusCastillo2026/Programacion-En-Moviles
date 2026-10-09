@@ -34,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -49,6 +50,7 @@ import com.saludplus.paciente.ui.components.SoftCard
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import com.saludplus.paciente.ui.components.SaludPlusButton
+import com.saludplus.paciente.ui.components.recordarHoraActual
 import com.saludplus.paciente.ui.theme.AzulClinico
 import com.saludplus.paciente.ui.theme.AzulProfundo
 import com.saludplus.paciente.ui.theme.CelesteSuave
@@ -64,7 +66,8 @@ fun HomeScreen(
     onSpecialty: (String) -> Unit = { onExplore() },
     onDetails: (String) -> Unit = { onAppointments() }
 ) {
-    val proxima = Repositorio.proximaCitaDelUsuario()
+    val ahora by recordarHoraActual()
+    val proxima = Repositorio.proximaCitaDelUsuario(ahora)
     val fuenteGrande = LocalDensity.current.fontScale > 1.3f
     Column(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)

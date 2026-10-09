@@ -102,4 +102,31 @@ class ExperienciaReservaTest {
         Repositorio.cerrarSesion()
         assertEquals(ErrorReserva.SIN_SESION, Repositorio.validarReserva("cardio", "m1", dia, "09:00"))
     }
+
+    @Test fun `hoy solo permite horas futuras y rechaza un turno que vence al confirmar`() {
+        val hoy = LocalDate.of(2026, 10, 9)
+        val ahora = hoy.atTime(11, 3)
+        val turnos = Repositorio.horariosDisponibles("m1", hoy, ahora)
+        assertFalse("11:00" in turnos)
+        assertTrue("11:30" in turnos)
+        assertEquals(ErrorReserva.HORA_PASADA, Repositorio.validarReserva("cardio", "m1", hoy, "11:00", ahora))
+        assertNull(Repositorio.validarReserva("cardio", "m1", hoy, "11:30", ahora))
+        assertEquals(ErrorReserva.HORA_PASADA, Repositorio.validarReserva("cardio", "m1", hoy, "11:30", hoy.atTime(11, 30)))
+        assertTrue(Repositorio.horariosDisponibles("m1", hoy, hoy.plusDays(1).atStartOfDay()).isEmpty())
+    }
+
+    @Test fun `la cita solo es visible y cancelable por su paciente antes del turno`() {
+        val cita = Repositorio.agendarCita("cardio", "m1", dia, "09:00", "Control")!!
+        assertTrue(Repositorio.puedeCancelarCita(cita, dia.atTime(8, 59)))
+        assertFalse(Repositorio.puedeCancelarCita(cita, dia.atTime(9, 0)))
+        assertFalse(Repositorio.puedeCancelarCita(cita, dia.plusDays(1).atStartOfDay()))
+        assertEquals("Programada", Repositorio.estadoVisible(cita, dia.atTime(8, 59)))
+        assertEquals("Fecha transcurrida", Repositorio.estadoVisible(cita, dia.atTime(9, 0)))
+        Repositorio.registrarUsuario("Otra paciente", "otra@tecsup.edu.pe", "999000111", "clave123")
+        assertNull(Repositorio.obtenerCita(cita.id))
+        assertFalse(Repositorio.cancelarCita(cita.id))
+        Repositorio.iniciarSesion("demo@saludplus.pe", "123456")
+        assertEquals(cita.id, Repositorio.obtenerCita(cita.id)?.id)
+        assertTrue(Repositorio.cancelarCita(cita.id))
+    }
 }

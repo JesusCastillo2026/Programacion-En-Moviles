@@ -39,15 +39,17 @@ fun FechaHoraScreen(
     borrador: BorradorReserva = rememberSaveable(saver = BorradorReserva.saver) { BorradorReserva() }
 ) {
     val medico = Repositorio.obtenerMedico(medicoId)
-    val hoy = LocalDate.now()
+    val ahora by recordarHoraActual()
+    val hoy = ahora.toLocalDate()
     val semanaActual = hoy.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
     val inicioSemana = runCatching { LocalDate.parse(borrador.semana) }.getOrDefault(semanaActual).coerceAtLeast(semanaActual)
     val dias = remember(inicioSemana, hoy) { Repositorio.cincoDiasHabiles(inicioSemana) }
     val fecha = runCatching { LocalDate.parse(borrador.fecha) }.getOrNull()
-    val horarios = fecha?.let { Repositorio.horariosDisponibles(medicoId, it) }.orEmpty()
+    val horarios = fecha?.let { Repositorio.horariosDisponibles(medicoId, it, ahora) }.orEmpty()
     val locale = Locale.forLanguageTag("es-PE")
     val fontScale = LocalDensity.current.fontScale
-    val puedeContinuar = fecha in dias && borrador.hora in horarios
+    val puedeContinuar = fecha in dias && borrador.hora in horarios &&
+        Repositorio.validarReserva(especialidadId, medicoId, fecha, borrador.hora, ahora) == null
     LaunchedEffect(especialidadId, medicoId) {
         borrador.elegirEspecialidad(especialidadId)
         borrador.elegirMedico(medicoId)
@@ -134,7 +136,11 @@ fun FechaHoraScreen(
                     if (borrador.hora.isNotEmpty() && borrador.hora !in horarios) {
                         FormError("El turno que elegiste ya no está disponible. Selecciona otro horario.")
                     }
-                    SaludPlusButton("Revisar mi cita", onClick = { onContinue(borrador.fecha, borrador.hora) },
+                    SaludPlusButton("Revisar mi cita", onClick = {
+                        if (Repositorio.validarReserva(especialidadId, medicoId, fecha, borrador.hora) == null) {
+                            onContinue(borrador.fecha, borrador.hora)
+                        }
+                    },
                         enabled = puedeContinuar)
                     Text("Puedes volver al paso anterior: conservaremos tu selección.",
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

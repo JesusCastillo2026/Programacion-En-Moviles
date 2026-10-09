@@ -1,6 +1,7 @@
 package com.saludplus.paciente.data.repository
 
 import java.time.LocalDate
+import com.saludplus.paciente.data.model.RelojClinica
 import java.util.Locale
 
 /** Reglas compartidas entre formularios y repositorio; no dependen de la interfaz. */
@@ -33,7 +34,7 @@ object Validaciones {
     }
 
     /** Las citas se ofrecen desde hoy y únicamente de lunes a viernes. */
-    fun fechaReservable(fecha: LocalDate, hoy: LocalDate = LocalDate.now()): Boolean =
+    fun fechaReservable(fecha: LocalDate, hoy: LocalDate = RelojClinica.hoy()): Boolean =
         !fecha.isBefore(hoy) && fecha.dayOfWeek.value in 1..5
 }
 

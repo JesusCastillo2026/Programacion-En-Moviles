@@ -55,3 +55,13 @@ Este registro corresponde a la implementación de la rama `mejora-ia`. Las solic
 **Qué se corrigió:** La barra inferior apuntaba a Splash aunque ya no estaba en el historial; ahora usa Inicio. Solo se restaura una pila de pestaña al cambiar entre pestañas, para evitar restaurar una confirmación terminada desde Cita exitosa. Los destinos guardados y el borrador se limpian al salir de la cuenta. El repositorio conserva una única validación para crear citas y explicar rechazos.
 
 **Verificación:** APK generado con `assembleDebug` y 16 pruebas aprobadas con `testDebugUnitTest`. Queda pendiente la prueba manual de navegación, teclado y apariencia en emulador. El mensaje de commit fue elegido por el usuario.
+
+## 7. Turnos vencidos y regreso a Inicio
+
+**Prompt del encargo (extracto):** «cuando se crea esa cita ya no puedo retornar al punto de inicio»; «este horario ya pasó»; «aparte de las dos [...] quiero ver si encuentras tú otras más con esa misma lógica».
+
+**Respuesta resumida:** Se simplificó el cambio entre pestañas para volver a Inicio desde Mis citas después de confirmar. Los turnos de hoy se comparan con la hora real de Lima y se ocultan al vencer. La confirmación repite esa validación y explica el rechazo.
+
+**Qué se corrigió:** El emulador estaba configurado en GMT y la clínica opera en hora de Lima. Se centralizó la zona `America/Lima` para calendario, disponibilidad y próxima cita. También se restringió el detalle y la cancelación a la cuenta actual, se impidió cancelar turnos ya comenzados y se diferenciaron las fechas transcurridas de las atenciones completadas.
+
+**Verificación:** APK generado, 18 pruebas unitarias aprobadas y recorrido en el emulador desde la selección de horario hasta Mis citas y el regreso a Inicio. En el emulador se comprobó que a las 11:10 de Lima se ofrecía 11:30, pero no 11:00.

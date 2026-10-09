@@ -54,7 +54,7 @@ class BorradorReserva {
     }
 
     companion object {
-        private fun semanaActual(): String = LocalDate.now()
+        private fun semanaActual(): String = RelojClinica.hoy()
             .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toString()
 
         /** Solo se guardan identificadores y fechas ISO; no se duplica el repositorio de citas. */

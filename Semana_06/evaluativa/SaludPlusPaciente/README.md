@@ -49,7 +49,14 @@ La validación de lógica se ejecuta con `gradlew.bat :app:testDebugUnitTest`. N
 - La barra inferior vuelve a Inicio, que permanece en el historial. Login y Registro intercambian sus destinos con estado guardado, sin acumular copias. Al cerrar sesión se eliminan los destinos guardados.
 - El calendario utiliza una cuadrícula adaptable y días desplazables horizontalmente. Catálogos, perfil, detalle, confirmación y listas admiten desplazamiento; se reorganizaron textos que podían competir por espacio. Los avisos anuncian cambios al lector de pantalla y las listas vacías ofrecen acciones.
 
-Verificado: APK debug generado y 16 pruebas unitarias aprobadas. Incluyen restauración del borrador, invalidación de selecciones dependientes, próxima cita por usuario/fecha/hora y motivos de rechazo. Estas pruebas no verifican la navegación de Android ni la apariencia final.
+Verificado: APK debug generado y 18 pruebas unitarias aprobadas. Incluyen restauración del borrador, próxima cita, turnos vencidos, pertenencia de citas y motivos de rechazo. Se recorrió en el emulador el registro de una cita, Mis citas y el regreso a Inicio.
+
+## Correcciones de navegación y hora local
+
+- Después de confirmar una cita, la barra inferior vuelve a Inicio sin recuperar una pantalla guardada del flujo anterior.
+- La clínica usa `America/Lima` para ofrecer fechas y turnos, aunque el emulador tenga otra zona horaria. En la pantalla de selección se ocultan los turnos cuya hora ya comenzó; el repositorio vuelve a comprobarlo al confirmar.
+- La disponibilidad y la próxima cita se refrescan mientras las pantallas están abiertas. Si un turno vence entre la selección y la confirmación, se muestra una causa concreta y se ofrece elegir otro.
+- Una cuenta solo puede abrir y cancelar sus propias citas. Las citas que ya comenzaron no pueden cancelarse y se muestran como «Fecha transcurrida», sin considerarlas automáticamente atendidas.
 
 Comprobación manual pendiente: volver desde Términos; alternar varias veces Login/Registro; reservar retrocediendo entre pasos; alternar las cuatro pestañas y pulsar Atrás; revisar 320 dp de ancho, texto ampliado y teclado abierto.
 

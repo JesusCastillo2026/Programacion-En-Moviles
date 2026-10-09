@@ -272,12 +272,15 @@ private fun NavHostController.irAInicio() {
 
 private fun NavHostController.openTab(route: String) {
     if (currentDestination?.route == route) return
-    val desdeTab = currentDestination?.route in tabs.map { it.route }
+    // Inicio es el destino base: regresar a él debe quitar las pantallas abiertas encima.
+    if (route == Rutas.INICIO) {
+        if (!popBackStack(Rutas.INICIO, false)) irAInicio()
+        return
+    }
     navigate(route) {
-        // Inicio permanece en el historial; Splash se retira después de iniciar sesión.
-        popUpTo(Rutas.INICIO) { saveState = desdeTab }
+        // Evita restaurar un flujo de reserva o una pestaña guardada después de confirmarla.
+        popUpTo(Rutas.INICIO)
         launchSingleTop = true
-        restoreState = desdeTab
     }
 }
 

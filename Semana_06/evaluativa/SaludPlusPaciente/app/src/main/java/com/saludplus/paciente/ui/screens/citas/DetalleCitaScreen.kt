@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.saludplus.paciente.data.repository.Repositorio
 import com.saludplus.paciente.ui.components.AppBackTopBar
 import com.saludplus.paciente.ui.components.SoftCard
+import com.saludplus.paciente.ui.components.recordarHoraActual
 import com.saludplus.paciente.ui.theme.AzulClinico
 import com.saludplus.paciente.ui.theme.TextoSecundario
 import java.time.format.DateTimeFormatter
@@ -33,6 +34,7 @@ import java.util.Locale
 /** Expone el resumen de una reserva y una confirmación antes de cancelarla. */
 fun DetalleCitaScreen(citaId: String, onBack: () -> Unit, onCancelled: () -> Unit) {
     val cita = Repositorio.obtenerCita(citaId)
+    val ahora by recordarHoraActual()
     var pedirConfirmacion by remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxSize()) {
         AppBackTopBar("Detalle de cita", onBack)
@@ -50,12 +52,16 @@ fun DetalleCitaScreen(citaId: String, onBack: () -> Unit, onCancelled: () -> Uni
                         DetalleLinea("Fecha", cita.fecha.format(DateTimeFormatter.ofPattern("EEEE d 'de' MMMM 'de' yyyy", Locale("es", "PE"))))
                         DetalleLinea("Hora", cita.hora)
                         DetalleLinea("Motivo", cita.motivo.ifBlank { "No especificado" })
-                        DetalleLinea("Estado", cita.estado.name.lowercase().replaceFirstChar { it.uppercase() })
+                        DetalleLinea("Estado", Repositorio.estadoVisible(cita, ahora))
                     }
                 }
                 Spacer(Modifier.height(12.dp))
-                TextButton(onClick = { pedirConfirmacion = true }, modifier = Modifier.fillMaxWidth()) {
-                    Text("Cancelar cita", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                if (Repositorio.puedeCancelarCita(cita, ahora)) {
+                    TextButton(onClick = { pedirConfirmacion = true }, modifier = Modifier.fillMaxWidth()) {
+                        Text("Cancelar cita", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                    }
+                } else {
+                    Text("Esta cita ya no se puede cancelar.", color = TextoSecundario)
                 }
             }
         }
@@ -68,9 +74,9 @@ fun DetalleCitaScreen(citaId: String, onBack: () -> Unit, onCancelled: () -> Uni
             text = { Text("La cita se quitará de tu lista y el horario volverá a estar disponible.") },
             confirmButton = {
                 TextButton(onClick = {
-                    Repositorio.cancelarCita(citaId)
+                    val cancelada = Repositorio.cancelarCita(citaId)
                     pedirConfirmacion = false
-                    onCancelled()
+                    if (cancelada) onCancelled()
                 }) { Text("Sí, cancelar", color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = { TextButton(onClick = { pedirConfirmacion = false }) { Text("Conservar") } }

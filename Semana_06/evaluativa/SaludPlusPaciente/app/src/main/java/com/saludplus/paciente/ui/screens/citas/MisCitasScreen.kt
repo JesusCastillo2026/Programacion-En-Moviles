@@ -17,6 +17,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,15 +29,18 @@ import com.saludplus.paciente.ui.components.EmptyState
 import com.saludplus.paciente.ui.components.PageHeading
 import com.saludplus.paciente.ui.components.SaludPlusButton
 import com.saludplus.paciente.ui.components.SoftCard
+import com.saludplus.paciente.ui.components.recordarHoraActual
 import com.saludplus.paciente.ui.theme.AzulClinico
 import com.saludplus.paciente.ui.theme.TextoSecundario
 import java.time.format.DateTimeFormatter
+import java.time.LocalDateTime
 import java.util.Locale
 
 @Composable
 /** Lista las citas del paciente y enlaza cada tarjeta con su detalle. */
 fun MisCitasScreen(onDetails: (String) -> Unit, onNewAppointment: () -> Unit) {
     val citas = Repositorio.citasDelUsuario()
+    val ahora by recordarHoraActual()
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(20.dp),
@@ -50,7 +54,7 @@ fun MisCitasScreen(onDetails: (String) -> Unit, onNewAppointment: () -> Unit) {
             }
         } else {
                 items(citas, key = { it.id }) { cita ->
-                    CitaCard(cita, onClick = { onDetails(cita.id) })
+                    CitaCard(cita, ahora, onClick = { onDetails(cita.id) })
                 }
             item { SaludPlusButton("Agendar otra cita", onNewAppointment, modifier = Modifier.padding(vertical = 12.dp)) }
         }
@@ -58,7 +62,7 @@ fun MisCitasScreen(onDetails: (String) -> Unit, onNewAppointment: () -> Unit) {
 }
 
 @Composable
-private fun CitaCard(cita: Cita, onClick: () -> Unit) {
+private fun CitaCard(cita: Cita, ahora: LocalDateTime, onClick: () -> Unit) {
     val medico = Repositorio.obtenerMedico(cita.medicoId)
     val especialidad = Repositorio.obtenerEspecialidad(cita.especialidadId)
     val fecha = cita.fecha.format(DateTimeFormatter.ofPattern("EEE d 'de' MMMM", Locale("es", "PE")))
@@ -71,7 +75,7 @@ private fun CitaCard(cita: Cita, onClick: () -> Unit) {
                     Text(medico?.nombre ?: "Profesional", color = TextoSecundario)
                 }
             }
-            Text(cita.estado.name.lowercase().replaceFirstChar { it.uppercase() }, color = AzulClinico, fontWeight = FontWeight.SemiBold)
+            Text(Repositorio.estadoVisible(cita, ahora), color = AzulClinico, fontWeight = FontWeight.SemiBold)
             Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(fecha.replaceFirstChar { it.uppercase(Locale("es", "PE")) }, color = TextoSecundario)
                 Text(cita.hora, color = AzulClinico, fontWeight = FontWeight.Bold)
