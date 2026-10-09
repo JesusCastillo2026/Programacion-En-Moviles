@@ -46,6 +46,7 @@ import com.saludplus.paciente.data.repository.Repositorio
 import com.saludplus.paciente.ui.components.AppBackTopBar
 import com.saludplus.paciente.ui.components.PageHeading
 import com.saludplus.paciente.ui.components.PlaceholderAvatar
+import com.saludplus.paciente.ui.components.FotoMedico
 import com.saludplus.paciente.ui.components.SaludPlusButton
 import com.saludplus.paciente.ui.components.SearchField
 import com.saludplus.paciente.ui.components.ReservaProgress
@@ -56,10 +57,10 @@ import com.saludplus.paciente.ui.theme.TextoSecundario
 
 @Composable
 /** Presenta médicos filtrables y envía su identificador al selector de turnos. */
-fun MedicosScreen(especialidadId: String, onBack: () -> Unit, onSelect: (String) -> Unit, seleccionadoId: String = "") {
+fun MedicosScreen(sedeId: String, especialidadId: String, onBack: () -> Unit, onSelect: (String) -> Unit, seleccionadoId: String = "") {
     val especialidad = Repositorio.obtenerEspecialidad(especialidadId)
     var consulta by rememberSaveable(especialidadId) { mutableStateOf("") }
-    val resultados = Repositorio.buscarMedicos(especialidadId, consulta)
+    val resultados = Repositorio.buscarMedicos(especialidadId, consulta, sedeId)
 
     Column(modifier = Modifier.fillMaxSize()) {
         AppBackTopBar("Médicos", onBack)
@@ -67,8 +68,8 @@ fun MedicosScreen(especialidadId: String, onBack: () -> Unit, onSelect: (String)
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
                 modifier = Modifier.fillMaxSize().imePadding()) {
                 item {
-                    ReservaProgress(2)
-                    PageHeading(especialidad?.nombre ?: "Especialistas", "Elige un profesional para continuar")
+                    ReservaProgress(3)
+                    PageHeading(especialidad?.nombre ?: "Especialistas", "Profesionales en ${Repositorio.obtenerSede(sedeId)?.nombre ?: "la sede elegida"}")
                     SearchField(consulta, { consulta = it }, "Buscar médico", Modifier.padding(top = 14.dp, bottom = 12.dp))
                 }
                 items(resultados, key = { it.id }) { medico ->
@@ -85,12 +86,6 @@ fun MedicosScreen(especialidadId: String, onBack: () -> Unit, onSelect: (String)
 
 @Composable
 private fun MedicoItem(medico: Medico, onClick: () -> Unit, seleccionado: Boolean) {
-    val context = LocalContext.current
-    val bitmap = remember {
-        runCatching {
-            context.assets.open("doctor_portraits.png").use { BitmapFactory.decodeStream(it).asImageBitmap() }
-        }.getOrNull()
-    }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -99,8 +94,7 @@ private fun MedicoItem(medico: Medico, onClick: () -> Unit, seleccionado: Boolea
         Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             if (seleccionado) StatusChip("Médico seleccionado")
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                if (bitmap != null) ImagenMedico(bitmap, medico.indiceImagen)
-                else PlaceholderAvatar(medico.nombre, 58.dp)
+                FotoMedico(medico, 58.dp)
                 Column(modifier = Modifier.weight(1f)) {
                     Text(medico.nombre, fontWeight = FontWeight.Bold)
                     Text(medico.especialidadNombre, color = TextoSecundario, style = MaterialTheme.typography.bodySmall)
@@ -112,23 +106,4 @@ private fun MedicoItem(medico: Medico, onClick: () -> Unit, seleccionado: Boolea
         }
     }
 }
-
-/** Recorta uno de los cuatro retratos ficticios incluidos en la hoja de recursos local. */
-@Composable
-private fun ImagenMedico(bitmap: ImageBitmap, indice: Int) {
-    val lado = 627
-    val columna = indice % 2
-    val fila = (indice / 2) % 2
-    Image(
-        painter = BitmapPainter(
-            image = bitmap,
-            srcOffset = IntOffset(columna * lado, fila * lado),
-            srcSize = IntSize(lado, lado)
-        ),
-        contentDescription = "Retrato ilustrativo de profesional de salud",
-        contentScale = ContentScale.Crop,
-        modifier = Modifier.size(58.dp).clip(CircleShape)
-    )
-}
-
 

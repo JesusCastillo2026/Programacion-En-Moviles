@@ -10,6 +10,7 @@ import com.saludplus.paciente.data.model.EstadoCita
 import com.saludplus.paciente.data.model.ErrorReserva
 import com.saludplus.paciente.data.model.Medico
 import com.saludplus.paciente.data.model.RelojClinica
+import com.saludplus.paciente.data.model.Sede
 import com.saludplus.paciente.data.model.Usuario
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -35,14 +36,22 @@ object Repositorio {
         Especialidad("oftalmo", "Oftalmología", "Prevención y cuidado de la visión", "◉", false)
     )
 
+    /** Sedes de demostración: los nombres son distritos, no direcciones verificadas. */
+    val sedes = listOf(
+        Sede("sjl", "San Juan de Lurigancho", "Lima Este", "Atención presencial"),
+        Sede("molina", "La Molina", "Lima Este", "Atención presencial"),
+        Sede("santa-anita", "Santa Anita", "Lima Este", "Atención presencial"),
+        Sede("san-borja", "San Borja", "Lima Centro", "Atención presencial")
+    )
+
     val medicos = listOf(
-        Medico("m1", "Dra. Ana Torres", "cardio", "Cardiología", 12, 4.9, 0),
-        Medico("m2", "Dra. Valeria Ríos", "pediatria", "Pediatría", 9, 4.8, 1),
-        Medico("m3", "Dr. Luis Vega", "derma", "Dermatología", 15, 4.7, 2),
-        Medico("m4", "Dra. Rosa Díaz", "gineco", "Ginecología", 11, 4.9, 3),
-        Medico("m5", "Dra. Camila Paredes", "cardio", "Cardiología", 7, 4.6, 1),
-        Medico("m6", "Dr. Marco Salazar", "trauma", "Traumatología", 14, 4.8, 2),
-        Medico("m7", "Dra. Elena Campos", "oftalmo", "Oftalmología", 10, 4.7, 3)
+        Medico("m1", "Dra. Ana Torres", "cardio", "Cardiología", 12, 4.9, 0, setOf("sjl", "molina")),
+        Medico("m2", "Dra. Valeria Ríos", "pediatria", "Pediatría", 9, 4.8, 1, setOf("sjl", "santa-anita")),
+        Medico("m3", "Dr. Luis Vega", "derma", "Dermatología", 15, 4.7, 2, setOf("molina", "santa-anita")),
+        Medico("m4", "Dra. Rosa Díaz", "gineco", "Ginecología", 11, 4.9, 3, setOf("sjl", "san-borja")),
+        Medico("m5", "Dra. Camila Paredes", "cardio", "Cardiología", 7, 4.6, 4, setOf("santa-anita", "san-borja")),
+        Medico("m6", "Dr. Marco Salazar", "trauma", "Traumatología", 14, 4.8, 5, setOf("molina", "san-borja")),
+        Medico("m7", "Dra. Elena Campos", "oftalmo", "Oftalmología", 10, 4.7, 6, setOf("sjl", "san-borja"))
     )
 
     private val horariosBase = listOf(
@@ -61,7 +70,6 @@ object Repositorio {
         if (usuarios.any { it.correo.equals(emailNormalizado, ignoreCase = true) }) return null
         val usuario = Usuario(UUID.randomUUID().toString(), nombre.trim(), emailNormalizado, telefono.trim(), contrasena)
         usuarios.add(usuario)
-        usuarioActual = usuario
         return usuario
     }
 
@@ -93,6 +101,14 @@ object Repositorio {
     /** Resuelve un elemento del catálogo por su identificador estable. */
     fun obtenerEspecialidad(id: String): Especialidad? = especialidades.find { it.id == id }
 
+    /** Ubica el local elegido sin depender del texto visible. */
+    fun obtenerSede(id: String): Sede? = sedes.find { it.id == id }
+
+    /** El catálogo de una sede solo presenta especialidades con médicos asignados allí. */
+    fun especialidadesPorSede(sedeId: String): List<Especialidad> = especialidades.filter { especialidad ->
+        medicos.any { it.especialidadId == especialidad.id && sedeId in it.sedesIds }
+    }
+
     /** Resuelve el profesional que se transfirió entre destinos de navegación. */
     fun obtenerMedico(id: String): Medico? = medicos.find { it.id == id }
 
@@ -100,20 +116,24 @@ object Repositorio {
     fun obtenerCita(id: String): Cita? = citas.find { it.id == id && it.usuarioId == usuarioActual?.id }
 
     /** Ordena profesionales por calificación dentro de la especialidad seleccionada. */
-    fun medicosPorEspecialidad(especialidadId: String): List<Medico> =
-        medicos.filter { it.especialidadId == especialidadId }.sortedByDescending { it.calificacion }
+    fun medicosPorEspecialidad(especialidadId: String, sedeId: String? = null): List<Medico> =
+        medicos.filter { it.especialidadId == especialidadId && (sedeId == null || sedeId in it.sedesIds) }
+            .sortedByDescending { it.calificacion }
 
     /** Aplica la búsqueda reactiva al nombre o especialidad del profesional. */
-    fun buscarMedicos(especialidadId: String, texto: String): List<Medico> {
+    fun buscarMedicos(especialidadId: String, texto: String, sedeId: String? = null): List<Medico> {
         val consulta = texto.trim()
-        return medicosPorEspecialidad(especialidadId).filter {
+        return medicosPorEspecialidad(especialidadId, sedeId).filter {
             it.nombre.contains(consulta, ignoreCase = true) || it.especialidadNombre.contains(consulta, ignoreCase = true)
         }
     }
 
     /** Oculta turnos ocupados y, si es hoy, los que ya comenzaron. */
-    fun horariosDisponibles(medicoId: String, fecha: LocalDate, ahora: LocalDateTime = RelojClinica.ahora()): List<String> {
-        if (obtenerMedico(medicoId) == null || !Validaciones.fechaReservable(fecha, ahora.toLocalDate())) return emptyList()
+    fun horariosDisponibles(sedeId: String, medicoId: String, fecha: LocalDate,
+                            ahora: LocalDateTime = RelojClinica.ahora()): List<String> {
+        val medico = obtenerMedico(medicoId)
+        if (obtenerSede(sedeId) == null || medico == null || sedeId !in medico.sedesIds ||
+            !Validaciones.fechaReservable(fecha, ahora.toLocalDate())) return emptyList()
         val ocupados = citas.filter {
             it.medicoId == medicoId && it.fecha == fecha && it.estado == EstadoCita.PROGRAMADA
         }.map { it.hora }.toSet()
@@ -123,12 +143,14 @@ object Repositorio {
     }
 
     /** Misma comprobación para la pantalla y para guardar: devuelve la causa concreta del rechazo. */
-    fun validarReserva(especialidadId: String, medicoId: String, fecha: LocalDate?, hora: String,
+    fun validarReserva(sedeId: String, especialidadId: String, medicoId: String, fecha: LocalDate?, hora: String,
                       ahora: LocalDateTime = RelojClinica.ahora()): ErrorReserva? {
         if (usuarioActual == null) return ErrorReserva.SIN_SESION
+        if (obtenerSede(sedeId) == null) return ErrorReserva.SEDE_INVALIDA
         if (obtenerEspecialidad(especialidadId) == null) return ErrorReserva.ESPECIALIDAD_INVALIDA
         val medico = obtenerMedico(medicoId) ?: return ErrorReserva.MEDICO_INVALIDO
         if (medico.especialidadId != especialidadId) return ErrorReserva.ESPECIALIDAD_NO_COINCIDE
+        if (sedeId !in medico.sedesIds) return ErrorReserva.MEDICO_NO_DISPONIBLE_EN_SEDE
         if (fecha == null) return ErrorReserva.FECHA_INVALIDA
         if (fecha.isBefore(ahora.toLocalDate())) return ErrorReserva.FECHA_PASADA
         if (fecha.dayOfWeek.value > 5) return ErrorReserva.FIN_DE_SEMANA
@@ -142,10 +164,11 @@ object Repositorio {
     }
 
     /** Comprueba el turno de nuevo antes de añadir la cita, aunque la pantalla ya lo haya validado. */
-    fun agendarCita(especialidadId: String, medicoId: String, fecha: LocalDate, hora: String, motivo: String): Cita? {
-        if (validarReserva(especialidadId, medicoId, fecha, hora) != null) return null
+    fun agendarCita(sedeId: String, especialidadId: String, medicoId: String,
+                   fecha: LocalDate, hora: String, motivo: String): Cita? {
+        if (validarReserva(sedeId, especialidadId, medicoId, fecha, hora) != null) return null
         val usuarioId = usuarioActual?.id ?: return null
-        val cita = Cita(UUID.randomUUID().toString(), usuarioId, medicoId, especialidadId, fecha, hora, motivo.trim())
+        val cita = Cita(UUID.randomUUID().toString(), usuarioId, sedeId, medicoId, especialidadId, fecha, hora, motivo.trim())
         citas.add(cita)
         return cita
     }

@@ -73,6 +73,8 @@ private fun CitaCard(cita: Cita, ahora: LocalDateTime, onClick: () -> Unit) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(especialidad?.nombre ?: "Consulta", fontWeight = FontWeight.Bold)
                     Text(medico?.nombre ?: "Profesional", color = TextoSecundario)
+                    Text("Sede: ${Repositorio.obtenerSede(cita.sedeId)?.nombre ?: "—"}",
+                        color = TextoSecundario, style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
                 }
             }
             Text(Repositorio.estadoVisible(cita, ahora), color = AzulClinico, fontWeight = FontWeight.SemiBold)

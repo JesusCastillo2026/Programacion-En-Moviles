@@ -54,6 +54,7 @@ fun CitaExitosaScreen(citaId: String, onHome: () -> Unit, onAppointments: () -> 
                 Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                     Text(medico?.nombre ?: "Profesional", fontWeight = FontWeight.Bold)
                     Text(especialidad?.nombre ?: "Consulta")
+                    Text("Sede: ${Repositorio.obtenerSede(cita.sedeId)?.nombre ?: "—"}")
                     Text(cita.fecha.format(DateTimeFormatter.ofPattern("EEEE d 'de' MMMM 'de' yyyy", locale)).replaceFirstChar { it.uppercase(locale) })
                     Text("${cita.hora} · Presencial")
                 }

@@ -7,6 +7,7 @@ data class Medico(
     val especialidadNombre: String,
     val experiencia: Int,
     val calificacion: Double,
-    val indiceImagen: Int
+    val indiceImagen: Int,
+    val sedesIds: Set<String>
 )
 

@@ -42,9 +42,10 @@ import com.saludplus.paciente.ui.theme.TextoSecundario
 
 @Composable
 /** Muestra el catálogo filtrable de especialidades que inicia la reserva. */
-fun EspecialidadesScreen(onBack: () -> Unit, onSelect: (String) -> Unit, seleccionadoId: String = "") {
+fun EspecialidadesScreen(sedeId: String, onBack: () -> Unit, onSelect: (String) -> Unit, seleccionadoId: String = "") {
     var consulta by rememberSaveable { mutableStateOf("") }
-    val resultados = Repositorio.buscarEspecialidades(consulta)
+    val disponibles = Repositorio.especialidadesPorSede(sedeId).map { it.id }.toSet()
+    val resultados = Repositorio.buscarEspecialidades(consulta).filter { it.id in disponibles }
 
     Column(modifier = Modifier.fillMaxSize()) {
         AppBackTopBar("Especialidades", onBack)
@@ -52,8 +53,8 @@ fun EspecialidadesScreen(onBack: () -> Unit, onSelect: (String) -> Unit, selecci
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
                 modifier = Modifier.fillMaxSize().imePadding()) {
                 item {
-                    ReservaProgress(1)
-                    PageHeading("Encuentra atención", "Elige el área de salud que buscas")
+                    ReservaProgress(2)
+                    PageHeading("Encuentra atención", "Especialidades en ${Repositorio.obtenerSede(sedeId)?.nombre ?: "la sede elegida"}")
                     SearchField(consulta, { consulta = it }, "Buscar especialidad", Modifier.padding(top = 14.dp, bottom = 12.dp))
                 }
                 items(resultados, key = { it.id }) { especialidad ->

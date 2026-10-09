@@ -48,6 +48,7 @@ fun DetalleCitaScreen(citaId: String, onBack: () -> Unit, onCancelled: () -> Uni
                 SoftCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         DetalleLinea("Profesional", medico?.nombre ?: "—")
+                        DetalleLinea("Sede", Repositorio.obtenerSede(cita.sedeId)?.nombre ?: "—")
                         DetalleLinea("Especialidad", especialidad?.nombre ?: "—")
                         DetalleLinea("Fecha", cita.fecha.format(DateTimeFormatter.ofPattern("EEEE d 'de' MMMM 'de' yyyy", Locale("es", "PE"))))
                         DetalleLinea("Hora", cita.hora)

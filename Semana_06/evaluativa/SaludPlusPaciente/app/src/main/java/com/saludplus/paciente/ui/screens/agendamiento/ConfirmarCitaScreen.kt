@@ -39,6 +39,7 @@ import java.util.Locale
 @Composable
 /** Revisa los datos seleccionados y solicita la creación de la cita al repositorio. */
 fun ConfirmarCitaScreen(
+    sedeId: String,
     especialidadId: String,
     medicoId: String,
     fecha: String,
@@ -61,11 +62,12 @@ fun ConfirmarCitaScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         AppBackTopBar("Confirmar cita", onBack)
         Column(modifier = Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            ReservaProgress(4)
+            ReservaProgress(5)
             Text("Revisa los detalles", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Text("Tu cita estará lista al confirmar.", color = TextoSecundario)
             SoftCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ResumenLinea("Sede", Repositorio.obtenerSede(sedeId)?.nombre ?: "—")
                     ResumenLinea("Especialidad", especialidad?.nombre ?: "—")
                     ResumenLinea("Profesional", medico?.nombre ?: "—")
                     ResumenLinea("Fecha", fechaTexto.replaceFirstChar { it.uppercase(Locale("es", "PE")) })
@@ -83,18 +85,20 @@ fun ConfirmarCitaScreen(
             error?.let { causa ->
                 FormError(causa.mensaje)
                 val volverALogin = causa == ErrorReserva.SIN_SESION
-                val cambiarMedico = causa in listOf(ErrorReserva.ESPECIALIDAD_INVALIDA, ErrorReserva.MEDICO_INVALIDO, ErrorReserva.ESPECIALIDAD_NO_COINCIDE)
+                val cambiarMedico = causa in listOf(ErrorReserva.SEDE_INVALIDA, ErrorReserva.ESPECIALIDAD_INVALIDA,
+                    ErrorReserva.MEDICO_INVALIDO, ErrorReserva.ESPECIALIDAD_NO_COINCIDE,
+                    ErrorReserva.MEDICO_NO_DISPONIBLE_EN_SEDE)
                 SaludPlusButton(
-                    if (volverALogin) "Iniciar sesión" else if (cambiarMedico) "Elegir especialidad y médico" else "Elegir otro horario",
+                    if (volverALogin) "Iniciar sesión" else if (cambiarMedico) "Elegir sede y profesional" else "Elegir otro horario",
                     onClick = if (volverALogin) onLogin else if (cambiarMedico) onChooseDoctor else onBack
                 )
             }
             Spacer(Modifier.height(12.dp))
             SaludPlusButton("Confirmar cita", onClick = {
                 val dia = runCatching { LocalDate.parse(fecha) }.getOrNull()
-                error = Repositorio.validarReserva(especialidadId, medicoId, dia, hora)
+                error = Repositorio.validarReserva(sedeId, especialidadId, medicoId, dia, hora)
                 if (error == null && onConfirm(motivo) == null) {
-                    error = Repositorio.validarReserva(especialidadId, medicoId, dia, hora) ?: ErrorReserva.NO_CONFIRMADA
+                    error = Repositorio.validarReserva(sedeId, especialidadId, medicoId, dia, hora) ?: ErrorReserva.NO_CONFIRMADA
                 }
             })
         }

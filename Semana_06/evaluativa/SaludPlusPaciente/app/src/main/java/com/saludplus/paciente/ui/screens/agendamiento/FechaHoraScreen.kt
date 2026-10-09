@@ -32,6 +32,7 @@ import java.util.Locale
 /** Un único contenedor desplazable adapta los turnos al ancho y al tamaño de letra. */
 @Composable
 fun FechaHoraScreen(
+    sedeId: String,
     especialidadId: String,
     medicoId: String,
     onBack: () -> Unit,
@@ -45,11 +46,11 @@ fun FechaHoraScreen(
     val inicioSemana = runCatching { LocalDate.parse(borrador.semana) }.getOrDefault(semanaActual).coerceAtLeast(semanaActual)
     val dias = remember(inicioSemana, hoy) { Repositorio.cincoDiasHabiles(inicioSemana) }
     val fecha = runCatching { LocalDate.parse(borrador.fecha) }.getOrNull()
-    val horarios = fecha?.let { Repositorio.horariosDisponibles(medicoId, it, ahora) }.orEmpty()
+    val horarios = fecha?.let { Repositorio.horariosDisponibles(sedeId, medicoId, it, ahora) }.orEmpty()
     val locale = Locale.forLanguageTag("es-PE")
     val fontScale = LocalDensity.current.fontScale
     val puedeContinuar = fecha in dias && borrador.hora in horarios &&
-        Repositorio.validarReserva(especialidadId, medicoId, fecha, borrador.hora, ahora) == null
+        Repositorio.validarReserva(sedeId, especialidadId, medicoId, fecha, borrador.hora, ahora) == null
     LaunchedEffect(especialidadId, medicoId) {
         borrador.elegirEspecialidad(especialidadId)
         borrador.elegirMedico(medicoId)
@@ -66,7 +67,7 @@ fun FechaHoraScreen(
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Column {
-                    ReservaProgress(3)
+                    ReservaProgress(4)
                     PageHeading("Elige cuándo", medico?.let { "${it.nombre} · ${it.especialidadNombre}" } ?: "Selecciona un profesional")
                 }
             }
@@ -137,7 +138,7 @@ fun FechaHoraScreen(
                         FormError("El turno que elegiste ya no está disponible. Selecciona otro horario.")
                     }
                     SaludPlusButton("Revisar mi cita", onClick = {
-                        if (Repositorio.validarReserva(especialidadId, medicoId, fecha, borrador.hora) == null) {
+                        if (Repositorio.validarReserva(sedeId, especialidadId, medicoId, fecha, borrador.hora) == null) {
                             onContinue(borrador.fecha, borrador.hora)
                         }
                     },

@@ -14,6 +14,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -36,6 +38,8 @@ import com.saludplus.paciente.ui.screens.agendamiento.CitaExitosaScreen
 import com.saludplus.paciente.ui.screens.agendamiento.ConfirmarCitaScreen
 import com.saludplus.paciente.ui.screens.agendamiento.FechaHoraScreen
 import com.saludplus.paciente.ui.screens.agendamiento.MedicosScreen
+import com.saludplus.paciente.ui.screens.agendamiento.SedesScreen
+import com.saludplus.paciente.ui.screens.doctores.DoctoresScreen
 import com.saludplus.paciente.ui.screens.citas.DetalleCitaScreen
 import com.saludplus.paciente.ui.screens.citas.MisCitasScreen
 import com.saludplus.paciente.ui.screens.home.HomeScreen
@@ -57,6 +61,7 @@ private val tabs = listOf(
 fun AppNavigation() {
     val navController = rememberNavController()
     val borrador = rememberSaveable(saver = BorradorReserva.saver) { BorradorReserva() }
+    var cuentaCreada by rememberSaveable { mutableStateOf(false) }
     val backStack by navController.currentBackStackEntryAsState()
     val route = backStack?.destination?.route
     val showNavigationBar = route in tabs.map { it.route }
@@ -93,7 +98,12 @@ fun AppNavigation() {
                     onBack = { navController.popBackStack() },
                     onRegister = { nombre, correo, telefono, contrasena ->
                         val usuario = Repositorio.registrarUsuario(nombre, correo, telefono, contrasena)
-                        if (usuario != null) { borrador.limpiar(); navController.irAInicio() }
+                        if (usuario != null) {
+                            borrador.limpiar()
+                            cuentaCreada = true
+                            navController.clearBackStack(Rutas.LOGIN)
+                            navController.navigate(Rutas.LOGIN) { popUpTo(Rutas.SPLASH); launchSingleTop = true }
+                        }
                         usuario != null
                     },
                     onLogin = { navController.openAuth(Rutas.LOGIN) },
@@ -102,10 +112,11 @@ fun AppNavigation() {
             }
             composable(Rutas.LOGIN) {
                 LoginScreen(
+                    cuentaCreada = cuentaCreada,
                     onBack = { navController.popBackStack() },
                     onLogin = { correo, contrasena ->
                         val usuario = Repositorio.iniciarSesion(correo, contrasena)
-                        if (usuario != null) { borrador.limpiar(); navController.irAInicio() }
+                        if (usuario != null) { cuentaCreada = false; borrador.limpiar(); navController.irAInicio() }
                         usuario != null
                     },
                     onRegister = { navController.openAuth(Rutas.REGISTRO) }
@@ -114,20 +125,34 @@ fun AppNavigation() {
             composable(Rutas.TERMINOS) { TerminosScreen(onBack = { navController.popBackStack() }) }
             composable(Rutas.INICIO) {
                 HomeScreen(
-                    onExplore = { borrador.limpiar(); navController.navigate(Rutas.ESPECIALIDADES) },
-                    onAppointments = { navController.openTab(Rutas.MIS_CITAS) },
-                    onResults = { navController.openTab(Rutas.RESULTADOS) },
-                    onNotifications = { navController.navigate(Rutas.NOTIFICACIONES) { launchSingleTop = true } },
-                    onSpecialty = { id ->
+                    onSedes = { borrador.limpiar(); navController.navigate(Rutas.SEDES) },
+                    onSede = { id ->
                         borrador.limpiar()
-                        borrador.elegirEspecialidad(id)
-                        navController.navigate(Rutas.medicos(id))
+                        borrador.elegirSede(id)
+                        navController.navigate(Rutas.ESPECIALIDADES)
                     },
-                    onDetails = { id -> navController.navigate(Rutas.detalleCita(id)) }
+                    onDoctors = { navController.navigate(Rutas.DOCTORES) },
+                    onResults = { navController.openTab(Rutas.RESULTADOS) },
+                    onNotifications = { navController.navigate(Rutas.NOTIFICACIONES) { launchSingleTop = true } }
                 )
+            }
+            composable(Rutas.SEDES) {
+                SedesScreen(
+                    onBack = { navController.popBackStack() },
+                    onSelect = { id ->
+                        borrador.elegirSede(id)
+                        navController.navigate(Rutas.ESPECIALIDADES) { launchSingleTop = true }
+                    },
+                    seleccionadoId = borrador.sedeId
+                )
+            }
+            composable(Rutas.DOCTORES) {
+                DoctoresScreen(onBack = { navController.popBackStack() },
+                    onBook = { borrador.limpiar(); navController.navigate(Rutas.SEDES) })
             }
             composable(Rutas.ESPECIALIDADES) {
                 EspecialidadesScreen(
+                    sedeId = borrador.sedeId,
                     onBack = { navController.popBackStack() },
                     onSelect = { id ->
                         borrador.elegirEspecialidad(id)
@@ -141,6 +166,7 @@ fun AppNavigation() {
                 arguments = listOf(navArgument("especialidadId") { type = NavType.StringType })
             ) { entry ->
                 MedicosScreen(
+                    sedeId = borrador.sedeId,
                     especialidadId = entry.arguments?.getString("especialidadId").orEmpty(),
                     onBack = { navController.popBackStack() },
                     onSelect = { medicoId ->
@@ -162,6 +188,7 @@ fun AppNavigation() {
                 val especialidadId = entry.arguments?.getString("especialidadId").orEmpty()
                 val medicoId = entry.arguments?.getString("medicoId").orEmpty()
                 FechaHoraScreen(
+                    sedeId = borrador.sedeId,
                     especialidadId = especialidadId,
                     medicoId = medicoId,
                     onBack = { navController.popBackStack() },
@@ -183,6 +210,7 @@ fun AppNavigation() {
                 val fecha = entry.arguments?.getString("fecha").orEmpty()
                 val hora = entry.arguments?.getString("hora").orEmpty()
                 ConfirmarCitaScreen(
+                    sedeId = borrador.sedeId,
                     especialidadId = especialidadId,
                     medicoId = medicoId,
                     fecha = fecha,
@@ -197,11 +225,12 @@ fun AppNavigation() {
                     },
                     onChooseDoctor = {
                         borrador.limpiar()
-                        navController.navigate(Rutas.ESPECIALIDADES) { popUpTo(Rutas.INICIO); launchSingleTop = true }
+                        navController.navigate(Rutas.SEDES) { popUpTo(Rutas.INICIO); launchSingleTop = true }
                     },
                     onConfirm = { motivo ->
                         val cita = runCatching {
-                            Repositorio.agendarCita(especialidadId, medicoId, java.time.LocalDate.parse(fecha), hora, motivo)
+                            Repositorio.agendarCita(borrador.sedeId, especialidadId, medicoId,
+                                java.time.LocalDate.parse(fecha), hora, motivo)
                         }.getOrNull()
                         if (cita != null) {
                             borrador.limpiar()
@@ -227,7 +256,7 @@ fun AppNavigation() {
             composable(Rutas.MIS_CITAS) {
                 MisCitasScreen(
                     onDetails = { id -> navController.navigate(Rutas.detalleCita(id)) },
-                    onNewAppointment = { borrador.limpiar(); navController.navigate(Rutas.ESPECIALIDADES) }
+                    onNewAppointment = { borrador.limpiar(); navController.navigate(Rutas.SEDES) }
                 )
             }
             composable(Rutas.RESULTADOS) { ResultadosScreen() }

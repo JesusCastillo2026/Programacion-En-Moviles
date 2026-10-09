@@ -16,12 +16,15 @@ import com.saludplus.paciente.ui.components.*
 
 /** Conserva las credenciales mientras se navega y normaliza el correo al iniciar sesión. */
 @Composable
-fun LoginScreen(onBack: () -> Unit, onLogin: (String, String) -> Boolean, onRegister: () -> Unit) {
+fun LoginScreen(onBack: () -> Unit, onLogin: (String, String) -> Boolean,
+                onRegister: () -> Unit, cuentaCreada: Boolean = false) {
     var correo by rememberSaveable { mutableStateOf("") }
     var contrasena by rememberSaveable { mutableStateOf("") }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     var enviado by rememberSaveable { mutableStateOf(false) }
     AuthLayout("Qué bueno verte.", "Ingresa para consultar tus citas y continuar cuidándote.", onBack) {
+        if (cuentaCreada) Text("Cuenta creada. Inicia sesión con tu correo y contraseña.",
+            color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyMedium)
         AuthField(correo, { correo = it; error = null }, "Correo electrónico",
             Icons.Default.Email, KeyboardType.Email,
             error = if (enviado && !Validaciones.correoValido(correo)) "Revisa el formato del correo." else null)

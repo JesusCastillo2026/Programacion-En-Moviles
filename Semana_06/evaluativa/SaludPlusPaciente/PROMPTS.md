@@ -65,3 +65,13 @@ Este registro corresponde a la implementación de la rama `mejora-ia`. Las solic
 **Qué se corrigió:** El emulador estaba configurado en GMT y la clínica opera en hora de Lima. Se centralizó la zona `America/Lima` para calendario, disponibilidad y próxima cita. También se restringió el detalle y la cancelación a la cuenta actual, se impidió cancelar turnos ya comenzados y se diferenciaron las fechas transcurridas de las atenciones completadas.
 
 **Verificación:** APK generado, 18 pruebas unitarias aprobadas y recorrido en el emulador desde la selección de horario hasta Mis citas y el regreso a Inicio. En el emulador se comprobó que a las 11:10 de Lima se ofrecía 11:30, pero no 11:00.
+
+## 8. Registro con Login y reserva por sede
+
+**Prompt del encargo (extracto):** «al momento de registrarme no debe mandarme [...] home [...] que me pida logearme»; «en el inicio [...] SEDES»; «un apartado que diga doctores [...] por categoria [...] con sus respectivas fotos»; «elegir un local, para poder pedir una cita».
+
+**Respuesta resumida:** Crear cuenta ya no inicia sesión automáticamente; después del registro se abre Login con aviso de éxito. Inicio presenta las sedes y un acceso a Doctores. El directorio filtra por especialidad y nombre. La reserva comienza por Sedes y conserva el local en el borrador y la cita.
+
+**Qué se corrigió:** Cada sede ofrece solo las especialidades y médicos asignados allí. El repositorio rechaza reservas sin sede o con un médico que no atiende en ella. La sede se muestra en la confirmación, comprobante, lista y detalle de citas. Se mantuvo la barra inferior de cuatro destinos; Mis citas sigue allí.
+
+**Prompts visuales (herramienta integrada de generación de imágenes):** Se solicitaron tres retratos fotográficos cuadrados de profesionales ficticios peruanos para el directorio: una cardióloga de unos 40 años con cabello oscuro rizado y uniforme verde azulado; un traumatólogo de unos 45 años con cabello corto y barba; una oftalmóloga de unos 50 años con cabello recogido y blusa lavanda. Los tres prompts pidieron cabeza y hombros, bata blanca, consultorio desenfocado, luz natural, una sola persona y ausencia de texto o logotipos. Se guardaron como `doctor_m5.png`, `doctor_m6.png` y `doctor_m7.png` junto a los cuatro retratos preexistentes.

@@ -10,6 +10,7 @@ import java.time.temporal.TemporalAdjusters
 
 /** Selecciones del flujo actual; se conservan al retroceder y se limpian al completar o iniciar otra reserva. */
 class BorradorReserva {
+    var sedeId by mutableStateOf("")
     var especialidadId by mutableStateOf("")
     var medicoId by mutableStateOf("")
     var fecha by mutableStateOf("")
@@ -17,10 +18,22 @@ class BorradorReserva {
     var semana by mutableStateOf(semanaActual())
     var motivo by mutableStateOf("")
 
+    /** Cambiar de local invalida la especialidad, el médico y el horario anterior. */
+    fun elegirSede(id: String) {
+        if (sedeId != id) {
+            limpiar()
+            sedeId = id
+        }
+    }
+
     fun elegirEspecialidad(id: String) {
         if (especialidadId != id) {
-            limpiar()
             especialidadId = id
+            medicoId = ""
+            fecha = ""
+            hora = ""
+            semana = semanaActual()
+            motivo = ""
         }
     }
 
@@ -45,6 +58,7 @@ class BorradorReserva {
     }
 
     fun limpiar() {
+        sedeId = ""
         especialidadId = ""
         medicoId = ""
         fecha = ""
@@ -59,7 +73,7 @@ class BorradorReserva {
 
         /** Solo se guardan identificadores y fechas ISO; no se duplica el repositorio de citas. */
         val saver = Saver<BorradorReserva, List<String>>(
-            save = { listOf(it.especialidadId, it.medicoId, it.fecha, it.hora, it.semana, it.motivo) },
+            save = { listOf(it.especialidadId, it.medicoId, it.fecha, it.hora, it.semana, it.motivo, it.sedeId) },
             restore = { valores -> BorradorReserva().apply {
                 especialidadId = valores[0]
                 medicoId = valores[1]
@@ -67,6 +81,7 @@ class BorradorReserva {
                 hora = valores[3]
                 semana = valores[4]
                 motivo = valores.getOrElse(5) { "" }
+                sedeId = valores.getOrElse(6) { "" }
             } }
         )
     }
