@@ -40,6 +40,19 @@ La versión base muestra cinco fechas consecutivas y recalcula los turnos cuando
 
 La validación de lógica se ejecuta con `gradlew.bat :app:testDebugUnitTest`. No requiere iniciar el emulador. La revisión visual final del nuevo diseño queda pendiente en el dispositivo.
 
+## Mejoras de experiencia de uso
+
+- Inicio muestra la próxima cita futura del paciente, con médico, especialidad, fecha, hora y acceso al detalle.
+- Las especialidades destacadas abren directamente sus médicos.
+- El agendamiento muestra cuatro pasos. El borrador conserva especialidad, médico, semana, día, hora y motivo al retroceder; cambiar de especialidad o médico invalida las selecciones dependientes. Al completar la reserva, comenzar otra o salir de la cuenta, se limpia.
+- Cada rechazo de reserva devuelve una causa concreta y una acción: iniciar sesión, elegir médico/especialidad o cambiar de horario.
+- La barra inferior vuelve a Inicio, que permanece en el historial. Login y Registro intercambian sus destinos con estado guardado, sin acumular copias. Al cerrar sesión se eliminan los destinos guardados.
+- El calendario utiliza una cuadrícula adaptable y días desplazables horizontalmente. Catálogos, perfil, detalle, confirmación y listas admiten desplazamiento; se reorganizaron textos que podían competir por espacio. Los avisos anuncian cambios al lector de pantalla y las listas vacías ofrecen acciones.
+
+Verificado: APK debug generado y 16 pruebas unitarias aprobadas. Incluyen restauración del borrador, invalidación de selecciones dependientes, próxima cita por usuario/fecha/hora y motivos de rechazo. Estas pruebas no verifican la navegación de Android ni la apariencia final.
+
+Comprobación manual pendiente: volver desde Términos; alternar varias veces Login/Registro; reservar retrocediendo entre pasos; alternar las cuatro pestañas y pulsar Atrás; revisar 320 dp de ancho, texto ampliado y teclado abierto.
+
 ## Preguntas de reflexión
 
 1. **¿Por qué el esqueleto separa modelos, rutas y navegación de las pantallas?** Los modelos describen la información y las rutas conectan destinos; son la base compartida. Las pantallas concentran la práctica visual y funcional que la guía pide completar. Como no se entregó el ZIP, se recreó la estructura indicada en el PDF.

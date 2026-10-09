@@ -1,166 +1,145 @@
 package com.saludplus.paciente.ui.screens.agendamiento
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.saludplus.paciente.data.model.BorradorReserva
 import com.saludplus.paciente.data.repository.Repositorio
-import com.saludplus.paciente.ui.components.AppBackTopBar
-import com.saludplus.paciente.ui.components.PageHeading
-import com.saludplus.paciente.ui.components.SaludPlusButton
-import com.saludplus.paciente.ui.theme.AzulClinico
-import com.saludplus.paciente.ui.theme.CelesteSuave
-import com.saludplus.paciente.ui.theme.TextoSecundario
+import com.saludplus.paciente.ui.components.*
 import java.time.LocalDate
 import java.time.DayOfWeek
 import java.time.temporal.TemporalAdjusters
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+/** Un único contenedor desplazable adapta los turnos al ancho y al tamaño de letra. */
 @Composable
-/** Permite cambiar de semana y elegir una fecha con un turno aún libre. */
 fun FechaHoraScreen(
     especialidadId: String,
     medicoId: String,
     onBack: () -> Unit,
-    onContinue: (String, String) -> Unit
+    onContinue: (String, String) -> Unit,
+    borrador: BorradorReserva = rememberSaveable(saver = BorradorReserva.saver) { BorradorReserva() }
 ) {
     val medico = Repositorio.obtenerMedico(medicoId)
-    val hoy = remember { LocalDate.now() }
-    val inicioSemanaActual = remember { hoy.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)) }
-    var inicioSemana by remember { mutableStateOf(inicioSemanaActual) }
-    val diasDisponibles = remember(inicioSemana, hoy) { Repositorio.cincoDiasHabiles(inicioSemana) }
-    var fechaSeleccionada by remember { mutableStateOf<LocalDate?>(null) }
-    var horaSeleccionada by remember { mutableStateOf<String?>(null) }
-    val horarios = fechaSeleccionada?.let { Repositorio.horariosDisponibles(medicoId, it) }.orEmpty()
-    val locale = Locale("es", "PE")
+    val hoy = LocalDate.now()
+    val semanaActual = hoy.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+    val inicioSemana = runCatching { LocalDate.parse(borrador.semana) }.getOrDefault(semanaActual).coerceAtLeast(semanaActual)
+    val dias = remember(inicioSemana, hoy) { Repositorio.cincoDiasHabiles(inicioSemana) }
+    val fecha = runCatching { LocalDate.parse(borrador.fecha) }.getOrNull()
+    val horarios = fecha?.let { Repositorio.horariosDisponibles(medicoId, it) }.orEmpty()
+    val locale = Locale.forLanguageTag("es-PE")
+    val fontScale = LocalDensity.current.fontScale
+    val puedeContinuar = fecha in dias && borrador.hora in horarios
+    LaunchedEffect(especialidadId, medicoId) {
+        borrador.elegirEspecialidad(especialidadId)
+        borrador.elegirMedico(medicoId)
+    }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        AppBackTopBar("Seleccionar fecha y hora", onBack)
-        Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 12.dp)
+    Column(Modifier.fillMaxSize()) {
+        AppBackTopBar("Fecha y hora", onBack)
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(maxOf(96.dp, 72.dp * fontScale)),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(20.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            PageHeading("Elige cuándo", medico?.let { "${it.nombre} · ${it.especialidadNombre}" } ?: "Selecciona una cita disponible")
-            Spacer(Modifier.height(18.dp))
-            // El encabezado deriva el mes de las fechas visibles, por eso también cambia al avanzar semanas.
-            val mes = diasDisponibles.firstOrNull()?.format(DateTimeFormatter.ofPattern("MMMM yyyy", locale))
-                ?.replaceFirstChar { it.uppercase(locale) } ?: "Calendario"
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                Text(mes, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Row {
-                    IconButton(onClick = {
-                        inicioSemana = inicioSemana.minusWeeks(1)
-                        fechaSeleccionada = null
-                        horaSeleccionada = null
-                    }, enabled = inicioSemana.isAfter(inicioSemanaActual)) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Column {
+                    ReservaProgress(3)
+                    PageHeading("Elige cuándo", medico?.let { "${it.nombre} · ${it.especialidadNombre}" } ?: "Selecciona un profesional")
+                }
+            }
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    val mes = dias.first().format(DateTimeFormatter.ofPattern("MMMM yyyy", locale))
+                    Text(mes.replaceFirstChar { it.uppercase(locale) }, Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                    IconButton(onClick = { borrador.cambiarSemana(inicioSemana.minusWeeks(1).toString()) },
+                        enabled = inicioSemana.isAfter(semanaActual)) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Semana anterior")
                     }
-                    IconButton(onClick = {
-                        inicioSemana = inicioSemana.plusWeeks(1)
-                        fechaSeleccionada = null
-                        horaSeleccionada = null
-                    }) {
+                    IconButton(onClick = { borrador.cambiarSemana(inicioSemana.plusWeeks(1).toString()) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Semana siguiente")
                     }
                 }
             }
-            Text("FECHA", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = TextoSecundario)
-            Spacer(Modifier.height(10.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                diasDisponibles.forEach { dia ->
-                    val seleccionado = fechaSeleccionada == dia
-                    Card(
-                        modifier = Modifier.weight(1f).clickable {
-                            fechaSeleccionada = dia
-                            horaSeleccionada = null
-                        },
-                        shape = RoundedCornerShape(14.dp),
-                        colors = CardDefaults.cardColors(containerColor = if (seleccionado) AzulClinico else Color.White)
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(dias, key = { it.toString() }) { dia ->
+                        val elegido = dia == fecha
+                        Surface(
+                            color = if (elegido) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.widthIn(min = maxOf(64.dp, 50.dp * fontScale))
+                                .selectable(selected = elegido, role = Role.RadioButton,
+                                    onClick = { borrador.elegirFecha(dia.toString()) })
+                                .semantics { contentDescription = dia.format(DateTimeFormatter.ofPattern("EEEE d 'de' MMMM yyyy", locale)) }
                         ) {
-                            Text(dia.format(DateTimeFormatter.ofPattern("EEE", locale)).replaceFirstChar { it.uppercase(locale) }, color = if (seleccionado) Color.White else TextoSecundario, style = MaterialTheme.typography.labelSmall)
-                            Text(dia.dayOfMonth.toString(), color = if (seleccionado) Color.White else AzulClinico, fontWeight = FontWeight.Bold)
+                            Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(dia.format(DateTimeFormatter.ofPattern("EEE", locale)), style = MaterialTheme.typography.labelLarge)
+                                Text(dia.dayOfMonth.toString(), style = MaterialTheme.typography.titleLarge)
+                            }
                         }
                     }
                 }
             }
-
-            Spacer(Modifier.height(22.dp))
-            Text("HORARIOS DISPONIBLES", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = TextoSecundario)
-            Spacer(Modifier.height(10.dp))
-            if (fechaSeleccionada == null) {
-                Text("Primero selecciona un día.", color = TextoSecundario)
-            } else if (horarios.isEmpty()) {
-                Text("No hay horarios disponibles para este día.", color = TextoSecundario)
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Text("Horarios disponibles", style = MaterialTheme.typography.titleMedium)
+            }
+            if (fecha == null) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Text("Selecciona un día para ver sus turnos.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            } else if (horarios.isEmpty() || fecha !in dias) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    EmptyState("Elige otro día", "Esta fecha no tiene turnos disponibles. Puedes cambiar de día o avanzar una semana.",
+                        actionLabel = "Semana siguiente",
+                        onAction = { borrador.cambiarSemana(inicioSemana.plusWeeks(1).toString()) })
+                }
             } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    modifier = Modifier.fillMaxWidth().height(220.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(horarios, key = { it }) { hora ->
-                        val seleccionado = horaSeleccionada == hora
-                        Text(
-                            text = hora,
-                            modifier = Modifier.fillMaxWidth().background(
-                                if (seleccionado) AzulClinico else Color.White,
-                                RoundedCornerShape(12.dp)
-                            ).clickable { horaSeleccionada = hora }.padding(vertical = 13.dp),
-                            color = if (seleccionado) Color.White else AzulClinico,
-                            fontWeight = FontWeight.SemiBold,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
+                items(horarios, key = { it }) { hora ->
+                    val elegido = borrador.hora == hora
+                    Surface(
+                        color = if (elegido) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)
+                            .selectable(selected = elegido, role = Role.RadioButton, onClick = { borrador.hora = hora })
+                    ) {
+                        Box(Modifier.padding(14.dp), contentAlignment = Alignment.Center) {
+                            Text(hora, fontWeight = FontWeight.SemiBold)
+                        }
                     }
                 }
             }
-
-            Spacer(Modifier.height(18.dp))
-            SaludPlusButton(
-                text = "Continuar",
-                onClick = {
-                    val fecha = fechaSeleccionada
-                    val hora = horaSeleccionada
-                    if (fecha != null && hora != null) onContinue(fecha.toString(), hora)
-                },
-                enabled = fechaSeleccionada != null && horaSeleccionada != null
-            )
-            Spacer(Modifier.height(18.dp))
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    if (borrador.hora.isNotEmpty() && borrador.hora !in horarios) {
+                        FormError("El turno que elegiste ya no está disponible. Selecciona otro horario.")
+                    }
+                    SaludPlusButton("Revisar mi cita", onClick = { onContinue(borrador.fecha, borrador.hora) },
+                        enabled = puedeContinuar)
+                    Text("Puedes volver al paso anterior: conservaremos tu selección.",
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
         }
     }
 }

@@ -24,6 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.saludplus.paciente.data.repository.Repositorio
+import com.saludplus.paciente.data.model.ErrorReserva
+import com.saludplus.paciente.ui.components.ReservaProgress
+import com.saludplus.paciente.ui.components.FormError
 import com.saludplus.paciente.ui.components.AppBackTopBar
 import com.saludplus.paciente.ui.components.SaludPlusButton
 import com.saludplus.paciente.ui.components.SoftCard
@@ -41,10 +44,14 @@ fun ConfirmarCitaScreen(
     fecha: String,
     hora: String,
     onBack: () -> Unit,
-    onConfirm: (String) -> String?
+    onConfirm: (String) -> String?,
+    onLogin: () -> Unit = onBack,
+    onChooseDoctor: () -> Unit = onBack,
+    motivoInicial: String = "",
+    onMotivoChange: (String) -> Unit = {}
 ) {
-    var motivo by rememberSaveable { mutableStateOf("") }
-    var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var motivo by rememberSaveable { mutableStateOf(motivoInicial) }
+    var error by rememberSaveable { mutableStateOf<ErrorReserva?>(null) }
     val medico = Repositorio.obtenerMedico(medicoId)
     val especialidad = Repositorio.obtenerEspecialidad(especialidadId)
     val fechaTexto = runCatching {
@@ -54,6 +61,7 @@ fun ConfirmarCitaScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         AppBackTopBar("Confirmar cita", onBack)
         Column(modifier = Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            ReservaProgress(4)
             Text("Revisa los detalles", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Text("Tu cita estará lista al confirmar.", color = TextoSecundario)
             SoftCard(modifier = Modifier.fillMaxWidth()) {
@@ -66,17 +74,28 @@ fun ConfirmarCitaScreen(
             }
             OutlinedTextField(
                 value = motivo,
-                onValueChange = { motivo = it; error = null },
+                onValueChange = { motivo = it; onMotivoChange(it); error = null },
                 label = { Text("Motivo de consulta (opcional)") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
                 shape = RoundedCornerShape(16.dp)
             )
-            if (error != null) Text(error.orEmpty(), color = MaterialTheme.colorScheme.error)
+            error?.let { causa ->
+                FormError(causa.mensaje)
+                val volverALogin = causa == ErrorReserva.SIN_SESION
+                val cambiarMedico = causa in listOf(ErrorReserva.ESPECIALIDAD_INVALIDA, ErrorReserva.MEDICO_INVALIDO, ErrorReserva.ESPECIALIDAD_NO_COINCIDE)
+                SaludPlusButton(
+                    if (volverALogin) "Iniciar sesión" else if (cambiarMedico) "Elegir especialidad y médico" else "Elegir otro horario",
+                    onClick = if (volverALogin) onLogin else if (cambiarMedico) onChooseDoctor else onBack
+                )
+            }
             Spacer(Modifier.height(12.dp))
             SaludPlusButton("Confirmar cita", onClick = {
-                val id = onConfirm(motivo)
-                if (id == null) error = "No se pudo reservar. Revisa el médico, la especialidad y el horario, o vuelve a iniciar sesión."
+                val dia = runCatching { LocalDate.parse(fecha) }.getOrNull()
+                error = Repositorio.validarReserva(especialidadId, medicoId, dia, hora)
+                if (error == null && onConfirm(motivo) == null) {
+                    error = Repositorio.validarReserva(especialidadId, medicoId, dia, hora) ?: ErrorReserva.NO_CONFIRMADA
+                }
             })
         }
     }

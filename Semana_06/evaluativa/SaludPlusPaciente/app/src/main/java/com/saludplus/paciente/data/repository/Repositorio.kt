@@ -7,9 +7,12 @@ import androidx.compose.runtime.setValue
 import com.saludplus.paciente.data.model.Cita
 import com.saludplus.paciente.data.model.Especialidad
 import com.saludplus.paciente.data.model.EstadoCita
+import com.saludplus.paciente.data.model.ErrorReserva
 import com.saludplus.paciente.data.model.Medico
 import com.saludplus.paciente.data.model.Usuario
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.util.UUID
 
 object Repositorio {
@@ -116,17 +119,27 @@ object Repositorio {
         return horariosBase.filterNot { it in ocupados }
     }
 
-    /** Crea una cita únicamente si existe sesión y el turno continúa disponible. */
-    fun agendarCita(especialidadId: String, medicoId: String, fecha: LocalDate, hora: String, motivo: String): Cita? {
-        val usuarioId = usuarioActual?.id ?: return null
-        val medico = obtenerMedico(medicoId) ?: return null
-        if (obtenerEspecialidad(especialidadId) == null || medico.especialidadId != especialidadId) return null
-        if (!Validaciones.fechaReservable(fecha) || hora !in horariosBase) return null
-        // Se vuelve a comprobar al confirmar: el turno pudo ocuparse después de seleccionarlo.
+    /** Misma comprobación para la pantalla y para guardar: devuelve la causa concreta del rechazo. */
+    fun validarReserva(especialidadId: String, medicoId: String, fecha: LocalDate?, hora: String): ErrorReserva? {
+        if (usuarioActual == null) return ErrorReserva.SIN_SESION
+        if (obtenerEspecialidad(especialidadId) == null) return ErrorReserva.ESPECIALIDAD_INVALIDA
+        val medico = obtenerMedico(medicoId) ?: return ErrorReserva.MEDICO_INVALIDO
+        if (medico.especialidadId != especialidadId) return ErrorReserva.ESPECIALIDAD_NO_COINCIDE
+        if (fecha == null) return ErrorReserva.FECHA_INVALIDA
+        if (fecha.isBefore(LocalDate.now())) return ErrorReserva.FECHA_PASADA
+        if (fecha.dayOfWeek.value > 5) return ErrorReserva.FIN_DE_SEMANA
+        if (hora !in horariosBase) return ErrorReserva.HORA_INVALIDA
         if (citas.any {
             it.medicoId == medicoId && it.fecha == fecha && it.hora == hora &&
                 it.estado == EstadoCita.PROGRAMADA
-        }) return null
+        }) return ErrorReserva.HORARIO_OCUPADO
+        return null
+    }
+
+    /** Comprueba el turno de nuevo antes de añadir la cita, aunque la pantalla ya lo haya validado. */
+    fun agendarCita(especialidadId: String, medicoId: String, fecha: LocalDate, hora: String, motivo: String): Cita? {
+        if (validarReserva(especialidadId, medicoId, fecha, hora) != null) return null
+        val usuarioId = usuarioActual?.id ?: return null
         val cita = Cita(UUID.randomUUID().toString(), usuarioId, medicoId, especialidadId, fecha, hora, motivo.trim())
         citas.add(cita)
         return cita
@@ -135,6 +148,13 @@ object Repositorio {
     /** Lista las citas del paciente actual en orden cronológico. */
     fun citasDelUsuario(usuarioId: String = usuarioActual?.id.orEmpty()): List<Cita> =
         citas.filter { it.usuarioId == usuarioId }.sortedWith(compareBy<Cita> { it.fecha }.thenBy { it.hora })
+
+    /** Devuelve la cita futura más cercana del paciente actual, descartando horas ya transcurridas. */
+    fun proximaCitaDelUsuario(ahora: LocalDateTime = LocalDateTime.now()): Cita? =
+        citasDelUsuario().firstOrNull {
+            it.estado == EstadoCita.PROGRAMADA &&
+                !LocalDateTime.of(it.fecha, LocalTime.parse(it.hora)).isBefore(ahora)
+        }
 
     /** Quita la cita local y devuelve si encontró algún elemento para cancelar. */
     fun cancelarCita(citaId: String): Boolean = citas.removeAll { it.id == citaId }

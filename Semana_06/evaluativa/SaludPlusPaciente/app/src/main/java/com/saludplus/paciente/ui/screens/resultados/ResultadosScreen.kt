@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,9 +36,8 @@ fun ResultadosScreen() {
         ResultadoEjemplo("Perfil lipídico", "12 oct 2026", "En revisión"),
         ResultadoEjemplo("Control preventivo", "04 oct 2026", "Disponible")
     )
-    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
-        PageHeading("Resultados", "Documentos de ejemplo de tu atención")
-        LazyColumn(modifier = Modifier.padding(top = 18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            item { PageHeading("Resultados", "Documentos de ejemplo de tu atención") }
             items(resultados) { item ->
                 Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
                     Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -45,12 +45,11 @@ fun ResultadosScreen() {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(item.nombre, fontWeight = FontWeight.Bold)
                             Text(item.fecha, color = TextoSecundario)
+                            Text(item.estado, color = AzulClinico, style = androidx.compose.material3.MaterialTheme.typography.labelMedium)
                         }
-                        Text(item.estado, color = AzulClinico, style = androidx.compose.material3.MaterialTheme.typography.labelMedium)
                     }
                 }
             }
         }
-    }
 }
 

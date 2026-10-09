@@ -43,3 +43,15 @@ Este registro corresponde a la implementación de la rama `mejora-ia`. Las solic
 **Qué se corrigió:** No se restringe el correo a Gmail porque también debe aceptar direcciones institucionales. Se usa normalización con `Locale.ROOT`. El repositorio vuelve a comprobar especialidad, médico, fecha y duplicados mediante `any` antes de `add`. Al compilar se ajustó la alineación de imagen a `BiasAlignment`. Las pruebas anteriores con fechas fijas se cambiaron por días futuros para que sigan siendo válidas.
 
 **Verificación:** Se ejecutaron las pruebas unitarias con procesamiento normal de recursos. En esta revisión AAPT2 sí completó ese procesamiento. La comprobación visual en un dispositivo sigue pendiente; no se sustituye por la compilación. El usuario realizará la integración, el commit y el push.
+
+## 6. Mejoras de experiencia, navegación y reserva
+
+**Prompt del encargo (extracto):** «Perfecto, entonces aplica todo eso es lo que me acabas de mencionar. y lo mismo aplica este un commit, pero en este caso que diga este mejoras con ChatGPT Astra».
+
+**Contexto de la petición:** Las seis mejoras propuestas fueron: próxima cita en Inicio, acceso directo a médicos desde especialidades destacadas, progreso y conservación de selecciones en la reserva, errores con acciones de recuperación, navegación sin pantallas repetidas y adaptación a pantallas pequeñas, texto grande, teclado y listas vacías.
+
+**Respuesta resumida:** Se añadió un borrador guardable del flujo y errores diferenciados de reserva, se conectó Inicio con especialidades y detalle de próxima cita y se ajustaron las pilas de navegación de pestañas y autenticación. Las pantallas ahora ofrecen progreso, búsqueda conservada, acciones en estados vacíos y contenedores adaptables.
+
+**Qué se corrigió:** La barra inferior apuntaba a Splash aunque ya no estaba en el historial; ahora usa Inicio. Solo se restaura una pila de pestaña al cambiar entre pestañas, para evitar restaurar una confirmación terminada desde Cita exitosa. Los destinos guardados y el borrador se limpian al salir de la cuenta. El repositorio conserva una única validación para crear citas y explicar rechazos.
+
+**Verificación:** APK generado con `assembleDebug` y 16 pruebas aprobadas con `testDebugUnitTest`. Queda pendiente la prueba manual de navegación, teclado y apariencia en emulador. El mensaje de commit fue elegido por el usuario.

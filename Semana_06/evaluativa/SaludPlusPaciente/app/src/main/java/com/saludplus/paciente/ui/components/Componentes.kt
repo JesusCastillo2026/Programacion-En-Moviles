@@ -131,7 +131,13 @@ fun PlaceholderAvatar(nombre: String, size: Dp = 54.dp) {
 
 @Composable
 /** Mensaje centrado que explica una lista vacía y cómo continuar. */
-fun EmptyState(title: String, message: String, modifier: Modifier = Modifier) {
+fun EmptyState(
+    title: String,
+    message: String,
+    modifier: Modifier = Modifier,
+    actionLabel: String? = null,
+    onAction: (() -> Unit)? = null
+) {
     Column(
         modifier = modifier.fillMaxWidth().padding(28.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -140,6 +146,7 @@ fun EmptyState(title: String, message: String, modifier: Modifier = Modifier) {
         Icon(Icons.Default.Person, contentDescription = null, tint = AzulClinico, modifier = Modifier.size(40.dp))
         Text(title, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         Text(message, color = TextoSecundario, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyMedium)
+        if (actionLabel != null && onAction != null) SaludPlusButton(actionLabel, onAction)
     }
 }
 

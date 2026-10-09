@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,7 +41,7 @@ fun DetalleCitaScreen(citaId: String, onBack: () -> Unit, onCancelled: () -> Uni
         } else {
             val medico = Repositorio.obtenerMedico(cita.medicoId)
             val especialidad = Repositorio.obtenerEspecialidad(cita.especialidadId)
-            Column(modifier = Modifier.fillMaxSize().padding(22.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(22.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text("Información de tu cita", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 SoftCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -51,7 +53,7 @@ fun DetalleCitaScreen(citaId: String, onBack: () -> Unit, onCancelled: () -> Uni
                         DetalleLinea("Estado", cita.estado.name.lowercase().replaceFirstChar { it.uppercase() })
                     }
                 }
-                Spacer(Modifier.weight(1f))
+                Spacer(Modifier.height(12.dp))
                 TextButton(onClick = { pedirConfirmacion = true }, modifier = Modifier.fillMaxWidth()) {
                     Text("Cancelar cita", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
                 }

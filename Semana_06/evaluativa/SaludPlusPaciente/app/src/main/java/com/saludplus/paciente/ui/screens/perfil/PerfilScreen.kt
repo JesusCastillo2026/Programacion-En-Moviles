@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
@@ -38,7 +41,7 @@ import com.saludplus.paciente.ui.theme.TextoSecundario
 fun PerfilScreen(onLogout: () -> Unit) {
     var confirmarCierre by remember { mutableStateOf(false) }
     val usuario = Repositorio.usuarioActual
-    Column(modifier = Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         PageHeading("Mi perfil", "Administra tu información")
         SoftCard(modifier = Modifier.fillMaxWidth()) {
             Row(
@@ -47,7 +50,7 @@ fun PerfilScreen(onLogout: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 PlaceholderAvatar(usuario?.nombre.orEmpty(), 64.dp)
-                Column {
+                Column(Modifier.weight(1f)) {
                     Text(usuario?.nombre ?: "Paciente", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
                     Text(usuario?.correo.orEmpty(), color = TextoSecundario)
                     Text(usuario?.telefono.orEmpty(), color = TextoSecundario)
@@ -60,7 +63,7 @@ fun PerfilScreen(onLogout: () -> Unit) {
                 Text("Tus datos se guardan en memoria durante esta sesión de demostración.", color = TextoSecundario)
             }
         }
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(16.dp))
         OutlinedButton(
             onClick = { confirmarCierre = true },
             modifier = Modifier.fillMaxWidth(),

@@ -14,10 +14,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -26,6 +26,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.saludplus.paciente.data.repository.Repositorio
+import com.saludplus.paciente.data.model.BorradorReserva
 import com.saludplus.paciente.ui.screens.auth.LoginScreen
 import com.saludplus.paciente.ui.screens.auth.RegistroScreen
 import com.saludplus.paciente.ui.screens.auth.SplashScreen
@@ -55,6 +56,7 @@ private val tabs = listOf(
 /** Centraliza destinos, argumentos de cita, barra inferior y transiciones del flujo. */
 fun AppNavigation() {
     val navController = rememberNavController()
+    val borrador = rememberSaveable(saver = BorradorReserva.saver) { BorradorReserva() }
     val backStack by navController.currentBackStackEntryAsState()
     val route = backStack?.destination?.route
     val showNavigationBar = route in tabs.map { it.route }
@@ -82,8 +84,8 @@ fun AppNavigation() {
         ) {
             composable(Rutas.SPLASH) {
                 SplashScreen(
-                    onRegister = { navController.navigate(Rutas.REGISTRO) },
-                    onLogin = { navController.navigate(Rutas.LOGIN) }
+                    onRegister = { navController.openAuth(Rutas.REGISTRO) },
+                    onLogin = { navController.openAuth(Rutas.LOGIN) }
                 )
             }
             composable(Rutas.REGISTRO) {
@@ -91,11 +93,11 @@ fun AppNavigation() {
                     onBack = { navController.popBackStack() },
                     onRegister = { nombre, correo, telefono, contrasena ->
                         val usuario = Repositorio.registrarUsuario(nombre, correo, telefono, contrasena)
-                        if (usuario != null) navController.irAInicio()
+                        if (usuario != null) { borrador.limpiar(); navController.irAInicio() }
                         usuario != null
                     },
-                    onLogin = { navController.navigate(Rutas.LOGIN) },
-                    onTerms = { navController.navigate(Rutas.TERMINOS) }
+                    onLogin = { navController.openAuth(Rutas.LOGIN) },
+                    onTerms = { navController.navigate(Rutas.TERMINOS) { launchSingleTop = true } }
                 )
             }
             composable(Rutas.LOGIN) {
@@ -103,25 +105,35 @@ fun AppNavigation() {
                     onBack = { navController.popBackStack() },
                     onLogin = { correo, contrasena ->
                         val usuario = Repositorio.iniciarSesion(correo, contrasena)
-                        if (usuario != null) navController.irAInicio()
+                        if (usuario != null) { borrador.limpiar(); navController.irAInicio() }
                         usuario != null
                     },
-                    onRegister = { navController.navigate(Rutas.REGISTRO) }
+                    onRegister = { navController.openAuth(Rutas.REGISTRO) }
                 )
             }
             composable(Rutas.TERMINOS) { TerminosScreen(onBack = { navController.popBackStack() }) }
             composable(Rutas.INICIO) {
                 HomeScreen(
-                    onExplore = { navController.navigate(Rutas.ESPECIALIDADES) },
-                    onAppointments = { navController.navigate(Rutas.MIS_CITAS) },
-                    onResults = { navController.navigate(Rutas.RESULTADOS) },
-                    onNotifications = { navController.navigate(Rutas.NOTIFICACIONES) }
+                    onExplore = { borrador.limpiar(); navController.navigate(Rutas.ESPECIALIDADES) },
+                    onAppointments = { navController.openTab(Rutas.MIS_CITAS) },
+                    onResults = { navController.openTab(Rutas.RESULTADOS) },
+                    onNotifications = { navController.navigate(Rutas.NOTIFICACIONES) { launchSingleTop = true } },
+                    onSpecialty = { id ->
+                        borrador.limpiar()
+                        borrador.elegirEspecialidad(id)
+                        navController.navigate(Rutas.medicos(id))
+                    },
+                    onDetails = { id -> navController.navigate(Rutas.detalleCita(id)) }
                 )
             }
             composable(Rutas.ESPECIALIDADES) {
                 EspecialidadesScreen(
                     onBack = { navController.popBackStack() },
-                    onSelect = { id -> navController.navigate(Rutas.medicos(id)) }
+                    onSelect = { id ->
+                        borrador.elegirEspecialidad(id)
+                        navController.navigate(Rutas.medicos(id)) { launchSingleTop = true }
+                    },
+                    seleccionadoId = borrador.especialidadId
                 )
             }
             composable(
@@ -131,7 +143,13 @@ fun AppNavigation() {
                 MedicosScreen(
                     especialidadId = entry.arguments?.getString("especialidadId").orEmpty(),
                     onBack = { navController.popBackStack() },
-                    onSelect = { medicoId -> navController.navigate(Rutas.fechaHora(entry.arguments?.getString("especialidadId").orEmpty(), medicoId)) }
+                    onSelect = { medicoId ->
+                        val especialidadId = entry.arguments?.getString("especialidadId").orEmpty()
+                        borrador.elegirEspecialidad(especialidadId)
+                        borrador.elegirMedico(medicoId)
+                        navController.navigate(Rutas.fechaHora(especialidadId, medicoId)) { launchSingleTop = true }
+                    },
+                    seleccionadoId = borrador.medicoId
                 )
             }
             composable(
@@ -147,7 +165,8 @@ fun AppNavigation() {
                     especialidadId = especialidadId,
                     medicoId = medicoId,
                     onBack = { navController.popBackStack() },
-                    onContinue = { fecha, hora -> navController.navigate(Rutas.confirmar(especialidadId, medicoId, fecha, hora)) }
+                    onContinue = { fecha, hora -> navController.navigate(Rutas.confirmar(especialidadId, medicoId, fecha, hora)) { launchSingleTop = true } },
+                    borrador = borrador
                 )
             }
             composable(
@@ -168,12 +187,24 @@ fun AppNavigation() {
                     medicoId = medicoId,
                     fecha = fecha,
                     hora = hora,
+                    motivoInicial = borrador.motivo,
+                    onMotivoChange = { borrador.motivo = it },
                     onBack = { navController.popBackStack() },
+                    onLogin = {
+                        borrador.limpiar()
+                        navController.navigate(Rutas.SPLASH) { popUpTo(navController.graph.id); launchSingleTop = true }
+                        navController.openAuth(Rutas.LOGIN)
+                    },
+                    onChooseDoctor = {
+                        borrador.limpiar()
+                        navController.navigate(Rutas.ESPECIALIDADES) { popUpTo(Rutas.INICIO); launchSingleTop = true }
+                    },
                     onConfirm = { motivo ->
                         val cita = runCatching {
                             Repositorio.agendarCita(especialidadId, medicoId, java.time.LocalDate.parse(fecha), hora, motivo)
                         }.getOrNull()
                         if (cita != null) {
+                            borrador.limpiar()
                             navController.navigate(Rutas.citaExitosa(cita.id)) {
                                 popUpTo(Rutas.INICIO)
                                 launchSingleTop = true
@@ -189,22 +220,24 @@ fun AppNavigation() {
             ) { entry ->
                 CitaExitosaScreen(
                     citaId = entry.arguments?.getString("citaId").orEmpty(),
-                    onHome = { navController.navigate(Rutas.INICIO) { popUpTo(Rutas.INICIO) } },
-                    onAppointments = { navController.navigate(Rutas.MIS_CITAS) }
+                    onHome = { navController.openTab(Rutas.INICIO) },
+                    onAppointments = { navController.openTab(Rutas.MIS_CITAS) }
                 )
             }
             composable(Rutas.MIS_CITAS) {
                 MisCitasScreen(
                     onDetails = { id -> navController.navigate(Rutas.detalleCita(id)) },
-                    onNewAppointment = { navController.navigate(Rutas.ESPECIALIDADES) }
+                    onNewAppointment = { borrador.limpiar(); navController.navigate(Rutas.ESPECIALIDADES) }
                 )
             }
             composable(Rutas.RESULTADOS) { ResultadosScreen() }
             composable(Rutas.PERFIL) {
                 PerfilScreen(onLogout = {
                     Repositorio.cerrarSesion()
+                    borrador.limpiar()
+                    navController.limpiarDestinosGuardados()
                     navController.navigate(Rutas.SPLASH) {
-                        popUpTo(Rutas.INICIO) { inclusive = true }
+                        popUpTo(navController.graph.id)
                         launchSingleTop = true
                     }
                 })
@@ -230,17 +263,35 @@ fun AppNavigation() {
 }
 
 private fun NavHostController.irAInicio() {
+    limpiarDestinosGuardados()
     navigate(Rutas.INICIO) {
-        popUpTo(Rutas.SPLASH) { inclusive = true }
+        popUpTo(graph.id)
         launchSingleTop = true
     }
 }
 
 private fun NavHostController.openTab(route: String) {
+    if (currentDestination?.route == route) return
+    val desdeTab = currentDestination?.route in tabs.map { it.route }
     navigate(route) {
-        popUpTo(graph.findStartDestination().id) { saveState = true }
+        // Inicio permanece en el historial; Splash se retira después de iniciar sesión.
+        popUpTo(Rutas.INICIO) { saveState = desdeTab }
+        launchSingleTop = true
+        restoreState = desdeTab
+    }
+}
+
+/** Intercambia Login y Registro guardando sus campos, sin apilar copias de ambas pantallas. */
+private fun NavHostController.openAuth(route: String) {
+    navigate(route) {
+        popUpTo(Rutas.SPLASH) { saveState = true }
         launchSingleTop = true
         restoreState = true
     }
+}
+
+/** Evita recuperar formularios o pantallas de una sesión anterior tras salir de la cuenta. */
+private fun NavHostController.limpiarDestinosGuardados() {
+    (tabs.map { it.route } + listOf(Rutas.LOGIN, Rutas.REGISTRO)).forEach { clearBackStack(it) }
 }
 

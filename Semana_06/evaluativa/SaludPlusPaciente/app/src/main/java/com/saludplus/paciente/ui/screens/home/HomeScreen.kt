@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
@@ -43,6 +45,9 @@ import androidx.compose.ui.unit.dp
 import com.saludplus.paciente.data.model.Especialidad
 import com.saludplus.paciente.data.repository.Repositorio
 import com.saludplus.paciente.ui.components.PageHeading
+import com.saludplus.paciente.ui.components.SoftCard
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import com.saludplus.paciente.ui.components.SaludPlusButton
 import com.saludplus.paciente.ui.theme.AzulClinico
 import com.saludplus.paciente.ui.theme.AzulProfundo
@@ -51,7 +56,16 @@ import com.saludplus.paciente.ui.theme.TextoSecundario
 
 @Composable
 /** Resume la actividad del paciente y enlaza con las secciones principales. */
-fun HomeScreen(onExplore: () -> Unit, onAppointments: () -> Unit, onResults: () -> Unit, onNotifications: () -> Unit) {
+fun HomeScreen(
+    onExplore: () -> Unit,
+    onAppointments: () -> Unit,
+    onResults: () -> Unit,
+    onNotifications: () -> Unit,
+    onSpecialty: (String) -> Unit = { onExplore() },
+    onDetails: (String) -> Unit = { onAppointments() }
+) {
+    val proxima = Repositorio.proximaCitaDelUsuario()
+    val fuenteGrande = LocalDensity.current.fontScale > 1.3f
     Column(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)
@@ -61,7 +75,7 @@ fun HomeScreen(onExplore: () -> Unit, onAppointments: () -> Unit, onResults: () 
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(Modifier.weight(1f)) {
                 Text("Clínica SaludPlus", style = MaterialTheme.typography.titleMedium, color = AzulClinico, fontWeight = FontWeight.Bold)
                 Text("Hola, ${Repositorio.usuarioActual?.nombre?.substringBefore(' ') ?: "Paciente"} 👋", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             }
@@ -97,17 +111,41 @@ fun HomeScreen(onExplore: () -> Unit, onAppointments: () -> Unit, onResults: () 
         }
 
         Spacer(Modifier.height(22.dp))
+        if (proxima != null) {
+            SoftCard(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("TU PRÓXIMA CITA", color = AzulClinico, style = MaterialTheme.typography.labelLarge)
+                    Text(Repositorio.obtenerMedico(proxima.medicoId)?.nombre ?: "Profesional",
+                        style = MaterialTheme.typography.titleLarge)
+                    Text(Repositorio.obtenerEspecialidad(proxima.especialidadId)?.nombre.orEmpty(), color = TextoSecundario)
+                    Text(proxima.fecha.format(DateTimeFormatter.ofPattern("EEEE d 'de' MMMM", Locale.forLanguageTag("es-PE"))),
+                        color = TextoSecundario)
+                    Text("Hora: ${proxima.hora}", fontWeight = FontWeight.Bold)
+                    SaludPlusButton("Ver detalle de mi cita", onClick = { onDetails(proxima.id) })
+                }
+            }
+            Spacer(Modifier.height(22.dp))
+        }
         PageHeading("Accesos rápidos", "Lo que necesitas, en un solo lugar")
-        Row(modifier = Modifier.fillMaxWidth().padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            ShortcutCard("Mis citas", "Revisa tus próximas atenciones", Icons.Default.CalendarMonth, onAppointments, Modifier.weight(1f))
-            ShortcutCard("Resultados", "Consulta tus resultados", Icons.Default.Favorite, onResults, Modifier.weight(1f))
+        BoxWithConstraints(Modifier.fillMaxWidth().padding(top = 12.dp)) {
+            if (maxWidth < 340.dp || fuenteGrande) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ShortcutCard("Mis citas", "Revisa tus próximas atenciones", Icons.Default.CalendarMonth, onAppointments, Modifier.fillMaxWidth())
+                    ShortcutCard("Resultados", "Consulta tus resultados", Icons.Default.Favorite, onResults, Modifier.fillMaxWidth())
+                }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ShortcutCard("Mis citas", "Revisa tus próximas atenciones", Icons.Default.CalendarMonth, onAppointments, Modifier.weight(1f))
+                    ShortcutCard("Resultados", "Consulta tus resultados", Icons.Default.Favorite, onResults, Modifier.weight(1f))
+                }
+            }
         }
 
         Spacer(Modifier.height(24.dp))
         PageHeading("Especialidades destacadas", "Profesionales para acompañarte")
         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 12.dp, bottom = 26.dp)) {
             items(Repositorio.especialidadesDestacadas(), key = { it.id }) { especialidad ->
-                SpecialtyCard(especialidad, onExplore)
+                SpecialtyCard(especialidad) { onSpecialty(especialidad.id) }
             }
         }
     }

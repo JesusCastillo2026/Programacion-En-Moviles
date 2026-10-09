@@ -1,6 +1,8 @@
 package com.saludplus.paciente.ui.screens.agendamiento
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -38,7 +40,7 @@ fun CitaExitosaScreen(citaId: String, onHome: () -> Unit, onAppointments: () -> 
     val locale = Locale("es", "PE")
 
     Column(
-        modifier = Modifier.fillMaxSize().background(Color.White).padding(24.dp),
+        modifier = Modifier.fillMaxSize().background(Color.White).verticalScroll(rememberScrollState()).padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
