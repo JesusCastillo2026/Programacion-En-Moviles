@@ -44,7 +44,7 @@ import com.saludplus.paciente.ui.theme.CelesteSuave
 import com.saludplus.paciente.ui.theme.TextoSecundario
 
 @Composable
-fun HomeScreen(onExplore: () -> Unit, onNotifications: () -> Unit) {
+fun HomeScreen(onExplore: () -> Unit, onAppointments: () -> Unit, onResults: () -> Unit, onNotifications: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)
@@ -81,8 +81,8 @@ fun HomeScreen(onExplore: () -> Unit, onNotifications: () -> Unit) {
         Spacer(Modifier.height(22.dp))
         PageHeading("Accesos rápidos", "Lo que necesitas, en un solo lugar")
         Row(modifier = Modifier.fillMaxWidth().padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            ShortcutCard("Mis citas", "Revisa tus próximas atenciones", Icons.Default.CalendarMonth, onExplore, Modifier.weight(1f))
-            ShortcutCard("Resultados", "Consulta tus resultados", Icons.Default.Favorite, onExplore, Modifier.weight(1f))
+            ShortcutCard("Mis citas", "Revisa tus próximas atenciones", Icons.Default.CalendarMonth, onAppointments, Modifier.weight(1f))
+            ShortcutCard("Resultados", "Consulta tus resultados", Icons.Default.Favorite, onResults, Modifier.weight(1f))
         }
 
         Spacer(Modifier.height(24.dp))

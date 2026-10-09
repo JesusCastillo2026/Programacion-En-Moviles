@@ -1,10 +1,9 @@
 <resources>
-    <style name="Theme.SaludPlusPaciente" parent="android:style/Theme.Material.Light.NoActionBar">
+    <style name="Theme.SaludPlus" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#146C94</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:statusBarColor">#F5F9FF</item>
+        <item name="android:statusBarColor">#F5F8FC</item>
         <item name="android:navigationBarColor">#FFFFFF</item>
-        <item name="android:windowLightNavigationBar">true</item>
     </style>
 </resources>
-

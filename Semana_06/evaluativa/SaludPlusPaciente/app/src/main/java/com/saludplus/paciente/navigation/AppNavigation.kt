@@ -1,8 +1,5 @@
 package com.saludplus.paciente.navigation
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assignment
@@ -17,7 +14,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -38,7 +34,12 @@ import com.saludplus.paciente.ui.screens.agendamiento.CitaExitosaScreen
 import com.saludplus.paciente.ui.screens.agendamiento.ConfirmarCitaScreen
 import com.saludplus.paciente.ui.screens.agendamiento.FechaHoraScreen
 import com.saludplus.paciente.ui.screens.agendamiento.MedicosScreen
+import com.saludplus.paciente.ui.screens.citas.DetalleCitaScreen
+import com.saludplus.paciente.ui.screens.citas.MisCitasScreen
 import com.saludplus.paciente.ui.screens.home.HomeScreen
+import com.saludplus.paciente.ui.screens.notificaciones.NotificacionesScreen
+import com.saludplus.paciente.ui.screens.perfil.PerfilScreen
+import com.saludplus.paciente.ui.screens.resultados.ResultadosScreen
 
 private data class TabItem(val route: String, val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
 
@@ -110,6 +111,8 @@ fun AppNavigation() {
             composable(Rutas.INICIO) {
                 HomeScreen(
                     onExplore = { navController.navigate(Rutas.ESPECIALIDADES) },
+                    onAppointments = { navController.navigate(Rutas.MIS_CITAS) },
+                    onResults = { navController.navigate(Rutas.RESULTADOS) },
                     onNotifications = { navController.navigate(Rutas.NOTIFICACIONES) }
                 )
             }
@@ -188,10 +191,38 @@ fun AppNavigation() {
                     onAppointments = { navController.navigate(Rutas.MIS_CITAS) }
                 )
             }
-            composable(Rutas.MIS_CITAS) { TabPlaceholder("Mis citas") }
-            composable(Rutas.RESULTADOS) { TabPlaceholder("Resultados") }
-            composable(Rutas.PERFIL) { TabPlaceholder("Perfil") }
-            composable(Rutas.NOTIFICACIONES) { TabPlaceholder("Notificaciones", onBack = { navController.popBackStack() }) }
+            composable(Rutas.MIS_CITAS) {
+                MisCitasScreen(
+                    onDetails = { id -> navController.navigate(Rutas.detalleCita(id)) },
+                    onNewAppointment = { navController.navigate(Rutas.ESPECIALIDADES) }
+                )
+            }
+            composable(Rutas.RESULTADOS) { ResultadosScreen() }
+            composable(Rutas.PERFIL) {
+                PerfilScreen(onLogout = {
+                    Repositorio.cerrarSesion()
+                    navController.navigate(Rutas.SPLASH) {
+                        popUpTo(Rutas.INICIO) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                })
+            }
+            composable(Rutas.NOTIFICACIONES) {
+                NotificacionesScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenAppointment = { id -> navController.navigate(Rutas.detalleCita(id)) }
+                )
+            }
+            composable(
+                route = Rutas.DETALLE_CITA,
+                arguments = listOf(navArgument("citaId") { type = NavType.StringType })
+            ) { entry ->
+                DetalleCitaScreen(
+                    citaId = entry.arguments?.getString("citaId").orEmpty(),
+                    onBack = { navController.popBackStack() },
+                    onCancelled = { navController.popBackStack() }
+                )
+            }
         }
     }
 }
@@ -208,18 +239,6 @@ private fun NavHostController.openTab(route: String) {
         popUpTo(graph.findStartDestination().id) { saveState = true }
         launchSingleTop = true
         restoreState = true
-    }
-}
-
-@Composable
-private fun TabPlaceholder(title: String, onBack: (() -> Unit)? = null) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(title, style = MaterialTheme.typography.headlineSmall)
-        if (onBack != null) androidx.compose.material3.TextButton(onClick = onBack) { Text("Volver") }
     }
 }
 
