@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -15,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -43,6 +45,7 @@ import com.saludplus.paciente.ui.theme.TextoSecundario
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
+/** Barra superior uniforme con título y acción para volver. */
 fun AppBackTopBar(title: String, onBack: () -> Unit) {
     TopAppBar(
         title = { Text(title, fontWeight = FontWeight.SemiBold) },
@@ -51,11 +54,16 @@ fun AppBackTopBar(title: String, onBack: () -> Unit) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.background,
+            titleContentColor = MaterialTheme.colorScheme.onBackground,
+            navigationIconContentColor = AzulClinico
+        )
     )
 }
 
 @Composable
+/** Encabezado reutilizable para el título y texto de apoyo de cada vista. */
 fun PageHeading(title: String, subtitle: String? = null, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
@@ -67,6 +75,7 @@ fun PageHeading(title: String, subtitle: String? = null, modifier: Modifier = Mo
 }
 
 @Composable
+/** Botón principal con altura y color consistentes en toda la experiencia. */
 fun SaludPlusButton(
     text: String,
     onClick: () -> Unit,
@@ -76,8 +85,8 @@ fun SaludPlusButton(
     Button(
         onClick = onClick,
         enabled = enabled,
-        modifier = modifier.fillMaxWidth().height(52.dp),
-        shape = RoundedCornerShape(16.dp),
+        modifier = modifier.fillMaxWidth().heightIn(min = 56.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = ButtonDefaults.buttonColors(containerColor = AzulClinico)
     ) {
         Text(text, fontWeight = FontWeight.SemiBold)
@@ -85,11 +94,13 @@ fun SaludPlusButton(
 }
 
 @Composable
+/** Campo de búsqueda compartido por los catálogos. */
 fun SearchField(value: String, onValueChange: (String) -> Unit, hint: String, modifier: Modifier = Modifier) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         placeholder = { Text(hint, color = TextoSecundario) },
+        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = TextoSecundario) },
         singleLine = true,
         shape = RoundedCornerShape(16.dp),
         modifier = modifier.fillMaxWidth(),
@@ -103,6 +114,7 @@ fun SearchField(value: String, onValueChange: (String) -> Unit, hint: String, mo
 }
 
 @Composable
+/** Avatar de iniciales de respaldo cuando no se carga un retrato ilustrativo. */
 fun PlaceholderAvatar(nombre: String, size: Dp = 54.dp) {
     Box(
         modifier = Modifier.size(size).clip(CircleShape).background(CelesteSuave),
@@ -118,7 +130,14 @@ fun PlaceholderAvatar(nombre: String, size: Dp = 54.dp) {
 }
 
 @Composable
-fun EmptyState(title: String, message: String, modifier: Modifier = Modifier) {
+/** Mensaje centrado que explica una lista vacía y cómo continuar. */
+fun EmptyState(
+    title: String,
+    message: String,
+    modifier: Modifier = Modifier,
+    actionLabel: String? = null,
+    onAction: (() -> Unit)? = null
+) {
     Column(
         modifier = modifier.fillMaxWidth().padding(28.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -127,10 +146,12 @@ fun EmptyState(title: String, message: String, modifier: Modifier = Modifier) {
         Icon(Icons.Default.Person, contentDescription = null, tint = AzulClinico, modifier = Modifier.size(40.dp))
         Text(title, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         Text(message, color = TextoSecundario, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyMedium)
+        if (actionLabel != null && onAction != null) SaludPlusButton(actionLabel, onAction)
     }
 }
 
 @Composable
+/** Contenedor blanco de bordes suaves para agrupar información relacionada. */
 fun SoftCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Card(
         modifier = modifier,
@@ -143,6 +164,7 @@ fun SoftCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
 }
 
 @Composable
+/** Etiqueta visual para mostrar el estado de una cita. */
 fun StatusChip(text: String, modifier: Modifier = Modifier) {
     Box(modifier = modifier.clip(RoundedCornerShape(50)).background(CelesteSuave).padding(horizontal = 12.dp, vertical = 6.dp)) {
         Text(text, color = AzulClinico, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)

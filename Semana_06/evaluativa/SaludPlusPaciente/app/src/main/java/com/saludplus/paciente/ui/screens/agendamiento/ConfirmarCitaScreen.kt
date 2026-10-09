@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -15,12 +18,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.saludplus.paciente.data.repository.Repositorio
+import com.saludplus.paciente.data.model.ErrorReserva
+import com.saludplus.paciente.ui.components.ReservaProgress
+import com.saludplus.paciente.ui.components.FormError
 import com.saludplus.paciente.ui.components.AppBackTopBar
 import com.saludplus.paciente.ui.components.SaludPlusButton
 import com.saludplus.paciente.ui.components.SoftCard
@@ -31,16 +37,22 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
+/** Revisa los datos seleccionados y solicita la creación de la cita al repositorio. */
 fun ConfirmarCitaScreen(
+    sedeId: String,
     especialidadId: String,
     medicoId: String,
     fecha: String,
     hora: String,
     onBack: () -> Unit,
-    onConfirm: (String) -> String?
+    onConfirm: (String) -> String?,
+    onLogin: () -> Unit = onBack,
+    onChooseDoctor: () -> Unit = onBack,
+    motivoInicial: String = "",
+    onMotivoChange: (String) -> Unit = {}
 ) {
-    var motivo by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf<String?>(null) }
+    var motivo by rememberSaveable { mutableStateOf(motivoInicial) }
+    var error by rememberSaveable { mutableStateOf<ErrorReserva?>(null) }
     val medico = Repositorio.obtenerMedico(medicoId)
     val especialidad = Repositorio.obtenerEspecialidad(especialidadId)
     val fechaTexto = runCatching {
@@ -49,11 +61,13 @@ fun ConfirmarCitaScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         AppBackTopBar("Confirmar cita", onBack)
-        Column(modifier = Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Column(modifier = Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            ReservaProgress(5)
             Text("Revisa los detalles", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Text("Tu cita estará lista al confirmar.", color = TextoSecundario)
             SoftCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ResumenLinea("Sede", Repositorio.obtenerSede(sedeId)?.nombre ?: "—")
                     ResumenLinea("Especialidad", especialidad?.nombre ?: "—")
                     ResumenLinea("Profesional", medico?.nombre ?: "—")
                     ResumenLinea("Fecha", fechaTexto.replaceFirstChar { it.uppercase(Locale("es", "PE")) })
@@ -62,17 +76,30 @@ fun ConfirmarCitaScreen(
             }
             OutlinedTextField(
                 value = motivo,
-                onValueChange = { motivo = it; error = null },
+                onValueChange = { motivo = it; onMotivoChange(it); error = null },
                 label = { Text("Motivo de consulta (opcional)") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
                 shape = RoundedCornerShape(16.dp)
             )
-            if (error != null) Text(error.orEmpty(), color = MaterialTheme.colorScheme.error)
-            Spacer(Modifier.weight(1f))
+            error?.let { causa ->
+                FormError(causa.mensaje)
+                val volverALogin = causa == ErrorReserva.SIN_SESION
+                val cambiarMedico = causa in listOf(ErrorReserva.SEDE_INVALIDA, ErrorReserva.ESPECIALIDAD_INVALIDA,
+                    ErrorReserva.MEDICO_INVALIDO, ErrorReserva.ESPECIALIDAD_NO_COINCIDE,
+                    ErrorReserva.MEDICO_NO_DISPONIBLE_EN_SEDE)
+                SaludPlusButton(
+                    if (volverALogin) "Iniciar sesión" else if (cambiarMedico) "Elegir sede y profesional" else "Elegir otro horario",
+                    onClick = if (volverALogin) onLogin else if (cambiarMedico) onChooseDoctor else onBack
+                )
+            }
+            Spacer(Modifier.height(12.dp))
             SaludPlusButton("Confirmar cita", onClick = {
-                val id = onConfirm(motivo)
-                if (id == null) error = "Ese horario ya no está disponible. Elige otro."
+                val dia = runCatching { LocalDate.parse(fecha) }.getOrNull()
+                error = Repositorio.validarReserva(sedeId, especialidadId, medicoId, dia, hora)
+                if (error == null && onConfirm(motivo) == null) {
+                    error = Repositorio.validarReserva(sedeId, especialidadId, medicoId, dia, hora) ?: ErrorReserva.NO_CONFIRMADA
+                }
             })
         }
     }
@@ -80,8 +107,8 @@ fun ConfirmarCitaScreen(
 
 @Composable
 private fun ResumenLinea(titulo: String, valor: String) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(titulo, color = TextoSecundario)
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(titulo, color = TextoSecundario, style = MaterialTheme.typography.labelMedium)
         Text(valor, color = AzulClinico, fontWeight = FontWeight.SemiBold)
     }
 }

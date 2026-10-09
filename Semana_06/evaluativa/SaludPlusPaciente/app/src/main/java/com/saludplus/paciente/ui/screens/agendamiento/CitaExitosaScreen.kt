@@ -1,6 +1,8 @@
 package com.saludplus.paciente.ui.screens.agendamiento
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +32,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
+/** Confirma el resultado de la reserva y ofrece continuar a Inicio o Mis citas. */
 fun CitaExitosaScreen(citaId: String, onHome: () -> Unit, onAppointments: () -> Unit) {
     val cita = Repositorio.obtenerCita(citaId)
     val medico = cita?.let { Repositorio.obtenerMedico(it.medicoId) }
@@ -37,7 +40,7 @@ fun CitaExitosaScreen(citaId: String, onHome: () -> Unit, onAppointments: () -> 
     val locale = Locale("es", "PE")
 
     Column(
-        modifier = Modifier.fillMaxSize().background(Color.White).padding(24.dp),
+        modifier = Modifier.fillMaxSize().background(Color.White).verticalScroll(rememberScrollState()).padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -51,6 +54,7 @@ fun CitaExitosaScreen(citaId: String, onHome: () -> Unit, onAppointments: () -> 
                 Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                     Text(medico?.nombre ?: "Profesional", fontWeight = FontWeight.Bold)
                     Text(especialidad?.nombre ?: "Consulta")
+                    Text("Sede: ${Repositorio.obtenerSede(cita.sedeId)?.nombre ?: "—"}")
                     Text(cita.fecha.format(DateTimeFormatter.ofPattern("EEEE d 'de' MMMM 'de' yyyy", locale)).replaceFirstChar { it.uppercase(locale) })
                     Text("${cita.hora} · Presencial")
                 }

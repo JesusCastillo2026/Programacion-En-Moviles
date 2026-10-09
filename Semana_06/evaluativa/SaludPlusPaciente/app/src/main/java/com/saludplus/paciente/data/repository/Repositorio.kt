@@ -7,15 +7,25 @@ import androidx.compose.runtime.setValue
 import com.saludplus.paciente.data.model.Cita
 import com.saludplus.paciente.data.model.Especialidad
 import com.saludplus.paciente.data.model.EstadoCita
+import com.saludplus.paciente.data.model.ErrorReserva
 import com.saludplus.paciente.data.model.Medico
+import com.saludplus.paciente.data.model.RelojClinica
+import com.saludplus.paciente.data.model.Sede
 import com.saludplus.paciente.data.model.Usuario
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.DayOfWeek
+import java.time.temporal.TemporalAdjusters
 import java.util.UUID
 
 object Repositorio {
+    /** Usuarios creados durante la ejecución actual; no se persisten al cerrar la app. */
     private val usuarios = mutableStateListOf<Usuario>()
+    /** Citas compartidas por las pantallas para reflejar cambios al recomponer Compose. */
     private val citas = mutableStateListOf<Cita>()
 
+    /** Identidad con sesión activa, observada por las pantallas de perfil y agendamiento. */
     var usuarioActual by mutableStateOf<Usuario?>(null)
         private set
 
@@ -28,14 +38,22 @@ object Repositorio {
         Especialidad("oftalmo", "Oftalmología", "Prevención y cuidado de la visión", "◉", false)
     )
 
+    /** Sedes de demostración: los nombres son distritos, no direcciones verificadas. */
+    val sedes = listOf(
+        Sede("sjl", "San Juan de Lurigancho", "Lima Este", "Atención presencial"),
+        Sede("molina", "La Molina", "Lima Este", "Atención presencial"),
+        Sede("santa-anita", "Santa Anita", "Lima Este", "Atención presencial"),
+        Sede("san-borja", "San Borja", "Lima Centro", "Atención presencial")
+    )
+
     val medicos = listOf(
-        Medico("m1", "Dra. Ana Torres", "cardio", "Cardiología", 12, 4.9, 0),
-        Medico("m2", "Dra. Valeria Ríos", "pediatria", "Pediatría", 9, 4.8, 1),
-        Medico("m3", "Dr. Luis Vega", "derma", "Dermatología", 15, 4.7, 2),
-        Medico("m4", "Dra. Rosa Díaz", "gineco", "Ginecología", 11, 4.9, 3),
-        Medico("m5", "Dra. Camila Paredes", "cardio", "Cardiología", 7, 4.6, 1),
-        Medico("m6", "Dr. Marco Salazar", "trauma", "Traumatología", 14, 4.8, 2),
-        Medico("m7", "Dra. Elena Campos", "oftalmo", "Oftalmología", 10, 4.7, 3)
+        Medico("m1", "Dra. Ana Torres", "cardio", "Cardiología", 12, 4.9, 0, setOf("sjl", "molina"), setOf(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.FRIDAY)),
+        Medico("m2", "Dra. Valeria Ríos", "pediatria", "Pediatría", 9, 4.8, 1, setOf("sjl", "santa-anita"), setOf(DayOfWeek.TUESDAY, DayOfWeek.THURSDAY)),
+        Medico("m3", "Dr. Luis Vega", "derma", "Dermatología", 15, 4.7, 2, setOf("molina", "santa-anita"), setOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY)),
+        Medico("m4", "Dra. Rosa Díaz", "gineco", "Ginecología", 11, 4.9, 3, setOf("sjl", "san-borja"), setOf(DayOfWeek.TUESDAY, DayOfWeek.FRIDAY)),
+        Medico("m5", "Dra. Camila Paredes", "cardio", "Cardiología", 7, 4.6, 4, setOf("santa-anita", "san-borja"), setOf(DayOfWeek.MONDAY, DayOfWeek.THURSDAY)),
+        Medico("m6", "Dr. Marco Salazar", "trauma", "Traumatología", 14, 4.8, 5, setOf("molina", "san-borja"), setOf(DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY)),
+        Medico("m7", "Dra. Elena Campos", "oftalmo", "Oftalmología", 10, 4.7, 6, setOf("sjl", "san-borja"), setOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY))
     )
 
     private val horariosBase = listOf(
@@ -44,18 +62,20 @@ object Repositorio {
     )
 
     init {
-        usuarios.add(Usuario("demo", "Paciente Demo", "demo@saludplus.pe", "999 111 222", "123456"))
+        usuarios.add(Usuario("demo", "Paciente Demo", "demo@saludplus.pe", "999111222", "123456"))
     }
 
+    /** Valida también aquí para que otra pantalla no pueda saltarse las reglas del formulario. */
     fun registrarUsuario(nombre: String, correo: String, telefono: String, contrasena: String): Usuario? {
-        val emailNormalizado = correo.trim().lowercase()
+        if (Validaciones.errorRegistro(nombre, correo, telefono, contrasena) != null) return null
+        val emailNormalizado = Validaciones.normalizarCorreo(correo)
         if (usuarios.any { it.correo.equals(emailNormalizado, ignoreCase = true) }) return null
         val usuario = Usuario(UUID.randomUUID().toString(), nombre.trim(), emailNormalizado, telefono.trim(), contrasena)
         usuarios.add(usuario)
-        usuarioActual = usuario
         return usuario
     }
 
+    /** Busca coincidencia de correo y contraseña, y actualiza la sesión activa. */
     fun iniciarSesion(correo: String, contrasena: String): Usuario? {
         val usuario = usuarios.firstOrNull {
             it.correo.equals(correo.trim(), ignoreCase = true) && it.contrasena == contrasena
@@ -64,10 +84,12 @@ object Repositorio {
         return usuario
     }
 
+    /** Limpia solo la sesión actual; las listas permanecen hasta cerrar la app. */
     fun cerrarSesion() {
         usuarioActual = null
     }
 
+    /** Filtra especialidades por nombre o descripción, ignorando mayúsculas. */
     fun buscarEspecialidades(texto: String): List<Especialidad> {
         val consulta = texto.trim()
         return especialidades.filter {
@@ -75,48 +97,149 @@ object Repositorio {
         }
     }
 
+    /** Limita la selección de Inicio a las especialidades destacadas. */
     fun especialidadesDestacadas(): List<Especialidad> = especialidades.filter { it.destacada }.take(5)
 
+    /** Resuelve un elemento del catálogo por su identificador estable. */
     fun obtenerEspecialidad(id: String): Especialidad? = especialidades.find { it.id == id }
 
+    /** Ubica el local elegido sin depender del texto visible. */
+    fun obtenerSede(id: String): Sede? = sedes.find { it.id == id }
+
+    /** El catálogo de una sede solo presenta especialidades con médicos asignados allí. */
+    fun especialidadesPorSede(sedeId: String): List<Especialidad> = especialidades.filter { especialidad ->
+        medicos.any { it.especialidadId == especialidad.id && sedeId in it.sedesIds }
+    }
+
+    /** Resuelve el profesional que se transfirió entre destinos de navegación. */
     fun obtenerMedico(id: String): Medico? = medicos.find { it.id == id }
 
-    fun obtenerCita(id: String): Cita? = citas.find { it.id == id }
+    /** Solo expone citas de la cuenta activa, incluso si se conoce un ID ajeno. */
+    fun obtenerCita(id: String): Cita? = citas.find { it.id == id && it.usuarioId == usuarioActual?.id }
 
-    fun medicosPorEspecialidad(especialidadId: String): List<Medico> =
-        medicos.filter { it.especialidadId == especialidadId }.sortedByDescending { it.calificacion }
+    /** Ordena profesionales por calificación dentro de la especialidad seleccionada. */
+    fun medicosPorEspecialidad(especialidadId: String, sedeId: String? = null): List<Medico> =
+        medicos.filter { it.especialidadId == especialidadId && (sedeId == null || sedeId in it.sedesIds) }
+            .sortedByDescending { it.calificacion }
 
-    fun buscarMedicos(especialidadId: String, texto: String): List<Medico> {
+    /** Aplica la búsqueda reactiva al nombre o especialidad del profesional. */
+    fun buscarMedicos(especialidadId: String, texto: String, sedeId: String? = null): List<Medico> {
         val consulta = texto.trim()
-        return medicosPorEspecialidad(especialidadId).filter {
+        return medicosPorEspecialidad(especialidadId, sedeId).filter {
             it.nombre.contains(consulta, ignoreCase = true) || it.especialidadNombre.contains(consulta, ignoreCase = true)
         }
     }
 
-    fun horariosDisponibles(medicoId: String, fecha: LocalDate): List<String> {
+    /** Oculta turnos ocupados y, si es hoy, los que ya comenzaron. */
+    fun horariosDisponibles(sedeId: String, medicoId: String, fecha: LocalDate,
+                            ahora: LocalDateTime = RelojClinica.ahora()): List<String> {
+        val medico = obtenerMedico(medicoId)
+        if (obtenerSede(sedeId) == null || medico == null || sedeId !in medico.sedesIds ||
+            !Validaciones.fechaReservable(fecha, ahora.toLocalDate()) || fecha.dayOfWeek !in medico.diasAtencion) return emptyList()
         val ocupados = citas.filter {
             it.medicoId == medicoId && it.fecha == fecha && it.estado == EstadoCita.PROGRAMADA
         }.map { it.hora }.toSet()
-        return horariosBase.filterNot { it in ocupados }
+        return horariosBase.filter { hora ->
+            hora !in ocupados && LocalDateTime.of(fecha, LocalTime.parse(hora)).isAfter(ahora)
+        }
     }
 
-    fun agendarCita(especialidadId: String, medicoId: String, fecha: LocalDate, hora: String, motivo: String): Cita? {
+    /** Misma comprobación para la pantalla y para guardar: devuelve la causa concreta del rechazo. */
+    fun validarReserva(sedeId: String, especialidadId: String, medicoId: String, fecha: LocalDate?, hora: String,
+                      ahora: LocalDateTime = RelojClinica.ahora()): ErrorReserva? {
+        if (usuarioActual == null) return ErrorReserva.SIN_SESION
+        if (obtenerSede(sedeId) == null) return ErrorReserva.SEDE_INVALIDA
+        if (obtenerEspecialidad(especialidadId) == null) return ErrorReserva.ESPECIALIDAD_INVALIDA
+        val medico = obtenerMedico(medicoId) ?: return ErrorReserva.MEDICO_INVALIDO
+        if (medico.especialidadId != especialidadId) return ErrorReserva.ESPECIALIDAD_NO_COINCIDE
+        if (sedeId !in medico.sedesIds) return ErrorReserva.MEDICO_NO_DISPONIBLE_EN_SEDE
+        if (fecha == null) return ErrorReserva.FECHA_INVALIDA
+        if (fecha.isBefore(ahora.toLocalDate())) return ErrorReserva.FECHA_PASADA
+        if (fecha.dayOfWeek.value > 5) return ErrorReserva.FIN_DE_SEMANA
+        if (fecha.dayOfWeek !in medico.diasAtencion) return ErrorReserva.MEDICO_NO_ATIENDE_ESE_DIA
+        if (hora !in horariosBase) return ErrorReserva.HORA_INVALIDA
+        if (!LocalDateTime.of(fecha, LocalTime.parse(hora)).isAfter(ahora)) return ErrorReserva.HORA_PASADA
+        if (citas.any {
+            it.medicoId == medicoId && it.fecha == fecha && it.hora == hora &&
+                it.estado == EstadoCita.PROGRAMADA
+        }) return ErrorReserva.HORARIO_OCUPADO
+        return null
+    }
+
+    /** Comprueba el turno de nuevo antes de añadir la cita, aunque la pantalla ya lo haya validado. */
+    fun agendarCita(sedeId: String, especialidadId: String, medicoId: String,
+                   fecha: LocalDate, hora: String, motivo: String): Cita? {
+        if (validarReserva(sedeId, especialidadId, medicoId, fecha, hora) != null) return null
         val usuarioId = usuarioActual?.id ?: return null
-        if (obtenerEspecialidad(especialidadId) == null || obtenerMedico(medicoId) == null) return null
-        if (hora !in horariosDisponibles(medicoId, fecha)) return null
-        val cita = Cita(UUID.randomUUID().toString(), usuarioId, medicoId, especialidadId, fecha, hora, motivo.trim())
+        val cita = Cita(UUID.randomUUID().toString(), usuarioId, sedeId, medicoId, especialidadId, fecha, hora, motivo.trim())
         citas.add(cita)
         return cita
     }
 
+    /** Lista las citas del paciente actual en orden cronológico. */
     fun citasDelUsuario(usuarioId: String = usuarioActual?.id.orEmpty()): List<Cita> =
         citas.filter { it.usuarioId == usuarioId }.sortedWith(compareBy<Cita> { it.fecha }.thenBy { it.hora })
 
-    fun cancelarCita(citaId: String): Boolean = citas.removeAll { it.id == citaId }
+    /** Devuelve la cita futura más cercana del paciente actual, descartando horas ya transcurridas. */
+    fun proximaCitaDelUsuario(ahora: LocalDateTime = RelojClinica.ahora()): Cita? =
+        citasDelUsuario().firstOrNull {
+            it.estado == EstadoCita.PROGRAMADA &&
+                !LocalDateTime.of(it.fecha, LocalTime.parse(it.hora)).isBefore(ahora)
+        }
+
+    /** Una cita vencida o de otra cuenta no puede cancelarse. */
+    fun puedeCancelarCita(cita: Cita, ahora: LocalDateTime = RelojClinica.ahora()): Boolean =
+        cita.usuarioId == usuarioActual?.id && cita.estado == EstadoCita.PROGRAMADA &&
+            LocalDateTime.of(cita.fecha, LocalTime.parse(cita.hora)).isAfter(ahora)
+
+    /** Una fecha vencida no equivale a atención completada; se muestra sin inventar ese resultado. */
+    fun estadoVisible(cita: Cita, ahora: LocalDateTime = RelojClinica.ahora()): String = when {
+        cita.estado == EstadoCita.COMPLETADA -> "Completada"
+        !LocalDateTime.of(cita.fecha, LocalTime.parse(cita.hora)).isAfter(ahora) -> "Fecha transcurrida"
+        else -> "Programada"
+    }
+
+    /** Libera un turno futuro solo si pertenece al paciente actual. */
+    fun cancelarCita(citaId: String): Boolean {
+        val cita = obtenerCita(citaId) ?: return false
+        if (!puedeCancelarCita(cita)) return false
+        return citas.remove(cita)
+    }
+
+    /** Devuelve los cinco días hábiles de la semana solicitada, sin ofrecer fechas pasadas. */
+    fun cincoDiasHabiles(inicioSemana: LocalDate): List<LocalDate> {
+        val hoy = RelojClinica.hoy()
+        var fecha = if (inicioSemana.isBefore(hoy)) hoy else inicioSemana
+        if (fecha.dayOfWeek.value > 5) fecha = fecha.plusDays((8 - fecha.dayOfWeek.value).toLong())
+        val resultado = mutableListOf<LocalDate>()
+        while (resultado.size < 5) {
+            if (fecha.dayOfWeek.value <= 5 && !fecha.isBefore(hoy)) resultado += fecha
+            fecha = fecha.plusDays(1)
+        }
+        return resultado
+    }
+
+    /** Devuelve solo días de atención futura del médico que aún tengan al menos un turno libre. */
+    fun diasDisponibles(
+        sedeId: String,
+        medicoId: String,
+        inicioSemana: LocalDate,
+        ahora: LocalDateTime = RelojClinica.ahora()
+    ): List<LocalDate> {
+        val medico = obtenerMedico(medicoId) ?: return emptyList()
+        if (obtenerSede(sedeId) == null || sedeId !in medico.sedesIds) return emptyList()
+        val lunes = inicioSemana.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        return (0L..4L)
+            .map(lunes::plusDays)
+            .filter { fecha ->
+                !fecha.isBefore(ahora.toLocalDate()) && fecha.dayOfWeek in medico.diasAtencion &&
+                    horariosDisponibles(sedeId, medicoId, fecha, ahora).isNotEmpty()
+            }
+    }
 
     internal fun restablecerParaPruebas() {
         usuarios.clear()
-        usuarios.add(Usuario("demo", "Paciente Demo", "demo@saludplus.pe", "999 111 222", "123456"))
+        usuarios.add(Usuario("demo", "Paciente Demo", "demo@saludplus.pe", "999111222", "123456"))
         citas.clear()
         usuarioActual = null
     }

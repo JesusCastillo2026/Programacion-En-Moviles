@@ -4,7 +4,7 @@ Aplicación Android con Jetpack Compose para consultar especialidades y médicos
 
 ## Estado del proyecto
 
-La carpeta contiene una **versión base asistida** que se ampliará en la rama `mejora-ia`. Esta entrega no se presenta como una fase desarrollada sin asistencia. El laboratorio de TECSUP Store permanece aparte, en `Semana_06/R1-SinIA`.
+La carpeta contiene una **versión base asistida**. La rama `mejora-ia` conserva esta aplicación y añade el calendario semanal, imágenes locales ilustrativas, documentación en el código y el registro de prompts en `PROMPTS.md`. El laboratorio de TECSUP Store permanece aparte, en `Semana_06/R1-SinIA`.
 
 ## Alcance
 
@@ -24,9 +24,47 @@ Cuenta de demostración: `demo@saludplus.pe` / `123456`.
 
 ## Pantallas y flujo
 
-La app incluye Splash, Registro, Inicio, Especialidades, Médicos, Fecha y hora, Confirmar cita, Login, Cita exitosa, Mis citas y Perfil. Los cuatro retos extra son Detalle/cancelación, Resultados, Notificaciones y Términos. La navegación de reserva pasa `especialidadId`, `medicoId`, `fecha` y `hora`; al confirmar, elimina el flujo de reserva del historial para que Atrás vuelva a Inicio.
+La app incluye Splash, Registro, Login, Inicio, Sedes, Doctores, Especialidades, Médicos, Fecha y hora, Confirmar cita, Cita exitosa, Mis citas y Perfil. Los cuatro retos extra son Detalle/cancelación, Resultados, Notificaciones y Términos. La navegación de reserva pasa `especialidadId`, `medicoId`, `fecha` y `hora`; la sede se conserva en el borrador y en la cita. Al confirmar, se elimina el flujo de reserva del historial para que Atrás vuelva a Inicio.
 
-La versión base muestra cinco fechas consecutivas y recalcula los turnos cuando se elige una fecha. La rama `mejora-ia` agrega calendario semanal con días hábiles, imágenes locales de médicos ficticios, mejoras visuales y `PROMPTS.md`.
+La versión base muestra cinco fechas consecutivas y recalcula los turnos cuando se elige una fecha. En `mejora-ia`, el calendario muestra cinco días hábiles, permite moverse entre semanas sin retroceder antes de la semana actual y reinicia la hora al cambiar de fecha. Los retratos y la portada son recursos locales ilustrativos; no representan profesionales reales.
+
+## Actualización ConIA: registro, reservas y diseño
+
+- El formulario conserva sus datos al consultar Términos y regresar. Login también conserva sus campos.
+- Se valida el formato del correo y se normalizan espacios exteriores y mayúsculas. Se admiten dominios institucionales y proveedores habituales; no se verifica la existencia del buzón.
+- El celular peruano debe tener nueve dígitos y empezar por 9, sin prefijo +51.
+- Las mismas reglas se aplican en el repositorio, además del formulario.
+- Al reservar se comprueba la relación médico/especialidad, sesión, fecha laborable desde hoy, horario del catálogo y ausencia de una reserva previa mediante `any`, antes de `add`.
+- Bienvenida, registro y login comparten una ilustración a todo el ancho, integrada con un degradado, campos con iconos, visibilidad de contraseña y errores junto a los campos.
+- Tema, tipografía, botones, barra inferior y encabezados comparten el estilo renovado. La confirmación admite desplazamiento y textos largos.
+
+La validación de lógica se ejecuta con `gradlew.bat :app:testDebugUnitTest`.
+
+## Mejoras de experiencia de uso
+
+- Inicio presenta sedes y acceso al directorio de doctores. Mis citas sigue disponible en la barra inferior.
+- El agendamiento muestra cinco pasos. El borrador conserva sede, especialidad, médico, semana, día, hora y motivo al retroceder; cambiar la sede o el médico invalida las selecciones dependientes. Al completar la reserva, comenzar otra o salir de la cuenta, se limpia.
+- Cada rechazo de reserva devuelve una causa concreta y una acción: iniciar sesión, elegir sede/profesional o cambiar de horario.
+- La barra inferior vuelve a Inicio, que permanece en el historial. Login y Registro intercambian sus destinos con estado guardado, sin acumular copias. Al cerrar sesión se eliminan los destinos guardados.
+- El calendario utiliza una cuadrícula adaptable y días desplazables horizontalmente. Catálogos, perfil, detalle, confirmación y listas admiten desplazamiento; se reorganizaron textos que podían competir por espacio. Los avisos anuncian cambios al lector de pantalla y las listas vacías ofrecen acciones.
+
+Verificado: APK debug generado y 18 pruebas unitarias aprobadas. Incluyen restauración del borrador, próxima cita, turnos vencidos, pertenencia de citas y motivos de rechazo. Se recorrió en el emulador el registro de una cita, Mis citas y el regreso a Inicio.
+
+## Correcciones de navegación y hora local
+
+- Después de confirmar una cita, la barra inferior vuelve a Inicio sin recuperar una pantalla guardada del flujo anterior.
+- La clínica usa `America/Lima` para ofrecer fechas y turnos, aunque el emulador tenga otra zona horaria. En la pantalla de selección se ocultan los turnos cuya hora ya comenzó; el repositorio vuelve a comprobarlo al confirmar.
+- La disponibilidad se refresca mientras la pantalla de selección está abierta. Si un turno vence entre la selección y la confirmación, se muestra una causa concreta y se ofrece elegir otro.
+- Una cuenta solo puede abrir y cancelar sus propias citas. Las citas que ya comenzaron no pueden cancelarse y se muestran como «Fecha transcurrida», sin considerarlas automáticamente atendidas.
+
+Comprobación manual pendiente: volver desde Términos; alternar varias veces Login/Registro; reservar retrocediendo entre pasos; alternar las cuatro pestañas y pulsar Atrás; revisar 320 dp de ancho, texto ampliado y teclado abierto.
+
+## Nuevo recorrido en `mejora-ia`
+
+1. Al crear una cuenta, se muestra Login y el paciente debe ingresar con las credenciales recién registradas. La cuenta permanece solo mientras la app sigue en ejecución.
+2. Inicio ofrece cuatro sedes de demostración: San Juan de Lurigancho, La Molina, Santa Anita y San Borja. Son nombres de distritos, no direcciones físicas verificadas.
+3. Doctores muestra los siete profesionales, búsqueda, filtro por especialidad, fotografía ilustrativa individual y los locales donde atienden. Sus fotos son ficticias, generadas para el prototipo.
+4. Para reservar se elige primero una sede. Luego solo aparecen especialidades y médicos asignados a ese local. El horario elegido se valida y la sede queda visible en la confirmación, el comprobante, Mis citas y el detalle.
 
 ## Preguntas de reflexión
 

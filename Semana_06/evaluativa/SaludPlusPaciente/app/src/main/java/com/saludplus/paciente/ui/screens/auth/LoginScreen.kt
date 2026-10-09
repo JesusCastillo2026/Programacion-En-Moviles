@@ -1,69 +1,52 @@
 package com.saludplus.paciente.ui.screens.auth
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.saludplus.paciente.ui.components.AppBackTopBar
-import com.saludplus.paciente.ui.components.SaludPlusButton
-import com.saludplus.paciente.ui.theme.CelesteSuave
-import com.saludplus.paciente.ui.theme.TextoSecundario
+import com.saludplus.paciente.data.repository.Validaciones
+import com.saludplus.paciente.ui.components.*
 
+/** Conserva las credenciales mientras se navega y normaliza el correo al iniciar sesión. */
 @Composable
-fun LoginScreen(onBack: () -> Unit, onLogin: (String, String) -> Boolean, onRegister: () -> Unit) {
-    var correo by remember { mutableStateOf("") }
-    var contrasena by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf<String?>(null) }
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        AppBackTopBar("Iniciar sesión", onBack)
-        Column(
-            modifier = Modifier.fillMaxSize().padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text("Bienvenido de nuevo", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            Text("Accede a tus citas y resultados.", color = TextoSecundario)
-            Spacer(Modifier.height(24.dp))
-            OutlinedTextField(correo, { correo = it; error = null }, label = { Text("Correo electrónico") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp))
-            Spacer(Modifier.height(12.dp))
-            OutlinedTextField(contrasena, { contrasena = it; error = null }, label = { Text("Contraseña") }, singleLine = true, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp))
-            if (error != null) {
-                Spacer(Modifier.height(8.dp))
-                Text(error.orEmpty(), color = MaterialTheme.colorScheme.error)
+fun LoginScreen(onBack: () -> Unit, onLogin: (String, String) -> Boolean,
+                onRegister: () -> Unit, cuentaCreada: Boolean = false) {
+    var correo by rememberSaveable { mutableStateOf("") }
+    var contrasena by rememberSaveable { mutableStateOf("") }
+    var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var enviado by rememberSaveable { mutableStateOf(false) }
+    AuthLayout("Qué bueno verte.", "Ingresa para consultar tus citas y continuar cuidándote.", onBack) {
+        if (cuentaCreada) Text("Cuenta creada. Inicia sesión con tu correo y contraseña.",
+            color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyMedium)
+        AuthField(correo, { correo = it; error = null }, "Correo electrónico",
+            Icons.Default.Email, KeyboardType.Email,
+            error = if (enviado && !Validaciones.correoValido(correo)) "Revisa el formato del correo." else null)
+        AuthField(contrasena, { contrasena = it; error = null }, "Contraseña",
+            Icons.Default.Lock, password = true,
+            error = if (enviado && contrasena.isBlank()) "Escribe tu contraseña." else null)
+        error?.let { FormError(it) }
+        SaludPlusButton("Ingresar", onClick = {
+            enviado = true
+            error = when {
+                !Validaciones.correoValido(correo) -> "Escribe un correo válido."
+                contrasena.isBlank() -> "Escribe tu contraseña."
+                !onLogin(Validaciones.normalizarCorreo(correo), contrasena) -> "Correo o contraseña incorrectos."
+                else -> null
             }
-            Spacer(Modifier.height(20.dp))
-            SaludPlusButton("Ingresar", onClick = {
-                if (correo.isBlank() || contrasena.isBlank()) error = "Escribe tu correo y contraseña."
-                else if (!onLogin(correo, contrasena)) error = "No encontramos una cuenta con esos datos."
-            })
-            Spacer(Modifier.height(16.dp))
-            Text("Demo: demo@saludplus.pe  ·  123456", modifier = Modifier.fillMaxWidth().background(CelesteSuave, RoundedCornerShape(12.dp)).padding(12.dp), color = TextoSecundario, style = MaterialTheme.typography.bodySmall)
-            Spacer(Modifier.height(8.dp))
-            androidx.compose.material3.TextButton(onClick = onRegister, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                Text("Crear una cuenta")
-            }
+        })
+        TextButton(onClick = onRegister, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+            Text("¿Primera vez? Crear una cuenta")
         }
+        HorizontalDivider()
+        Text("Cuenta de demostración\ndemo@saludplus.pe · 123456",
+            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
