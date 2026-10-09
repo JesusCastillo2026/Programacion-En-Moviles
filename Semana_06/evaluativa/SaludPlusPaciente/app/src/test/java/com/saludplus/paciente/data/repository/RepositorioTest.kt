@@ -5,6 +5,8 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import org.junit.Assert.assertTrue
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 class RepositorioTest {
@@ -40,6 +42,25 @@ class RepositorioTest {
 
         assertNotNull(primera)
         assertNull(segunda)
+    }
+
+    @Test
+    fun `el calendario muestra cinco dias habiles sin fechas pasadas`() {
+        val dias = Repositorio.cincoDiasHabiles(LocalDate.now())
+
+        assertEquals(5, dias.size)
+        assertTrue(dias.all { it.dayOfWeek.value in 1..5 })
+        assertTrue(dias.all { !it.isBefore(LocalDate.now()) })
+        assertTrue(dias.zipWithNext().all { (primero, segundo) -> primero.isBefore(segundo) })
+    }
+
+    @Test
+    fun `una semana que empieza en fin de semana avanza a dias laborables`() {
+        val sabado = LocalDate.now().with(DayOfWeek.SATURDAY)
+        val dias = Repositorio.cincoDiasHabiles(sabado)
+
+        assertEquals(5, dias.size)
+        assertTrue(dias.all { it.dayOfWeek.value in 1..5 })
     }
 }
 

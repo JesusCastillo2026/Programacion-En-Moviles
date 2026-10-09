@@ -13,9 +13,12 @@ import java.time.LocalDate
 import java.util.UUID
 
 object Repositorio {
+    /** Usuarios creados durante la ejecución actual; no se persisten al cerrar la app. */
     private val usuarios = mutableStateListOf<Usuario>()
+    /** Citas compartidas por las pantallas para reflejar cambios al recomponer Compose. */
     private val citas = mutableStateListOf<Cita>()
 
+    /** Identidad con sesión activa, observada por las pantallas de perfil y agendamiento. */
     var usuarioActual by mutableStateOf<Usuario?>(null)
         private set
 
@@ -47,6 +50,7 @@ object Repositorio {
         usuarios.add(Usuario("demo", "Paciente Demo", "demo@saludplus.pe", "999 111 222", "123456"))
     }
 
+    /** Registra una cuenta en memoria; devuelve null si el correo ya está ocupado. */
     fun registrarUsuario(nombre: String, correo: String, telefono: String, contrasena: String): Usuario? {
         val emailNormalizado = correo.trim().lowercase()
         if (usuarios.any { it.correo.equals(emailNormalizado, ignoreCase = true) }) return null
@@ -56,6 +60,7 @@ object Repositorio {
         return usuario
     }
 
+    /** Busca coincidencia de correo y contraseña, y actualiza la sesión activa. */
     fun iniciarSesion(correo: String, contrasena: String): Usuario? {
         val usuario = usuarios.firstOrNull {
             it.correo.equals(correo.trim(), ignoreCase = true) && it.contrasena == contrasena
@@ -64,10 +69,12 @@ object Repositorio {
         return usuario
     }
 
+    /** Limpia solo la sesión actual; las listas permanecen hasta cerrar la app. */
     fun cerrarSesion() {
         usuarioActual = null
     }
 
+    /** Filtra especialidades por nombre o descripción, ignorando mayúsculas. */
     fun buscarEspecialidades(texto: String): List<Especialidad> {
         val consulta = texto.trim()
         return especialidades.filter {
@@ -75,17 +82,23 @@ object Repositorio {
         }
     }
 
+    /** Limita la selección de Inicio a las especialidades destacadas. */
     fun especialidadesDestacadas(): List<Especialidad> = especialidades.filter { it.destacada }.take(5)
 
+    /** Resuelve un elemento del catálogo por su identificador estable. */
     fun obtenerEspecialidad(id: String): Especialidad? = especialidades.find { it.id == id }
 
+    /** Resuelve el profesional que se transfirió entre destinos de navegación. */
     fun obtenerMedico(id: String): Medico? = medicos.find { it.id == id }
 
+    /** Recupera los datos de una cita para su vista de detalle. */
     fun obtenerCita(id: String): Cita? = citas.find { it.id == id }
 
+    /** Ordena profesionales por calificación dentro de la especialidad seleccionada. */
     fun medicosPorEspecialidad(especialidadId: String): List<Medico> =
         medicos.filter { it.especialidadId == especialidadId }.sortedByDescending { it.calificacion }
 
+    /** Aplica la búsqueda reactiva al nombre o especialidad del profesional. */
     fun buscarMedicos(especialidadId: String, texto: String): List<Medico> {
         val consulta = texto.trim()
         return medicosPorEspecialidad(especialidadId).filter {
@@ -93,6 +106,7 @@ object Repositorio {
         }
     }
 
+    /** Oculta turnos ya reservados para el mismo profesional y fecha. */
     fun horariosDisponibles(medicoId: String, fecha: LocalDate): List<String> {
         val ocupados = citas.filter {
             it.medicoId == medicoId && it.fecha == fecha && it.estado == EstadoCita.PROGRAMADA
@@ -100,6 +114,7 @@ object Repositorio {
         return horariosBase.filterNot { it in ocupados }
     }
 
+    /** Crea una cita únicamente si existe sesión y el turno continúa disponible. */
     fun agendarCita(especialidadId: String, medicoId: String, fecha: LocalDate, hora: String, motivo: String): Cita? {
         val usuarioId = usuarioActual?.id ?: return null
         if (obtenerEspecialidad(especialidadId) == null || obtenerMedico(medicoId) == null) return null
@@ -109,10 +124,25 @@ object Repositorio {
         return cita
     }
 
+    /** Lista las citas del paciente actual en orden cronológico. */
     fun citasDelUsuario(usuarioId: String = usuarioActual?.id.orEmpty()): List<Cita> =
         citas.filter { it.usuarioId == usuarioId }.sortedWith(compareBy<Cita> { it.fecha }.thenBy { it.hora })
 
+    /** Quita la cita local y devuelve si encontró algún elemento para cancelar. */
     fun cancelarCita(citaId: String): Boolean = citas.removeAll { it.id == citaId }
+
+    /** Devuelve los cinco días hábiles de la semana solicitada, sin ofrecer fechas pasadas. */
+    fun cincoDiasHabiles(inicioSemana: LocalDate): List<LocalDate> {
+        val hoy = LocalDate.now()
+        var fecha = if (inicioSemana.isBefore(hoy)) hoy else inicioSemana
+        if (fecha.dayOfWeek.value > 5) fecha = fecha.plusDays((8 - fecha.dayOfWeek.value).toLong())
+        val resultado = mutableListOf<LocalDate>()
+        while (resultado.size < 5) {
+            if (fecha.dayOfWeek.value <= 5 && !fecha.isBefore(hoy)) resultado += fecha
+            fecha = fecha.plusDays(1)
+        }
+        return resultado
+    }
 
     internal fun restablecerParaPruebas() {
         usuarios.clear()

@@ -18,6 +18,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,10 +43,13 @@ import com.saludplus.paciente.ui.theme.AzulClinico
 import com.saludplus.paciente.ui.theme.CelesteSuave
 import com.saludplus.paciente.ui.theme.TextoSecundario
 import java.time.LocalDate
+import java.time.DayOfWeek
+import java.time.temporal.TemporalAdjusters
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
+/** Permite cambiar de semana y elegir una fecha con un turno aún libre. */
 fun FechaHoraScreen(
     especialidadId: String,
     medicoId: String,
@@ -49,7 +57,10 @@ fun FechaHoraScreen(
     onContinue: (String, String) -> Unit
 ) {
     val medico = Repositorio.obtenerMedico(medicoId)
-    val diasDisponibles = remember { (1L..5L).map { LocalDate.now().plusDays(it) } }
+    val hoy = remember { LocalDate.now() }
+    val inicioSemanaActual = remember { hoy.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)) }
+    var inicioSemana by remember { mutableStateOf(inicioSemanaActual) }
+    val diasDisponibles = remember(inicioSemana, hoy) { Repositorio.cincoDiasHabiles(inicioSemana) }
     var fechaSeleccionada by remember { mutableStateOf<LocalDate?>(null) }
     var horaSeleccionada by remember { mutableStateOf<String?>(null) }
     val horarios = fechaSeleccionada?.let { Repositorio.horariosDisponibles(medicoId, it) }.orEmpty()
@@ -62,6 +73,28 @@ fun FechaHoraScreen(
         ) {
             PageHeading("Elige cuándo", medico?.let { "${it.nombre} · ${it.especialidadNombre}" } ?: "Selecciona una cita disponible")
             Spacer(Modifier.height(18.dp))
+            // El encabezado deriva el mes de las fechas visibles, por eso también cambia al avanzar semanas.
+            val mes = diasDisponibles.firstOrNull()?.format(DateTimeFormatter.ofPattern("MMMM yyyy", locale))
+                ?.replaceFirstChar { it.uppercase(locale) } ?: "Calendario"
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                Text(mes, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Row {
+                    IconButton(onClick = {
+                        inicioSemana = inicioSemana.minusWeeks(1)
+                        fechaSeleccionada = null
+                        horaSeleccionada = null
+                    }, enabled = inicioSemana.isAfter(inicioSemanaActual)) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Semana anterior")
+                    }
+                    IconButton(onClick = {
+                        inicioSemana = inicioSemana.plusWeeks(1)
+                        fechaSeleccionada = null
+                        horaSeleccionada = null
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Semana siguiente")
+                    }
+                }
+            }
             Text("FECHA", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = TextoSecundario)
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
