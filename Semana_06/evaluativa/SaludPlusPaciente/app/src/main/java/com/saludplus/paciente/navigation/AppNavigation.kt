@@ -22,15 +22,19 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.saludplus.paciente.data.repository.Repositorio
 import com.saludplus.paciente.ui.screens.auth.LoginScreen
 import com.saludplus.paciente.ui.screens.auth.RegistroScreen
 import com.saludplus.paciente.ui.screens.auth.SplashScreen
 import com.saludplus.paciente.ui.screens.auth.TerminosScreen
+import com.saludplus.paciente.ui.screens.agendamiento.EspecialidadesScreen
+import com.saludplus.paciente.ui.screens.agendamiento.MedicosScreen
 import com.saludplus.paciente.ui.screens.home.HomeScreen
 
 private data class TabItem(val route: String, val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
@@ -106,7 +110,22 @@ fun AppNavigation() {
                     onNotifications = { navController.navigate(Rutas.NOTIFICACIONES) }
                 )
             }
-            composable(Rutas.ESPECIALIDADES) { TabPlaceholder("Especialidades", onBack = { navController.popBackStack() }) }
+            composable(Rutas.ESPECIALIDADES) {
+                EspecialidadesScreen(
+                    onBack = { navController.popBackStack() },
+                    onSelect = { id -> navController.navigate(Rutas.medicos(id)) }
+                )
+            }
+            composable(
+                route = Rutas.MEDICOS,
+                arguments = listOf(navArgument("especialidadId") { type = NavType.StringType })
+            ) { entry ->
+                MedicosScreen(
+                    especialidadId = entry.arguments?.getString("especialidadId").orEmpty(),
+                    onBack = { navController.popBackStack() },
+                    onSelect = { medicoId -> navController.navigate(Rutas.fechaHora(entry.arguments?.getString("especialidadId").orEmpty(), medicoId)) }
+                )
+            }
             composable(Rutas.MIS_CITAS) { TabPlaceholder("Mis citas") }
             composable(Rutas.RESULTADOS) { TabPlaceholder("Resultados") }
             composable(Rutas.PERFIL) { TabPlaceholder("Perfil") }
