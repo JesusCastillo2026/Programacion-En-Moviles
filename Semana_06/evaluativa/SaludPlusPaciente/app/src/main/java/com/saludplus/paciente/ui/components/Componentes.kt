@@ -43,6 +43,7 @@ import com.saludplus.paciente.ui.theme.TextoSecundario
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
+/** Barra superior uniforme con título y acción para volver. */
 fun AppBackTopBar(title: String, onBack: () -> Unit) {
     TopAppBar(
         title = { Text(title, fontWeight = FontWeight.SemiBold) },
@@ -56,6 +57,7 @@ fun AppBackTopBar(title: String, onBack: () -> Unit) {
 }
 
 @Composable
+/** Encabezado reutilizable para el título y texto de apoyo de cada vista. */
 fun PageHeading(title: String, subtitle: String? = null, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
@@ -67,6 +69,7 @@ fun PageHeading(title: String, subtitle: String? = null, modifier: Modifier = Mo
 }
 
 @Composable
+/** Botón principal con altura y color consistentes en toda la experiencia. */
 fun SaludPlusButton(
     text: String,
     onClick: () -> Unit,
@@ -85,6 +88,7 @@ fun SaludPlusButton(
 }
 
 @Composable
+/** Campo de búsqueda compartido por los catálogos. */
 fun SearchField(value: String, onValueChange: (String) -> Unit, hint: String, modifier: Modifier = Modifier) {
     OutlinedTextField(
         value = value,
@@ -103,6 +107,7 @@ fun SearchField(value: String, onValueChange: (String) -> Unit, hint: String, mo
 }
 
 @Composable
+/** Avatar de iniciales de respaldo cuando no se carga un retrato ilustrativo. */
 fun PlaceholderAvatar(nombre: String, size: Dp = 54.dp) {
     Box(
         modifier = Modifier.size(size).clip(CircleShape).background(CelesteSuave),
@@ -118,6 +123,7 @@ fun PlaceholderAvatar(nombre: String, size: Dp = 54.dp) {
 }
 
 @Composable
+/** Mensaje centrado que explica una lista vacía y cómo continuar. */
 fun EmptyState(title: String, message: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxWidth().padding(28.dp),
@@ -131,6 +137,7 @@ fun EmptyState(title: String, message: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
+/** Contenedor blanco de bordes suaves para agrupar información relacionada. */
 fun SoftCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Card(
         modifier = modifier,
@@ -143,6 +150,7 @@ fun SoftCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
 }
 
 @Composable
+/** Etiqueta visual para mostrar el estado de una cita. */
 fun StatusChip(text: String, modifier: Modifier = Modifier) {
     Box(modifier = modifier.clip(RoundedCornerShape(50)).background(CelesteSuave).padding(horizontal = 12.dp, vertical = 6.dp)) {
         Text(text, color = AzulClinico, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)

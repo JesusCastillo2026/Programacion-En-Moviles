@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
+/** Expone el resumen de una reserva y una confirmación antes de cancelarla. */
 fun DetalleCitaScreen(citaId: String, onBack: () -> Unit, onCancelled: () -> Unit) {
     val cita = Repositorio.obtenerCita(citaId)
     var pedirConfirmacion by remember { mutableStateOf(false) }

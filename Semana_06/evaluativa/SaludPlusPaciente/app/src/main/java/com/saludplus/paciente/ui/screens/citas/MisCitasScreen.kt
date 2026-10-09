@@ -33,6 +33,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
+/** Lista las citas del paciente y enlaza cada tarjeta con su detalle. */
 fun MisCitasScreen(onDetails: (String) -> Unit, onNewAppointment: () -> Unit) {
     val citas = Repositorio.citasDelUsuario()
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {

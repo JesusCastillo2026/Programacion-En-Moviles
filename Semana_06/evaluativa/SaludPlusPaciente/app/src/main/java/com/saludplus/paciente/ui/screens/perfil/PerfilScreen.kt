@@ -34,6 +34,7 @@ import com.saludplus.paciente.ui.theme.AzulClinico
 import com.saludplus.paciente.ui.theme.TextoSecundario
 
 @Composable
+/** Presenta los datos locales del paciente y confirma el cierre de sesión. */
 fun PerfilScreen(onLogout: () -> Unit) {
     var confirmarCierre by remember { mutableStateOf(false) }
     val usuario = Repositorio.usuarioActual

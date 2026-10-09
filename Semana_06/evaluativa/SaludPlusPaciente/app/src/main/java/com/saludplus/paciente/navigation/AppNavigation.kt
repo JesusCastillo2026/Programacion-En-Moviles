@@ -51,6 +51,7 @@ private val tabs = listOf(
 )
 
 @Composable
+/** Centraliza destinos, argumentos de cita, barra inferior y transiciones del flujo. */
 fun AppNavigation() {
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()

@@ -28,6 +28,7 @@ import com.saludplus.paciente.ui.theme.TextoSecundario
 private data class ResultadoEjemplo(val nombre: String, val fecha: String, val estado: String)
 
 @Composable
+/** Pantalla de reto con muestras locales de resultados clínicos de demostración. */
 fun ResultadosScreen() {
     val resultados = listOf(
         ResultadoEjemplo("Hemograma completo", "18 oct 2026", "Disponible"),

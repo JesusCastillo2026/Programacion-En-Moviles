@@ -37,6 +37,7 @@ import com.saludplus.paciente.ui.theme.CelesteSuave
 import com.saludplus.paciente.ui.theme.TextoSecundario
 
 @Composable
+/** Muestra el catálogo filtrable de especialidades que inicia la reserva. */
 fun EspecialidadesScreen(onBack: () -> Unit, onSelect: (String) -> Unit) {
     var consulta by remember { mutableStateOf("") }
     val resultados = Repositorio.buscarEspecialidades(consulta)

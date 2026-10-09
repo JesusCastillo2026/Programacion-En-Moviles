@@ -34,6 +34,7 @@ import com.saludplus.paciente.ui.theme.AzulClinico
 import com.saludplus.paciente.ui.theme.TextoSecundario
 
 @Composable
+/** Valida los campos básicos y envía una nueva cuenta al repositorio en memoria. */
 fun RegistroScreen(
     onBack: () -> Unit,
     onRegister: (String, String, String, String) -> Boolean,

@@ -44,6 +44,7 @@ import com.saludplus.paciente.ui.theme.CelesteSuave
 import com.saludplus.paciente.ui.theme.TextoSecundario
 
 @Composable
+/** Resume la actividad del paciente y enlaza con las secciones principales. */
 fun HomeScreen(onExplore: () -> Unit, onAppointments: () -> Unit, onResults: () -> Unit, onNotifications: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)

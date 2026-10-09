@@ -4,7 +4,7 @@ Aplicación Android con Jetpack Compose para consultar especialidades y médicos
 
 ## Estado del proyecto
 
-La carpeta contiene una **versión base asistida** que se ampliará en la rama `mejora-ia`. Esta entrega no se presenta como una fase desarrollada sin asistencia. El laboratorio de TECSUP Store permanece aparte, en `Semana_06/R1-SinIA`.
+La carpeta contiene una **versión base asistida**. La rama `mejora-ia` conserva esta aplicación y añade el calendario semanal, imágenes locales ilustrativas, documentación en el código y el registro de prompts en `PROMPTS.md`. El laboratorio de TECSUP Store permanece aparte, en `Semana_06/R1-SinIA`.
 
 ## Alcance
 
@@ -26,7 +26,7 @@ Cuenta de demostración: `demo@saludplus.pe` / `123456`.
 
 La app incluye Splash, Registro, Inicio, Especialidades, Médicos, Fecha y hora, Confirmar cita, Login, Cita exitosa, Mis citas y Perfil. Los cuatro retos extra son Detalle/cancelación, Resultados, Notificaciones y Términos. La navegación de reserva pasa `especialidadId`, `medicoId`, `fecha` y `hora`; al confirmar, elimina el flujo de reserva del historial para que Atrás vuelva a Inicio.
 
-La versión base muestra cinco fechas consecutivas y recalcula los turnos cuando se elige una fecha. La rama `mejora-ia` agrega calendario semanal con días hábiles, imágenes locales de médicos ficticios, mejoras visuales y `PROMPTS.md`.
+La versión base muestra cinco fechas consecutivas y recalcula los turnos cuando se elige una fecha. En `mejora-ia`, el calendario muestra cinco días hábiles, permite moverse entre semanas sin retroceder antes de la semana actual y reinicia la hora al cambiar de fecha. Los retratos y la portada son recursos locales ilustrativos; no representan profesionales reales.
 
 ## Preguntas de reflexión
 

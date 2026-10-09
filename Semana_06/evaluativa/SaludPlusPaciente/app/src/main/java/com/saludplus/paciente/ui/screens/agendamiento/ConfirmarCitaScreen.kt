@@ -31,6 +31,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
+/** Revisa los datos seleccionados y solicita la creación de la cita al repositorio. */
 fun ConfirmarCitaScreen(
     especialidadId: String,
     medicoId: String,

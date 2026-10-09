@@ -30,6 +30,7 @@ import com.saludplus.paciente.ui.theme.CelesteSuave
 import com.saludplus.paciente.ui.theme.TextoSecundario
 
 @Composable
+/** Recoge credenciales y presenta el resultado del intento de inicio de sesión. */
 fun LoginScreen(onBack: () -> Unit, onLogin: (String, String) -> Boolean, onRegister: () -> Unit) {
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }

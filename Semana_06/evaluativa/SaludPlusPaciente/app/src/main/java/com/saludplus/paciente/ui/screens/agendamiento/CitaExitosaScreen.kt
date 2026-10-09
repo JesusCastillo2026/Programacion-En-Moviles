@@ -30,6 +30,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
+/** Confirma el resultado de la reserva y ofrece continuar a Inicio o Mis citas. */
 fun CitaExitosaScreen(citaId: String, onHome: () -> Unit, onAppointments: () -> Unit) {
     val cita = Repositorio.obtenerCita(citaId)
     val medico = cita?.let { Repositorio.obtenerMedico(it.medicoId) }
