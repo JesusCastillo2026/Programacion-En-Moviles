@@ -31,7 +31,7 @@ Esta carpeta contiene la versión ConIA del laboratorio 06. Se creó a partir de
 
 ## Alcance real
 
-Es una **demostración local**: no realiza pagos, no envía reportes a un servidor y no guarda productos, favoritos ni pedidos entre cierres de la aplicación. El menú Compartir sí abre el selector de aplicaciones instalado en el dispositivo. No se modificó Clínica SaludPlus; es otro trabajo.
+Es una **demostración local**: no realiza pagos, no envía reportes a un servidor y no guarda productos, favoritos ni pedidos entre cierres de la aplicación. El menú Compartir sí abre el selector de aplicaciones instalado en el dispositivo.
 
 ## Comprobación sugerida
 
