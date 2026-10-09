@@ -47,12 +47,13 @@ object Repositorio {
     )
 
     init {
-        usuarios.add(Usuario("demo", "Paciente Demo", "demo@saludplus.pe", "999 111 222", "123456"))
+        usuarios.add(Usuario("demo", "Paciente Demo", "demo@saludplus.pe", "999111222", "123456"))
     }
 
-    /** Registra una cuenta en memoria; devuelve null si el correo ya está ocupado. */
+    /** Valida también aquí para que otra pantalla no pueda saltarse las reglas del formulario. */
     fun registrarUsuario(nombre: String, correo: String, telefono: String, contrasena: String): Usuario? {
-        val emailNormalizado = correo.trim().lowercase()
+        if (Validaciones.errorRegistro(nombre, correo, telefono, contrasena) != null) return null
+        val emailNormalizado = Validaciones.normalizarCorreo(correo)
         if (usuarios.any { it.correo.equals(emailNormalizado, ignoreCase = true) }) return null
         val usuario = Usuario(UUID.randomUUID().toString(), nombre.trim(), emailNormalizado, telefono.trim(), contrasena)
         usuarios.add(usuario)
@@ -108,6 +109,7 @@ object Repositorio {
 
     /** Oculta turnos ya reservados para el mismo profesional y fecha. */
     fun horariosDisponibles(medicoId: String, fecha: LocalDate): List<String> {
+        if (obtenerMedico(medicoId) == null || !Validaciones.fechaReservable(fecha)) return emptyList()
         val ocupados = citas.filter {
             it.medicoId == medicoId && it.fecha == fecha && it.estado == EstadoCita.PROGRAMADA
         }.map { it.hora }.toSet()
@@ -117,8 +119,14 @@ object Repositorio {
     /** Crea una cita únicamente si existe sesión y el turno continúa disponible. */
     fun agendarCita(especialidadId: String, medicoId: String, fecha: LocalDate, hora: String, motivo: String): Cita? {
         val usuarioId = usuarioActual?.id ?: return null
-        if (obtenerEspecialidad(especialidadId) == null || obtenerMedico(medicoId) == null) return null
-        if (hora !in horariosDisponibles(medicoId, fecha)) return null
+        val medico = obtenerMedico(medicoId) ?: return null
+        if (obtenerEspecialidad(especialidadId) == null || medico.especialidadId != especialidadId) return null
+        if (!Validaciones.fechaReservable(fecha) || hora !in horariosBase) return null
+        // Se vuelve a comprobar al confirmar: el turno pudo ocuparse después de seleccionarlo.
+        if (citas.any {
+            it.medicoId == medicoId && it.fecha == fecha && it.hora == hora &&
+                it.estado == EstadoCita.PROGRAMADA
+        }) return null
         val cita = Cita(UUID.randomUUID().toString(), usuarioId, medicoId, especialidadId, fecha, hora, motivo.trim())
         citas.add(cita)
         return cita
@@ -146,7 +154,7 @@ object Repositorio {
 
     internal fun restablecerParaPruebas() {
         usuarios.clear()
-        usuarios.add(Usuario("demo", "Paciente Demo", "demo@saludplus.pe", "999 111 222", "123456"))
+        usuarios.add(Usuario("demo", "Paciente Demo", "demo@saludplus.pe", "999111222", "123456"))
         citas.clear()
         usuarioActual = null
     }

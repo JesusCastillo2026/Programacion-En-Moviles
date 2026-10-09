@@ -28,6 +28,18 @@ La app incluye Splash, Registro, Inicio, Especialidades, Médicos, Fecha y hora,
 
 La versión base muestra cinco fechas consecutivas y recalcula los turnos cuando se elige una fecha. En `mejora-ia`, el calendario muestra cinco días hábiles, permite moverse entre semanas sin retroceder antes de la semana actual y reinicia la hora al cambiar de fecha. Los retratos y la portada son recursos locales ilustrativos; no representan profesionales reales.
 
+## Actualización ConIA: registro, reservas y diseño
+
+- El formulario conserva sus datos al consultar Términos y regresar. Login también conserva sus campos.
+- Se valida el formato del correo y se normalizan espacios exteriores y mayúsculas. Se admiten dominios institucionales y proveedores habituales; no se verifica la existencia del buzón.
+- El celular peruano debe tener nueve dígitos y empezar por 9, sin prefijo +51.
+- Las mismas reglas se aplican en el repositorio, además del formulario.
+- Al reservar se comprueba la relación médico/especialidad, sesión, fecha laborable desde hoy, horario del catálogo y ausencia de una reserva previa mediante `any`, antes de `add`.
+- Bienvenida, registro y login comparten una ilustración a todo el ancho, integrada con un degradado, campos con iconos, visibilidad de contraseña y errores junto a los campos.
+- Tema, tipografía, botones, barra inferior y encabezados comparten el estilo renovado. La confirmación admite desplazamiento y textos largos.
+
+La validación de lógica se ejecuta con `gradlew.bat :app:testDebugUnitTest`. No requiere iniciar el emulador. La revisión visual final del nuevo diseño queda pendiente en el dispositivo.
+
 ## Preguntas de reflexión
 
 1. **¿Por qué el esqueleto separa modelos, rutas y navegación de las pantallas?** Los modelos describen la información y las rutas conectan destinos; son la base compartida. Las pantallas concentran la práctica visual y funcional que la guía pide completar. Como no se entregó el ZIP, se recreó la estructura indicada en el PDF.

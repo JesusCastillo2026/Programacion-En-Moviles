@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -24,6 +26,8 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.saludplus.paciente.data.model.Especialidad
@@ -40,6 +45,7 @@ import com.saludplus.paciente.data.repository.Repositorio
 import com.saludplus.paciente.ui.components.PageHeading
 import com.saludplus.paciente.ui.components.SaludPlusButton
 import com.saludplus.paciente.ui.theme.AzulClinico
+import com.saludplus.paciente.ui.theme.AzulProfundo
 import com.saludplus.paciente.ui.theme.CelesteSuave
 import com.saludplus.paciente.ui.theme.TextoSecundario
 
@@ -69,13 +75,24 @@ fun HomeScreen(onExplore: () -> Unit, onAppointments: () -> Unit, onResults: () 
             shape = RoundedCornerShape(26.dp),
             colors = CardDefaults.cardColors(containerColor = AzulClinico)
         ) {
-            Column(modifier = Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .background(Brush.linearGradient(listOf(AzulProfundo, AzulClinico))).padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
                 Box(modifier = Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.18f)).padding(horizontal = 12.dp, vertical = 6.dp)) {
                     Text("TU BIENESTAR, PRIMERO", color = Color.White, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
                 }
                 Text("Cuida tu salud\ncon un plan simple", color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Text("Encuentra atención confiable para ti y tu familia.", color = Color.White.copy(alpha = 0.88f))
-                SaludPlusButton("Agendar una cita", onClick = onExplore, modifier = Modifier.fillMaxWidth())
+                Button(
+                    onClick = onExplore,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = AzulProfundo)
+                ) {
+                    Text("Agendar una cita", modifier = Modifier.padding(vertical = 8.dp), fontWeight = FontWeight.Bold)
+                }
             }
         }
 
@@ -114,7 +131,7 @@ private fun ShortcutCard(title: String, description: String, icon: androidx.comp
 @Composable
 private fun SpecialtyCard(especialidad: Especialidad, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.size(width = 142.dp, height = 124.dp).clickable(onClick = onClick),
+        modifier = Modifier.width(156.dp).heightIn(min = 132.dp).clickable(onClick = onClick),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {

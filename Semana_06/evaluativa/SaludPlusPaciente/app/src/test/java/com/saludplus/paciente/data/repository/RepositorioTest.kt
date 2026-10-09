@@ -27,7 +27,7 @@ class RepositorioTest {
 
     @Test
     fun `un horario reservado deja de estar disponible`() {
-        val fecha = LocalDate.of(2026, 10, 19)
+        val fecha = LocalDate.now().plusWeeks(1).with(DayOfWeek.MONDAY)
         val reserva = Repositorio.agendarCita("cardio", "m1", fecha, "08:00", "Control")
 
         assertNotNull(reserva)
@@ -36,7 +36,7 @@ class RepositorioTest {
 
     @Test
     fun `no se puede reservar dos veces el mismo turno del medico`() {
-        val fecha = LocalDate.of(2026, 10, 20)
+        val fecha = LocalDate.now().plusWeeks(1).with(DayOfWeek.TUESDAY)
         val primera = Repositorio.agendarCita("cardio", "m1", fecha, "09:00", "Control")
         val segunda = Repositorio.agendarCita("cardio", "m1", fecha, "09:00", "Seguimiento")
 
@@ -61,6 +61,50 @@ class RepositorioTest {
 
         assertEquals(5, dias.size)
         assertTrue(dias.all { it.dayOfWeek.value in 1..5 })
+    }
+
+    @Test
+    fun `el repositorio rechaza datos de registro invalidos sin cambiar la sesion`() {
+        listOf("@dominio.pe", "a@.", "a..b@dominio.pe", "a@-dominio.pe", "a b@dominio.pe").forEach {
+            assertNull(Repositorio.registrarUsuario("Paciente", it, "999000111", "clave123"))
+        }
+        listOf("899000111", "99900011", "9990001110", "999abc111").forEach {
+            assertNull(Repositorio.registrarUsuario("Paciente", "persona@gmail.com", it, "clave123"))
+        }
+        assertEquals("demo", Repositorio.usuarioActual?.id)
+    }
+
+    @Test
+    fun `acepta correo institucional y normaliza espacios y mayusculas`() {
+        val usuario = Repositorio.registrarUsuario(" Jesus ", " JESUS@TECSUP.EDU.PE ", "999000111", "clave123")
+        assertNotNull(usuario)
+        assertEquals("jesus@tecsup.edu.pe", usuario?.correo)
+        assertNotNull(Repositorio.iniciarSesion("JESUS@TECSUP.EDU.PE", "clave123"))
+    }
+
+    @Test
+    fun `no crea citas para otra especialidad ni fechas u horas invalidas`() {
+        val fecha = LocalDate.now().plusWeeks(1).with(DayOfWeek.MONDAY)
+        assertNull(Repositorio.agendarCita("pediatria", "m1", fecha, "09:00", ""))
+        assertNull(Repositorio.agendarCita("cardio", "desconocido", fecha, "09:00", ""))
+        assertNull(Repositorio.agendarCita("cardio", "m1", LocalDate.now().minusDays(1), "09:00", ""))
+        assertNull(Repositorio.agendarCita("cardio", "m1", fecha.with(DayOfWeek.SATURDAY), "09:00", ""))
+        assertNull(Repositorio.agendarCita("cardio", "m1", fecha, "25:00", ""))
+        assertTrue(Repositorio.citasDelUsuario().isEmpty())
+        assertTrue(Repositorio.horariosDisponibles("m1", fecha.with(DayOfWeek.SUNDAY)).isEmpty())
+    }
+
+    @Test
+    fun `cancelar libera el turno y cada medico tiene disponibilidad independiente`() {
+        val fecha = LocalDate.now().plusWeeks(1).with(DayOfWeek.MONDAY)
+        val cita = Repositorio.agendarCita("cardio", "m1", fecha, "09:00", "")
+        assertNotNull(cita)
+        assertNotNull(Repositorio.agendarCita("cardio", "m5", fecha, "09:00", ""))
+        assertTrue(Repositorio.cancelarCita(cita!!.id))
+        assertTrue("09:00" in Repositorio.horariosDisponibles("m1", fecha))
+        assertNotNull(Repositorio.agendarCita("cardio", "m1", fecha, "09:00", ""))
+        Repositorio.cerrarSesion()
+        assertNull(Repositorio.agendarCita("cardio", "m1", fecha, "10:00", ""))
     }
 }
 

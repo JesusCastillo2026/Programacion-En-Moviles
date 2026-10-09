@@ -25,3 +25,21 @@ Este registro corresponde a la implementación de la rama `mejora-ia`. Las solic
 **Respuesta resumida:** Este archivo reúne las instrucciones que guiaron esta versión, un resumen de la solución y las decisiones de corrección relevantes.
 
 **Correcciones aplicadas:** Se evita presentar los retratos generados como fotografías auténticas. Se añadieron pruebas unitarias para la regla de cinco días hábiles y compilación de Kotlin. La generación final del APK y la ejecución completa de pruebas no pudieron verificarse en este equipo porque AAPT2 se cae con una excepción nativa al procesar recursos de AndroidX.
+
+## 4. Conservar el registro al consultar términos
+
+**Prompt del encargo (extracto):** «cuando entramos a términos y condiciones [...] se borra todo el formulario [...] quiero que corrijas eso».
+
+**Respuesta resumida:** Se cambió el estado del formulario a `rememberSaveable` para restaurar sus datos al volver desde Términos. La mejora visual posterior conserva esta solución y la extiende a Login.
+
+**Qué se corrigió:** La explicación inicial atribuía el reinicio solo a abrir una nueva ruta. En realidad, `remember` no garantiza conservar los campos cuando el destino sale de la composición. Se utiliza el estado guardable asociado a la entrada de navegación.
+
+## 5. Validaciones y diseño integrado de ConIA
+
+**Prompt del encargo (extractos):** «quiero que apliques todos estos cambios que hemos visto en correo, teléfono, médico, especialidad y cita»; «quiero un formato más moderno y que la imagen esté bien integrada con lo que es el registro y login y no solo sea un cuadro de la imagen».
+
+**Respuesta resumida:** Se añadieron reglas compartidas para correo y celular peruano, validación defensiva de reservas y controles de errores. La portada existente se integra a todo el ancho con un degradado hacia el formulario. Registro, Login y bienvenida comparten componentes; se renovaron tipografía, colores, botones, encabezados y navegación inferior. La confirmación permite desplazarse con el teclado visible.
+
+**Qué se corrigió:** No se restringe el correo a Gmail porque también debe aceptar direcciones institucionales. Se usa normalización con `Locale.ROOT`. El repositorio vuelve a comprobar especialidad, médico, fecha y duplicados mediante `any` antes de `add`. Al compilar se ajustó la alineación de imagen a `BiasAlignment`. Las pruebas anteriores con fechas fijas se cambiaron por días futuros para que sigan siendo válidas.
+
+**Verificación:** Se ejecutaron las pruebas unitarias con procesamiento normal de recursos. En esta revisión AAPT2 sí completó ese procesamiento. La comprobación visual en un dispositivo sigue pendiente; no se sustituye por la compilación. El usuario realizará la integración, el commit y el push.
