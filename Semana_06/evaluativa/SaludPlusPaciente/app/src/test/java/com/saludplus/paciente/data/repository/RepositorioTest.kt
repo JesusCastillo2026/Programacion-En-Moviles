@@ -31,5 +31,15 @@ class RepositorioTest {
         assertNotNull(reserva)
         assertEquals(false, "08:00" in Repositorio.horariosDisponibles("m1", fecha))
     }
+
+    @Test
+    fun `no se puede reservar dos veces el mismo turno del medico`() {
+        val fecha = LocalDate.of(2026, 10, 20)
+        val primera = Repositorio.agendarCita("cardio", "m1", fecha, "09:00", "Control")
+        val segunda = Repositorio.agendarCita("cardio", "m1", fecha, "09:00", "Seguimiento")
+
+        assertNotNull(primera)
+        assertNull(segunda)
+    }
 }
 

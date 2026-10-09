@@ -34,6 +34,9 @@ import com.saludplus.paciente.ui.screens.auth.RegistroScreen
 import com.saludplus.paciente.ui.screens.auth.SplashScreen
 import com.saludplus.paciente.ui.screens.auth.TerminosScreen
 import com.saludplus.paciente.ui.screens.agendamiento.EspecialidadesScreen
+import com.saludplus.paciente.ui.screens.agendamiento.CitaExitosaScreen
+import com.saludplus.paciente.ui.screens.agendamiento.ConfirmarCitaScreen
+import com.saludplus.paciente.ui.screens.agendamiento.FechaHoraScreen
 import com.saludplus.paciente.ui.screens.agendamiento.MedicosScreen
 import com.saludplus.paciente.ui.screens.home.HomeScreen
 
@@ -124,6 +127,65 @@ fun AppNavigation() {
                     especialidadId = entry.arguments?.getString("especialidadId").orEmpty(),
                     onBack = { navController.popBackStack() },
                     onSelect = { medicoId -> navController.navigate(Rutas.fechaHora(entry.arguments?.getString("especialidadId").orEmpty(), medicoId)) }
+                )
+            }
+            composable(
+                route = Rutas.FECHA_HORA,
+                arguments = listOf(
+                    navArgument("especialidadId") { type = NavType.StringType },
+                    navArgument("medicoId") { type = NavType.StringType }
+                )
+            ) { entry ->
+                val especialidadId = entry.arguments?.getString("especialidadId").orEmpty()
+                val medicoId = entry.arguments?.getString("medicoId").orEmpty()
+                FechaHoraScreen(
+                    especialidadId = especialidadId,
+                    medicoId = medicoId,
+                    onBack = { navController.popBackStack() },
+                    onContinue = { fecha, hora -> navController.navigate(Rutas.confirmar(especialidadId, medicoId, fecha, hora)) }
+                )
+            }
+            composable(
+                route = Rutas.CONFIRMAR_CITA,
+                arguments = listOf(
+                    navArgument("especialidadId") { type = NavType.StringType },
+                    navArgument("medicoId") { type = NavType.StringType },
+                    navArgument("fecha") { type = NavType.StringType },
+                    navArgument("hora") { type = NavType.StringType }
+                )
+            ) { entry ->
+                val especialidadId = entry.arguments?.getString("especialidadId").orEmpty()
+                val medicoId = entry.arguments?.getString("medicoId").orEmpty()
+                val fecha = entry.arguments?.getString("fecha").orEmpty()
+                val hora = entry.arguments?.getString("hora").orEmpty()
+                ConfirmarCitaScreen(
+                    especialidadId = especialidadId,
+                    medicoId = medicoId,
+                    fecha = fecha,
+                    hora = hora,
+                    onBack = { navController.popBackStack() },
+                    onConfirm = { motivo ->
+                        val cita = runCatching {
+                            Repositorio.agendarCita(especialidadId, medicoId, java.time.LocalDate.parse(fecha), hora, motivo)
+                        }.getOrNull()
+                        if (cita != null) {
+                            navController.navigate(Rutas.citaExitosa(cita.id)) {
+                                popUpTo(Rutas.INICIO)
+                                launchSingleTop = true
+                            }
+                            cita.id
+                        } else null
+                    }
+                )
+            }
+            composable(
+                route = Rutas.CITA_EXITOSA,
+                arguments = listOf(navArgument("citaId") { type = NavType.StringType })
+            ) { entry ->
+                CitaExitosaScreen(
+                    citaId = entry.arguments?.getString("citaId").orEmpty(),
+                    onHome = { navController.navigate(Rutas.INICIO) { popUpTo(Rutas.INICIO) } },
+                    onAppointments = { navController.navigate(Rutas.MIS_CITAS) }
                 )
             }
             composable(Rutas.MIS_CITAS) { TabPlaceholder("Mis citas") }
