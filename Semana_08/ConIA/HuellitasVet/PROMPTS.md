@@ -12,6 +12,34 @@
 
 **¿Respeta MVVM?:** Sí. Las vistas solo conocen sus ViewModels, los ViewModels solo conocen `VetRepository` (interfaz), y Room queda detrás de `VetRepositoryRoom`. No se añadieron entidades ni se modificó el esquema de la base, así que no corresponde aumentar su versión.
 
+## Prompt 2 — Mejora profesional del área de cliente
+
+**Texto solicitado por el usuario (redacción profesional):** «Toma como referencia la imagen del área de cliente de HuellitasVet y adapta sus pantallas para que mantengan una presentación coherente y cuidada. Revisa Inicio, Mascotas, Ficha de mascota, Pedir cita, Mis citas y Perfil; conserva las funciones existentes y aplica el mismo estilo visual entre ellas. Organiza la información para que sea clara en el móvil, evita repetir encabezados, muestra correctamente los datos de las mascotas y sus citas, y asegura que el botón Cerrar sesión limpie la navegación y regrese al inicio de sesión sin permitir volver a pantallas privadas con Atrás».
+
+**Respuesta resumida:** Se reorganizaron las pantallas del cliente con componentes, tamaños de texto, tarjetas, chips y navegación coherentes con la referencia. El perfil reúne identidad, resumen de mascotas y citas, preferencias y cierre de sesión. La salida de sesión limpia la pila privada y conduce al login.
+
+**Qué se corrigió al integrar:** Se quitaron títulos duplicados en pantallas que ya usan la barra superior, se ajustó la ficha para separar historial y datos, y se evitó mostrar una indicación de vacunación que no estaba respaldada por datos clínicos. Se mantuvo el Panel veterinario fuera de este cambio. La compilación se verificó en Android Studio.
+
+## Prompts complementarios de revisión
+
+Los siguientes prompts se redactaron para dejar por escrito criterios de revisión derivados del trabajo. Se incluyen como guías de apoyo, no como transcripciones literales de mensajes enviados.
+
+### Prompt 3 — Coherencia entre pantallas
+
+**Prompt de apoyo:** «Revisa las pantallas del cliente de HuellitasVet como una experiencia móvil completa. Comprueba que Inicio, Mascotas, Ficha, Pedir cita, Mis citas y Perfil compartan jerarquía visual, espaciado y componentes; que cada acción lleve a una pantalla relacionada; y que los estados vacíos indiquen claramente qué puede hacer la persona».
+
+**Respuesta resumida:** Se alinearon jerarquías tipográficas, tarjetas y acciones entre las pantallas, y se conectó el acceso a la lista completa de mascotas desde Inicio.
+
+**Qué se debe validar:** Confirmar en el emulador el recorrido completo entre pantallas, con listas vacías y con datos, y revisar que la navegación inferior y el botón Atrás mantengan el destino esperado.
+
+### Prompt 4 — Revisión segura del cierre de sesión
+
+**Prompt de apoyo:** «Inspecciona el cierre de sesión de la aplicación. Al cerrar la sesión, elimina las pantallas privadas de la pila de navegación, muestra el login y evita que el botón Atrás permita regresar al perfil, las mascotas o las citas de la sesión anterior».
+
+**Respuesta resumida:** La navegación observa el estado de sesión y redirige al login cuando el usuario deja de estar autenticado; la pila anterior se limpia para impedir el retorno a rutas privadas.
+
+**Qué se debe validar:** Ejecutar en el dispositivo el cierre de sesión desde Perfil y probar Atrás y el inicio de sesión posterior para confirmar que cada cuenta ve únicamente su propia sesión.
+
 ## Reflexión (5 líneas)
 
 - La asistencia aceleró la integración de tres funciones entre datos, reglas y pantallas.
