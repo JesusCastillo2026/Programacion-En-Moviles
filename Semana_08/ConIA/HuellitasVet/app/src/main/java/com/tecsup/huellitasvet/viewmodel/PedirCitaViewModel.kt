@@ -67,6 +67,7 @@ class PedirCitaViewModel(
     }
 
     fun horaDisponible(valor: String): Boolean {
+        if (valor.isBlank()) return false
         val dia = LocalDate.parse(fecha.value)
         val duracion = servicios.value.filter { it.id in serviciosSeleccionados.value }.sumOf { it.duracionMin }.coerceAtLeast(30)
         val inicio = LocalTime.parse(valor)

@@ -37,6 +37,7 @@ class ReprogramarCitaViewModel(private val repo: VetRepository, private val duen
     fun elegirFecha(valor: String) { fecha.value = valor; hora.value = ""; mensaje.value = null }
 
     fun disponible(valor: String): Boolean {
+        if (valor.isBlank()) return false
         val actual = cita.value?.cita
         val propio = actual?.fecha == fecha.value && actual.hora == valor
         val duracion = cita.value?.let { (it.servicios.ifEmpty { listOf(it.servicio) }).sumOf { servicio -> servicio.duracionMin } }?.coerceAtLeast(30) ?: 30

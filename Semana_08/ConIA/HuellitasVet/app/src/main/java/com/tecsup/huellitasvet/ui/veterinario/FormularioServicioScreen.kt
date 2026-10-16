@@ -128,9 +128,7 @@ fun FormularioServicioScreen(
                         leadingIcon = {
                             Checkbox(
                                 checked = marcada,
-                                onCheckedChange = { activa ->
-                                    if (activa) categorias.add(opcion) else categorias.remove(opcion)
-                                },
+                                onCheckedChange = null,
                                 colors = CheckboxDefaults.colors(
                                     checkedColor = MaterialTheme.colorScheme.primary,
                                     uncheckedColor = MaterialTheme.colorScheme.primary.copy(alpha = .55f)

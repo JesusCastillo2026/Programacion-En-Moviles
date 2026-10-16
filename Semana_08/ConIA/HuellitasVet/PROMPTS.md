@@ -70,7 +70,7 @@ Los siguientes prompts se redactaron para dejar por escrito criterios de revisi�
 
 **Respuesta resumida:** Los horarios se generan según el día de la semana y la duración total elegida. Las horas ocupadas y los intervalos que se cruzan con una reserva existente quedan deshabilitados; el repositorio vuelve a validar disponibilidad antes de guardar. El cliente puede seleccionar varios servicios desde el catálogo o la pantalla de cita, y la reserva guarda los servicios asociados, el precio total y la duración combinada.
 
-**Qué se corrigió al integrar:** Se conservó `servicioId` como referencia principal para que el historial existente siga funcionando y se agregó una relación Room `cita_servicios` para asociar varios servicios a una cita. La migración enlaza las reservas existentes con su servicio actual. Los datos de demostración también quedan enlazados para que se reflejen como horas ocupadas.
+**Qué se corrigió al integrar:** Se conservó `servicioId` como referencia principal para que el historial existente siga funcionando y se agregó una relación Room `cita_servicios` para asociar varios servicios a una cita. La migración enlaza las reservas existentes con su servicio actual. Los datos de demostración también quedan enlazados para que se reflejen como horas ocupadas. Se protegió la validación del botón de cita para que una hora aún vacía no se intente convertir a `LocalTime`, evitando una excepción durante la selección.
 
 ### Prompt 9 — Cuentas de veterinarios administradas por ADMIN
 
