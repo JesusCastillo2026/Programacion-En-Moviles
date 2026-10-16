@@ -17,7 +17,7 @@ import com.tecsup.huellitasvet.data.local.relation.CitaConDetalle
 fun HistorialItem(detalle: CitaConDetalle, modifier: Modifier = Modifier) {
     Card(modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
         Column(Modifier.padding(16.dp)) {
-            Text("${detalle.servicio.nombre}", fontSize = 16.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
+            Text(detalle.nombresServicios, fontSize = 16.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
             Text("${detalle.cita.fecha} · ${detalle.cita.diagnostico.orEmpty()}", fontSize = 14.sp)
             if (!detalle.cita.tratamiento.isNullOrBlank()) Text("Tratamiento: ${detalle.cita.tratamiento}", fontSize = 12.sp)
             detalle.cita.pesoRegistrado?.let { Text("♥  Peso: $it kg", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary) }

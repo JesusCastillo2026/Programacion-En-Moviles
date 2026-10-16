@@ -8,6 +8,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -21,7 +22,16 @@ class ReprogramarCitaViewModel(private val repo: VetRepository, private val duen
     val fecha = MutableStateFlow(LocalDate.now().toString())
     val hora = MutableStateFlow("")
     val mensaje = MutableStateFlow<String?>(null)
-    val ocupadas = fecha.flatMapLatest { repo.observarHorasOcupadas(it) }
+    val ocupadas = fecha.flatMapLatest { dia -> repo.observarCitasPorFecha(dia).map { citas ->
+        citas.filter { it.cita.id != citaId && it.cita.estado != "CANCELADA" }.flatMap { detalle ->
+            val minutos = (detalle.servicios.ifEmpty { listOf(detalle.servicio) }).sumOf { it.duracionMin }.coerceAtLeast(30)
+            val inicio = LocalTime.parse(detalle.cita.hora)
+            generateSequence(inicio) { it.plusMinutes(30) }
+                .takeWhile { it.isBefore(inicio.plusMinutes(minutos.toLong())) }
+                .map { it.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")) }
+                .toList()
+        }.distinct()
+    } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun elegirFecha(valor: String) { fecha.value = valor; hora.value = ""; mensaje.value = null }
@@ -29,7 +39,12 @@ class ReprogramarCitaViewModel(private val repo: VetRepository, private val duen
     fun disponible(valor: String): Boolean {
         val actual = cita.value?.cita
         val propio = actual?.fecha == fecha.value && actual.hora == valor
-        return valor in Horarios.todos && valor !in ocupadas.value && !propio &&
+        val duracion = cita.value?.let { (it.servicios.ifEmpty { listOf(it.servicio) }).sumOf { servicio -> servicio.duracionMin } }?.coerceAtLeast(30) ?: 30
+        val inicio = LocalTime.parse(valor)
+        val seCruza = (0 until (duracion + 29) / 30).any { paso ->
+            inicio.plusMinutes(paso * 30L).format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")) in ocupadas.value
+        }
+        return valor in Horarios.paraFecha(LocalDate.parse(fecha.value), duracion) && !seCruza && !propio &&
             LocalDateTime.of(LocalDate.parse(fecha.value), LocalTime.parse(valor)).isAfter(LocalDateTime.now())
     }
 

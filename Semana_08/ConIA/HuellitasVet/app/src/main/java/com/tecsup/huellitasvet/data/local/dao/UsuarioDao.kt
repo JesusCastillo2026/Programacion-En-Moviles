@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import com.tecsup.huellitasvet.data.local.entity.Usuario
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UsuarioDao {
@@ -13,6 +14,9 @@ interface UsuarioDao {
 
     @Query("SELECT * FROM usuarios WHERE id = :id")
     suspend fun obtener(id: Int): Usuario?
+
+    @Query("SELECT * FROM usuarios WHERE rol = :rol ORDER BY nombre COLLATE NOCASE")
+    fun observarPorRol(rol: String): Flow<List<Usuario>>
 
     @Query("SELECT EXISTS(SELECT 1 FROM usuarios WHERE correo = :correo)")
     suspend fun existeCorreo(correo: String): Boolean

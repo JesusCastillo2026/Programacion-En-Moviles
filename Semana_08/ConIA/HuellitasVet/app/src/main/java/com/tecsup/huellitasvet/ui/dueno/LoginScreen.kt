@@ -12,16 +12,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
@@ -41,24 +41,16 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tecsup.huellitasvet.model.Rol
 import com.tecsup.huellitasvet.ui.theme.VetTheme
+import com.tecsup.huellitasvet.ui.components.RequisitosContrasenaCard
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
-
-private data class ReglaClave(val titulo: String, val cumplida: Boolean)
-
-private fun reglasClave(clave: String) = listOf(
-    ReglaClave("Al menos 8 caracteres", clave.length >= 8),
-    ReglaClave("Una letra mayúscula", clave.any(Char::isUpperCase)),
-    ReglaClave("Una letra minúscula", clave.any(Char::isLowerCase)),
-    ReglaClave("Un número", clave.any(Char::isDigit)),
-    ReglaClave("Un símbolo (por ejemplo: !, @ o #)", clave.any { !it.isLetterOrDigit() && !it.isWhitespace() }),
-    ReglaClave("Sin espacios", clave.none(Char::isWhitespace))
-)
 
 @Composable
 fun LoginScreen(vm: SesionViewModel) {
     var rol by remember { mutableStateOf(Rol.CLIENTE) }
     var esRegistro by remember { mutableStateOf(false) }
     var nombre by remember { mutableStateOf("") }
+    var telefono by remember { mutableStateOf("") }
+    var distrito by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
     var clave by remember { mutableStateOf("") }
     var confirmarClave by remember { mutableStateOf("") }
@@ -69,9 +61,22 @@ fun LoginScreen(vm: SesionViewModel) {
     var errorLocal by remember { mutableStateOf<String?>(null) }
     val error by vm.error.collectAsStateWithLifecycle()
     val oscuro by vm.modoOscuro.collectAsStateWithLifecycle()
-    val reglas = reglasClave(clave)
 
-    VetTheme(if (esRegistro) Rol.CLIENTE else rol, oscuro) {
+    val rolVisual = if (esRegistro) Rol.CLIENTE else if (rol == Rol.VETERINARIO) Rol.VETERINARIO else Rol.CLIENTE
+    VetTheme(rolVisual, oscuro) {
+        val coloresCampo = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = .48f),
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            unfocusedLabelColor = MaterialTheme.colorScheme.primary.copy(alpha = .78f),
+            cursorColor = MaterialTheme.colorScheme.primary
+        )
+        val coloresOpcion = FilterChipDefaults.filterChipColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = .52f),
+            labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            selectedContainerColor = MaterialTheme.colorScheme.primary,
+            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+        )
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 26.dp, vertical = 28.dp),
             horizontalAlignment = Alignment.Start,
@@ -85,7 +90,7 @@ fun LoginScreen(vm: SesionViewModel) {
             Text(
                 if (esRegistro) "Regístrate para cuidar mejor a tus mascotas" else "Ingresa para continuar",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.primary.copy(alpha = .82f)
             )
             Spacer(Modifier.height(22.dp))
 
@@ -94,12 +99,14 @@ fun LoginScreen(vm: SesionViewModel) {
                     FilterChip(
                         selected = rol == Rol.CLIENTE,
                         onClick = { rol = Rol.CLIENTE; vm.limpiarError(); avisoRegistro = null },
-                        label = { Text("Dueño") }, modifier = Modifier.weight(1f)
+                        label = { Text("Dueño") }, modifier = Modifier.weight(1f),
+                        colors = coloresOpcion
                     )
                     FilterChip(
-                        selected = rol == Rol.ADMIN,
-                        onClick = { rol = Rol.ADMIN; vm.limpiarError(); avisoRegistro = null },
-                        label = { Text("Veterinario") }, modifier = Modifier.weight(1f)
+                        selected = rol == Rol.VETERINARIO,
+                        onClick = { rol = Rol.VETERINARIO; vm.limpiarError(); avisoRegistro = null },
+                        label = { Text("Veterinario") }, modifier = Modifier.weight(1f),
+                        colors = coloresOpcion
                     )
                 }
                 Spacer(Modifier.height(16.dp))
@@ -109,7 +116,20 @@ fun LoginScreen(vm: SesionViewModel) {
                 OutlinedTextField(
                     value = nombre, onValueChange = { nombre = it; errorLocal = null; vm.limpiarError() },
                     label = { Text("Nombre completo") }, singleLine = true,
-                    shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()
+                    shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth(), colors = coloresCampo
+                )
+                Spacer(Modifier.height(10.dp))
+                OutlinedTextField(
+                    value = telefono,
+                    onValueChange = { valor -> telefono = valor.filter(Char::isDigit).take(9); errorLocal = null; vm.limpiarError() },
+                    label = { Text("Teléfono (9 dígitos)") }, singleLine = true,
+                    shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth(), colors = coloresCampo
+                )
+                Spacer(Modifier.height(10.dp))
+                OutlinedTextField(
+                    value = distrito, onValueChange = { distrito = it; errorLocal = null; vm.limpiarError() },
+                    label = { Text("Distrito") }, singleLine = true,
+                    shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth(), colors = coloresCampo
                 )
                 Spacer(Modifier.height(10.dp))
             }
@@ -118,7 +138,7 @@ fun LoginScreen(vm: SesionViewModel) {
                 value = correo,
                 onValueChange = { correo = it; errorLocal = null; avisoRegistro = null; vm.limpiarError() },
                 label = { Text("Correo electrónico") }, singleLine = true,
-                shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()
+                shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth(), colors = coloresCampo
             )
             Spacer(Modifier.height(10.dp))
             OutlinedTextField(
@@ -133,18 +153,22 @@ fun LoginScreen(vm: SesionViewModel) {
                 },
                 shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth().then(
                     if (esRegistro) Modifier.onFocusChanged { if (it.isFocused) mostrarRequisitos = true } else Modifier
-                )
+                ), colors = coloresCampo
             )
 
             if (esRegistro) {
-                TextButton(onClick = { mostrarRequisitos = true }, modifier = Modifier.align(Alignment.End)) {
-                    Text("Ver requisitos de contraseña")
+                if (mostrarRequisitos) {
+                    RequisitosContrasenaCard(clave)
                 }
+                TextButton(
+                    onClick = { mostrarRequisitos = !mostrarRequisitos },
+                    modifier = Modifier.align(Alignment.End)
+                ) { Text(if (mostrarRequisitos) "Ocultar requisitos" else "Ver requisitos de contraseña") }
                 OutlinedTextField(
                     value = confirmarClave, onValueChange = { confirmarClave = it; errorLocal = null; vm.limpiarError() },
                     label = { Text("Confirmar contraseña") }, singleLine = true,
                     visualTransformation = if (claveVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()
+                    shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth(), colors = coloresCampo
                 )
                 Spacer(Modifier.height(14.dp))
             } else {
@@ -165,12 +189,14 @@ fun LoginScreen(vm: SesionViewModel) {
                 onClick = {
                     if (esRegistro) {
                         if (clave != confirmarClave) errorLocal = "Las contraseñas no coinciden"
-                        else vm.registrarCliente(nombre, correo, clave) {
+                        else vm.registrarCliente(nombre, correo, telefono, distrito, clave) {
                             esRegistro = false
                             rol = Rol.CLIENTE
                             clave = ""
                             confirmarClave = ""
                             nombre = ""
+                            telefono = ""
+                            distrito = ""
                             avisoRegistro = "Cuenta creada exitosamente. Inicia sesión para continuar."
                         }
                     } else vm.login(correo, clave, rol)
@@ -190,12 +216,21 @@ fun LoginScreen(vm: SesionViewModel) {
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) { Text("¿No tienes cuenta? Regístrate") }
                 }
-                TextButton(
-                    onClick = {
-                        if (rol == Rol.CLIENTE) { correo = "ana@correo.test"; clave = "1234" }
-                        else { correo = "vet@huellitas.test"; clave = "admin" }
-                    }, modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) { Text("Usar cuenta de demostración") }
+                if (rol == Rol.CLIENTE) {
+                    TextButton(
+                        onClick = { correo = "ana@correo.test"; clave = "1234" },
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) { Text("Usar cuenta de demostración") }
+                } else {
+                    TextButton(
+                        onClick = { correo = "vet@huellitas.test"; clave = "admin" },
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) { Text("Acceso de veterinario (demo)") }
+                    TextButton(
+                        onClick = { correo = "camila.rojas@huellitas.test"; clave = "VetHuellitas2026!" },
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) { Text("Acceso de administrador (demo)") }
+                }
             }
         }
 
@@ -206,25 +241,5 @@ fun LoginScreen(vm: SesionViewModel) {
             confirmButton = { TextButton(onClick = { mostrarAyuda = false }) { Text("Entendido") } }
         )
 
-        if (mostrarRequisitos && esRegistro) AlertDialog(
-            onDismissRequest = { mostrarRequisitos = false },
-            title = { Text("Requisitos de contraseña") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                    Text("Para proteger tu cuenta, incluye todos estos elementos:", style = MaterialTheme.typography.bodyMedium)
-                    reglas.forEach { regla ->
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                            Icon(
-                                imageVector = if (regla.cumplida) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
-                                contentDescription = null,
-                                tint = if (regla.cumplida) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(regla.titulo, color = if (regla.cumplida) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
-                        }
-                    }
-                }
-            },
-            confirmButton = { TextButton(onClick = { mostrarRequisitos = false }) { Text("Entendido") } }
-        )
     }
 }

@@ -34,6 +34,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.tecsup.huellitasvet.VetApp
 import com.tecsup.huellitasvet.ui.dueno.LoginScreen
 import com.tecsup.huellitasvet.ui.dueno.InicioScreen
@@ -62,10 +64,13 @@ import com.tecsup.huellitasvet.viewmodel.PerfilViewModel
 import com.tecsup.huellitasvet.ui.veterinario.ServiciosScreen
 import com.tecsup.huellitasvet.ui.veterinario.FormularioServicioScreen
 import com.tecsup.huellitasvet.ui.veterinario.AjustesScreen
+import com.tecsup.huellitasvet.ui.veterinario.GestionVeterinariosScreen
 import com.tecsup.huellitasvet.ui.dueno.PerfilScreen
+import com.tecsup.huellitasvet.ui.dueno.ServiciosClienteScreen
 import com.tecsup.huellitasvet.ui.components.AppTopBar
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 import com.tecsup.huellitasvet.viewmodel.VetViewModelFactory
+import com.tecsup.huellitasvet.viewmodel.VeterinariosViewModel
 
 @Composable
 fun NavVet(sesion: SesionViewModel, app: VetApp) {
@@ -74,9 +79,9 @@ fun NavVet(sesion: SesionViewModel, app: VetApp) {
     val cargando by sesion.cargando.collectAsStateWithLifecycle()
     val entrada by nav.currentBackStackEntryAsState()
     val ruta = entrada?.destination?.route
-    val dueno = listOf(Rutas.INICIO to "Inicio", Rutas.MASCOTAS to "Mascotas", Rutas.CITAS to "Citas", Rutas.PERFIL to "Perfil")
+    val dueno = listOf(Rutas.INICIO to "Inicio", Rutas.MASCOTAS to "Mascotas", Rutas.CITAS to "Citas", Rutas.SERVICIOS_CLIENTE to "Servicios", Rutas.PERFIL to "Perfil")
     val veterinario = listOf(Rutas.PANEL to "Panel", Rutas.AGENDA to "Agenda", Rutas.PACIENTES to "Pacientes", Rutas.SERVICIOS to "Servicios", Rutas.AJUSTES to "Ajustes")
-    val destinos = if (usuario?.rol == "ADMIN") veterinario else dueno
+    val destinos = if (usuario?.rol == "CLIENTE" || usuario == null) dueno else veterinario
     var tituloFicha by remember { mutableStateOf("Ficha de mascota") }
 
     LaunchedEffect(ruta) {
@@ -88,7 +93,7 @@ fun NavVet(sesion: SesionViewModel, app: VetApp) {
             val rutaActual = nav.currentBackStackEntry?.destination?.route
             when {
                 usuario != null -> {
-                    val destino = if (usuario?.rol == "ADMIN") Rutas.PANEL else Rutas.INICIO
+                    val destino = if (usuario?.rol == "CLIENTE") Rutas.INICIO else Rutas.PANEL
                     if (rutaActual != destino) nav.navigate(destino) {
                         popUpTo(nav.graph.id) { inclusive = false }
                         launchSingleTop = true
@@ -110,6 +115,7 @@ fun NavVet(sesion: SesionViewModel, app: VetApp) {
             Rutas.PACIENTES -> "Pacientes"
             Rutas.SERVICIOS -> "Servicios"
             Rutas.AJUSTES -> "Ajustes"
+            Rutas.GESTION_VETERINARIOS -> "Equipo veterinario"
             Rutas.FICHA -> tituloFicha
             Rutas.FORM_MASCOTA -> if ((entrada?.arguments?.getString("id")?.toIntOrNull() ?: 0) == 0) "Nueva mascota" else "Editar mascota"
             Rutas.PEDIR_CITA -> "Pedir cita"
@@ -119,7 +125,9 @@ fun NavVet(sesion: SesionViewModel, app: VetApp) {
             else -> null
         }
         if (titulo != null) AppTopBar(titulo) {
-            if (ruta in listOf(Rutas.AGENDA, Rutas.PACIENTES, Rutas.SERVICIOS, Rutas.AJUSTES)) {
+            if (ruta == Rutas.GESTION_VETERINARIOS) {
+                nav.popBackStack(Rutas.AJUSTES, inclusive = false)
+            } else if (ruta in listOf(Rutas.AGENDA, Rutas.PACIENTES, Rutas.SERVICIOS, Rutas.AJUSTES)) {
                 nav.navigate(Rutas.PANEL) {
                     popUpTo(Rutas.PANEL) { inclusive = false }
                     launchSingleTop = true
@@ -150,7 +158,7 @@ fun NavVet(sesion: SesionViewModel, app: VetApp) {
                             Rutas.PERFIL -> Icons.Default.Person
                             Rutas.PANEL -> Icons.Default.BarChart
                             Rutas.AGENDA -> Icons.Default.Event
-                            Rutas.SERVICIOS -> Icons.Default.MedicalServices
+                            Rutas.SERVICIOS, Rutas.SERVICIOS_CLIENTE -> Icons.Default.MedicalServices
                             else -> Icons.Default.Settings
                         }
                         Icon(icono, contentDescription = titulo)
@@ -181,6 +189,17 @@ fun NavVet(sesion: SesionViewModel, app: VetApp) {
             composable(Rutas.CITAS) {
                 val vm: MisCitasViewModel = viewModel(key = "citas-${usuario?.id}", factory = VetViewModelFactory(app, usuario?.id ?: 0))
                 MisCitasScreen(vm, { nav.navigate("pedir_cita/0") }, { nav.navigate("reprogramar/$it") })
+            }
+            composable(Rutas.SERVICIOS_CLIENTE) {
+                val vm: PedirCitaViewModel = viewModel(
+                    key = "catalogo-${usuario?.id}",
+                    factory = VetViewModelFactory(app, usuario?.id ?: 0)
+                )
+                ServiciosClienteScreen(
+                    vm = vm,
+                    onAgendar = { mascotaId, serviciosIds -> nav.navigate("pedir_cita/$mascotaId?servicios=${serviciosIds.joinToString(",")}") },
+                    onRegistrarMascota = { nav.navigate("mascota_form/0") }
+                )
             }
             composable(Rutas.PANEL) {
                 val vm: PanelViewModel = viewModel(factory = VetViewModelFactory(app))
@@ -215,11 +234,23 @@ fun NavVet(sesion: SesionViewModel, app: VetApp) {
             }
             composable(Rutas.PERFIL) {
                 val vm: PerfilViewModel = viewModel(key = "perfil-${usuario?.id}", factory = VetViewModelFactory(app, usuario?.id ?: 0))
-                PerfilScreen(usuario?.nombre.orEmpty(), usuario?.correo.orEmpty(), vm, sesion)
+                PerfilScreen(usuario?.nombre.orEmpty(), usuario?.correo.orEmpty(), usuario?.telefono.orEmpty(), usuario?.distrito.orEmpty(), vm, sesion)
             }
             composable(Rutas.AJUSTES) {
                 val vm: PerfilViewModel = viewModel(key = "ajustes-${usuario?.id}", factory = VetViewModelFactory(app, usuario?.id ?: 0))
-                AjustesScreen(usuario?.nombre.orEmpty(), usuario?.correo.orEmpty(), vm, sesion)
+                AjustesScreen(
+                    usuario?.nombre.orEmpty(), usuario?.correo.orEmpty(), vm, sesion,
+                    esAdministrador = usuario?.rol == "ADMIN",
+                    onGestionarVeterinarios = { nav.navigate(Rutas.GESTION_VETERINARIOS) }
+                )
+            }
+            composable(Rutas.GESTION_VETERINARIOS) {
+                if (usuario?.rol == "ADMIN") {
+                    val vm: VeterinariosViewModel = viewModel(factory = VetViewModelFactory(app))
+                    GestionVeterinariosScreen(vm)
+                } else {
+                    LaunchedEffect(usuario?.rol) { nav.popBackStack() }
+                }
             }
             composable(Rutas.FICHA) { destino ->
                 val id = destino.arguments?.getString("id")?.toIntOrNull() ?: 0
@@ -238,9 +269,18 @@ fun NavVet(sesion: SesionViewModel, app: VetApp) {
                 val vm: MascotaViewModel = viewModel(key = "form-$id", factory = VetViewModelFactory(app, usuario?.id ?: 0, id))
                 FormularioMascotaScreen(vm, onGuardado = { nav.popBackStack() }, onCancelar = { nav.popBackStack() })
             }
-            composable(Rutas.PEDIR_CITA) { destino ->
+            composable(
+                Rutas.PEDIR_CITA,
+                arguments = listOf(navArgument("servicios") { type = NavType.StringType; defaultValue = "" })
+            ) { destino ->
                 val id = destino.arguments?.getString("id")?.toIntOrNull() ?: 0
-                val vm: PedirCitaViewModel = viewModel(key = "pedir-$id", factory = VetViewModelFactory(app, usuario?.id ?: 0, id))
+                val serviciosIds = destino.arguments?.getString("servicios").orEmpty()
+                    .split(",").mapNotNull(String::toIntOrNull).distinct()
+                val servicioId = serviciosIds.firstOrNull() ?: 0
+                val vm: PedirCitaViewModel = viewModel(
+                    key = "pedir-$id-${serviciosIds.joinToString("-")}",
+                    factory = VetViewModelFactory(app, usuario?.id ?: 0, id, servicioId, serviciosIds)
+                )
                 PedirCitaScreen(vm) { nav.navigate(Rutas.CITAS) { popUpTo(Rutas.INICIO) } }
             }
             composable(Rutas.REPROGRAMAR) { destino ->

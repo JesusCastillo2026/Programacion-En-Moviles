@@ -3,6 +3,7 @@ package com.tecsup.huellitasvet.data.repository
 import androidx.room.withTransaction
 import com.tecsup.huellitasvet.data.local.VetDatabase
 import com.tecsup.huellitasvet.data.local.entity.Cita
+import com.tecsup.huellitasvet.data.local.entity.CitaServicio
 import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.entity.Servicio
 import com.tecsup.huellitasvet.data.local.entity.Usuario
@@ -26,10 +27,11 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
     override suspend fun registrarUsuario(usuario: Usuario): Boolean =
         db.usuarioDao().registrar(usuario.copy(nombre = usuario.nombre.trim(), correo = usuario.correo.trim().lowercase(Locale.ROOT))) > 0
     override suspend fun obtenerUsuario(id: Int): Usuario? = db.usuarioDao().obtener(id)
+    override fun observarVeterinarios(): Flow<List<Usuario>> = db.usuarioDao().observarPorRol("VETERINARIO")
     override fun observarServicios(): Flow<List<Servicio>> = db.servicioDao().observarTodos()
     override fun observarServiciosActivos(): Flow<List<Servicio>> = db.servicioDao().observarActivos()
     override suspend fun guardarServicio(servicio: Servicio) {
-        require(servicio.nombre.isNotBlank() && servicio.precio > 0 && servicio.duracionMin in listOf(15, 30, 45, 60))
+        require(servicio.nombre.isNotBlank() && servicio.categorias.isNotBlank() && servicio.precio > 0 && servicio.duracionMin in listOf(15, 30, 45, 60))
         if (servicio.id == 0) db.servicioDao().insertar(servicio) else db.servicioDao().actualizar(servicio)
     }
     override suspend fun eliminarServicio(servicio: Servicio) {
@@ -50,17 +52,31 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
     }
     override suspend fun mascotaTieneCitas(id: Int): Boolean = db.mascotaDao().contarCitas(id) > 0
     override fun observarHorasOcupadas(fecha: String): Flow<List<String>> = db.citaDao().observarHorasOcupadas(fecha)
-    override suspend fun crearCita(mascotaId: Int, servicioId: Int, fecha: String, hora: String, nota: String): Long = db.withTransaction {
+    override suspend fun crearCita(mascotaId: Int, serviciosIds: List<Int>, fecha: String, hora: String, nota: String): Long = db.withTransaction {
         val mascota = db.mascotaDao().obtener(mascotaId) ?: error("Mascota no encontrada")
         require(db.usuarioDao().obtener(mascota.duenoId)?.rol == "CLIENTE") { "Dueño no válido" }
-        val servicio = db.servicioDao().obtener(servicioId) ?: error("Servicio no encontrado")
-        require(servicio.activo) { "Servicio inactivo" }
+        val ids = serviciosIds.distinct()
+        require(ids.isNotEmpty()) { "Selecciona al menos un servicio" }
+        val servicios = ids.map { db.servicioDao().obtener(it) ?: error("Servicio no encontrado") }
+        require(servicios.all { it.activo }) { "Uno de los servicios ya no está disponible" }
+        val duracionTotal = servicios.sumOf { it.duracionMin }
+        val primerServicio = servicios.first()
         val dia = LocalDate.parse(fecha)
         val ahora = LocalDateTime.now()
         require(!dia.isBefore(ahora.toLocalDate()) && !dia.isAfter(ahora.toLocalDate().plusDays(7))) { "Fecha fuera de rango" }
-        require(hora in Horarios.todos && LocalDateTime.of(dia, LocalTime.parse(hora)).isAfter(ahora)) { "Horario no disponible" }
-        require(db.citaDao().contarOcupadas(fecha, hora) == 0) { "Horario ocupado" }
-        db.citaDao().insertar(Cita(mascotaId = mascotaId, servicioId = servicioId, fecha = fecha, hora = hora, nota = nota, estado = EstadoCita.PENDIENTE.name, precio = servicio.precio))
+        require(hora in Horarios.paraFecha(dia, duracionTotal) && LocalDateTime.of(dia, LocalTime.parse(hora)).isAfter(ahora)) { "Horario no disponible para la duración seleccionada" }
+        val inicioNuevo = LocalDateTime.of(dia, LocalTime.parse(hora))
+        val finNuevo = inicioNuevo.plusMinutes(duracionTotal.toLong())
+        val cruzaOtraCita = db.citaDao().obtenerCitasActivasDeFecha(fecha).any { existente ->
+            val serviciosIdsExistentes = db.citaDao().obtenerServiciosDeCita(existente.id).ifEmpty { listOf(existente.servicioId) }
+            val minutosExistentes = serviciosIdsExistentes.sumOf { db.servicioDao().obtener(it)?.duracionMin ?: 30 }
+            val inicioExistente = LocalDateTime.of(dia, LocalTime.parse(existente.hora))
+            inicioNuevo < inicioExistente.plusMinutes(minutosExistentes.toLong()) && finNuevo > inicioExistente
+        }
+        require(!cruzaOtraCita) { "Ese horario se cruza con otra cita; elige una hora libre" }
+        val citaId = db.citaDao().insertar(Cita(mascotaId = mascotaId, servicioId = primerServicio.id, fecha = fecha, hora = hora, nota = nota, estado = EstadoCita.PENDIENTE.name, precio = servicios.sumOf { it.precio })).toInt()
+        db.citaDao().insertarServiciosCita(ids.map { CitaServicio(citaId, it) })
+        citaId.toLong()
     }
     override fun observarCitasDeDueno(duenoId: Int): Flow<List<CitaConDetalle>> = db.citaDao().observarPorDueno(duenoId)
     override fun observarCitasPorFecha(fecha: String): Flow<List<CitaConDetalle>> = db.citaDao().observarPorFecha(fecha)
@@ -80,9 +96,19 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
         require(original.isAfter(ahora.plusHours(2))) { "Solo se puede reprogramar con más de 2 horas de anticipación" }
         val dia = LocalDate.parse(fecha)
         require(!dia.isBefore(ahora.toLocalDate()) && !dia.isAfter(ahora.toLocalDate().plusDays(7))) { "Fecha fuera de rango" }
-        require(hora in Horarios.todos && LocalDateTime.of(dia, LocalTime.parse(hora)).isAfter(ahora)) { "Elige una hora futura" }
+        val servicioIds = db.citaDao().obtenerServiciosDeCita(cita.id).ifEmpty { listOf(cita.servicioId) }
+        val duracion = servicioIds.sumOf { db.servicioDao().obtener(it)?.duracionMin ?: 30 }
+        require(hora in Horarios.paraFecha(dia, duracion) && LocalDateTime.of(dia, LocalTime.parse(hora)).isAfter(ahora)) { "Elige una hora futura dentro del horario de atención" }
         require(fecha != cita.fecha || hora != cita.hora) { "Selecciona un horario distinto" }
-        require(db.citaDao().contarOcupadas(fecha, hora) == 0) { "Horario ocupado" }
+        val inicioNuevo = LocalDateTime.of(dia, LocalTime.parse(hora))
+        val finNuevo = inicioNuevo.plusMinutes(duracion.toLong())
+        val cruzaOtraCita = db.citaDao().obtenerCitasActivasDeFecha(fecha).filter { it.id != cita.id }.any { existente ->
+            val idsExistentes = db.citaDao().obtenerServiciosDeCita(existente.id).ifEmpty { listOf(existente.servicioId) }
+            val minutos = idsExistentes.sumOf { db.servicioDao().obtener(it)?.duracionMin ?: 30 }
+            val inicio = LocalDateTime.of(dia, LocalTime.parse(existente.hora))
+            inicioNuevo < inicio.plusMinutes(minutos.toLong()) && finNuevo > inicio
+        }
+        require(!cruzaOtraCita) { "Horario ocupado" }
         db.citaDao().reprogramar(id, fecha, hora)
     }
     override suspend fun cambiarEstadoCita(id: Int, estado: EstadoCita) {

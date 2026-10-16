@@ -37,7 +37,7 @@ import com.tecsup.huellitasvet.viewmodel.PerfilViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 
 @Composable
-fun PerfilScreen(nombre: String, correo: String, vm: PerfilViewModel, sesion: SesionViewModel) {
+fun PerfilScreen(nombre: String, correo: String, telefono: String, distrito: String, vm: PerfilViewModel, sesion: SesionViewModel) {
     val mascotas by vm.mascotas.collectAsStateWithLifecycle()
     val citas by vm.citas.collectAsStateWithLifecycle()
     val atenciones by vm.atenciones.collectAsStateWithLifecycle()
@@ -53,6 +53,8 @@ fun PerfilScreen(nombre: String, correo: String, vm: PerfilViewModel, sesion: Se
                 Column {
                     Text(nombre, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                     Text(correo, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (telefono.isNotBlank()) Text(telefono, fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
+                    if (distrito.isNotBlank()) Text(distrito, fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
                     Surface(shape = RoundedCornerShape(30.dp), color = MaterialTheme.colorScheme.primaryContainer) {
                         Text("Dueña", Modifier.padding(horizontal = 8.dp, vertical = 2.dp), color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                     }

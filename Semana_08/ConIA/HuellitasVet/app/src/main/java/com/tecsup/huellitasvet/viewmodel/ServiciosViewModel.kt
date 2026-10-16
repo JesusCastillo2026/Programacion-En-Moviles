@@ -20,8 +20,8 @@ class ServiciosViewModel(private val repo: VetRepository) : ViewModel() {
     }
 
     fun guardar(servicio: Servicio, onExito: () -> Unit) {
-        if (servicio.nombre.isBlank() || servicio.precio <= 0 || servicio.duracionMin !in listOf(15, 30, 45, 60)) {
-            mensaje.value = "Completa nombre, duración y precio válido"
+        if (servicio.nombre.isBlank() || servicio.categorias.isBlank() || servicio.precio <= 0 || servicio.duracionMin !in listOf(15, 30, 45, 60)) {
+            mensaje.value = "Completa nombre, tipo de servicio, duración y precio válido"
             return
         }
         viewModelScope.launch {

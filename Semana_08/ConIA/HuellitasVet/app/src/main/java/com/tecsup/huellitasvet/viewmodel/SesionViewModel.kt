@@ -7,12 +7,16 @@ import com.tecsup.huellitasvet.data.prefs.PreferenciasStore
 import com.tecsup.huellitasvet.data.repository.VetRepository
 import com.tecsup.huellitasvet.model.Rol
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class SesionViewModel(
     private val repo: VetRepository,
     private val prefs: PreferenciasStore,
@@ -28,7 +32,11 @@ class SesionViewModel(
     val modoOscuro: StateFlow<Boolean> = _modoOscuro
 
     init {
-        viewModelScope.launch { prefs.modoOscuro.collect { _modoOscuro.value = it } }
+        viewModelScope.launch {
+            prefs.usuarioId.flatMapLatest { id ->
+                if (id > 0) prefs.modoOscuro(id) else flowOf(false)
+            }.collect { _modoOscuro.value = it }
+        }
         viewModelScope.launch {
             combine(prefs.usuarioId, prefs.perfilActivo, listo) { id, rol, listoYa -> Triple(id, rol, listoYa) }
                 .collectLatest { (id, rol, listoYa) ->
@@ -49,7 +57,8 @@ class SesionViewModel(
         viewModelScope.launch {
             val usuario = repo.login(correo, clave)
             if (usuario == null) _error.value = "Correo o contraseña incorrectos"
-            else if (usuario.rol != rol.name) _error.value = "Elige el perfil correcto"
+            else if (rol == Rol.CLIENTE && usuario.rol != Rol.CLIENTE.name) _error.value = "Elige el perfil correcto"
+            else if (rol == Rol.VETERINARIO && usuario.rol == Rol.CLIENTE.name) _error.value = "Elige el perfil correcto"
             else {
                 _error.value = null
                 prefs.guardarSesion(usuario.rol, usuario.id)
@@ -57,10 +66,15 @@ class SesionViewModel(
         }
     }
 
-    fun registrarCliente(nombre: String, correo: String, clave: String, onExito: () -> Unit) {
+    fun registrarCliente(nombre: String, correo: String, telefono: String, distrito: String, clave: String, onExito: () -> Unit) {
         val email = correo.trim()
-        if (nombre.isBlank() || email.isBlank() || clave.isBlank()) {
+        val numero = telefono.filter(Char::isDigit)
+        if (nombre.isBlank() || email.isBlank() || numero.isBlank() || distrito.isBlank() || clave.isBlank()) {
             _error.value = "Completa todos los campos"
+            return
+        }
+        if (numero.length != 9) {
+            _error.value = "El teléfono debe tener 9 dígitos"
             return
         }
         if (!email.matches(Regex("^[A-Za-z0-9+._%\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}$"))) {
@@ -73,7 +87,12 @@ class SesionViewModel(
         }
         viewModelScope.launch {
             runCatching {
-                repo.registrarUsuario(Usuario(nombre = nombre.trim(), correo = email, clave = clave, rol = Rol.CLIENTE.name))
+                repo.registrarUsuario(
+                    Usuario(
+                        nombre = nombre.trim(), correo = email, clave = clave, rol = Rol.CLIENTE.name,
+                        telefono = numero, distrito = distrito.trim()
+                    )
+                )
             }.onSuccess { registrado ->
                 if (registrado) {
                     _error.value = null
@@ -89,12 +108,15 @@ class SesionViewModel(
 
     fun cambiarPerfil() {
         viewModelScope.launch {
-            val id = if (_usuarioActual.value?.rol == Rol.ADMIN.name) 1 else 3
+            val id = if (_usuarioActual.value?.rol == Rol.CLIENTE.name) 3 else 1
             repo.obtenerUsuario(id)?.let { prefs.guardarSesion(it.rol, it.id) }
         }
     }
 
     fun cerrarSesion() { viewModelScope.launch { prefs.cerrarSesion() } }
-    fun guardarModoOscuro(valor: Boolean) { viewModelScope.launch { prefs.guardarModoOscuro(valor) } }
+    fun guardarModoOscuro(valor: Boolean) {
+        val usuarioId = _usuarioActual.value?.id ?: return
+        viewModelScope.launch { prefs.guardarModoOscuro(usuarioId, valor) }
+    }
     fun limpiarError() { _error.value = null }
 }

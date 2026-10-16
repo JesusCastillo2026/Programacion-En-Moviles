@@ -81,7 +81,7 @@ fun InicioScreen(nombre: String, vm: InicioViewModel, onMascota: (Int) -> Unit, 
                 Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         Text("Próxima cita", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = .78f), fontSize = 12.sp)
-                        Text(cita?.let { "${it.mascota.mascota.nombre} · ${it.servicio.nombre}" } ?: "Cuida su salud con una revisión", color = MaterialTheme.colorScheme.onPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Text(cita?.let { "${it.mascota.mascota.nombre} · ${it.nombresServicios}" } ?: "Cuida su salud con una revisión", color = MaterialTheme.colorScheme.onPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             Icon(Icons.Default.CalendarMonth, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(15.dp))
                             Text(cita?.let { "${it.cita.fecha} · ${it.cita.hora}" } ?: "Agenda una visita cuando la necesites", color = MaterialTheme.colorScheme.onPrimary, fontSize = 12.sp)

@@ -49,14 +49,16 @@ fun PedirCitaScreen(vm: PedirCitaViewModel, onConfirmada: () -> Unit) {
     val servicios by vm.servicios.collectAsStateWithLifecycle()
     val fecha by vm.fecha.collectAsStateWithLifecycle()
     val mascotaId by vm.mascotaId.collectAsStateWithLifecycle()
-    val servicioId by vm.servicioId.collectAsStateWithLifecycle()
+    val serviciosIds by vm.serviciosSeleccionados.collectAsStateWithLifecycle()
     val hora by vm.hora.collectAsStateWithLifecycle()
     val nota by vm.nota.collectAsStateWithLifecycle()
     val ocupadas by vm.horasOcupadas.collectAsStateWithLifecycle()
     val mensaje by vm.mensaje.collectAsStateWithLifecycle()
     val acepta by vm.aceptarCitas.collectAsStateWithLifecycle()
     val mascotaElegida = mascotas.find { it.id == mascotaId }
-    val servicio = servicios.find { it.id == servicioId }
+    val serviciosElegidos = servicios.filter { it.id in serviciosIds }
+    val duracionSeleccionada = serviciosElegidos.sumOf { it.duracionMin }.coerceAtLeast(30)
+    val horariosDelDia = Horarios.paraFecha(LocalDate.parse(fecha), duracionSeleccionada)
 
     LazyColumn(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentPadding = PaddingValues(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (!acepta) item { Text("La clínica no está recibiendo citas", Modifier.padding(horizontal = 20.dp), color = MaterialTheme.colorScheme.error) }
@@ -75,11 +77,11 @@ fun PedirCitaScreen(vm: PedirCitaViewModel, onConfirmada: () -> Unit) {
                 }
             }
         }
-        item { Text("Servicio", Modifier.padding(horizontal = 20.dp), fontSize = 18.sp, fontWeight = FontWeight.SemiBold) }
+        item { Text("Elige uno o más servicios", Modifier.padding(horizontal = 20.dp), fontSize = 18.sp, fontWeight = FontWeight.SemiBold) }
         items(servicios, key = { it.id }) { item ->
-            val seleccionado = item.id == servicioId
+            val seleccionado = item.id in serviciosIds
             Card(
-                onClick = { vm.servicioId.value = item.id },
+                onClick = { vm.alternarServicio(item.id) },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).then(if (seleccionado) Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(16.dp)) else Modifier),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = if (seleccionado) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)
@@ -91,9 +93,11 @@ fun PedirCitaScreen(vm: PedirCitaViewModel, onConfirmada: () -> Unit) {
                     )
                     Column(Modifier.weight(1f)) {
                         Text(item.nombre, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                        Text(item.categorias.replace("|", " · "), fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
                         Text("${item.duracionMin} min", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Text("S/ ${item.precio.toInt()}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    if (seleccionado) Text("✓", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -103,13 +107,19 @@ fun PedirCitaScreen(vm: PedirCitaViewModel, onConfirmada: () -> Unit) {
                 items((0..4).map { LocalDate.now().plusDays(it.toLong()) }) { dia -> FechaChip(dia, fecha == dia.toString()) { vm.elegirFecha(dia.toString()) } }
             }
         }
-        item { Text("Hora", Modifier.padding(horizontal = 20.dp), fontSize = 18.sp, fontWeight = FontWeight.SemiBold) }
+        item {
+            Column(Modifier.padding(horizontal = 20.dp)) {
+                Text("Hora", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                Text("Lun–sáb: 10:00 a. m.–6:00 p. m. · Dom: 10:00 a. m.–1:00 p. m.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("Ocupadas deshabilitadas · Duración: $duracionSeleccionada min", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+            }
+        }
         item {
             LazyVerticalGrid(
                 GridCells.Fixed(3), modifier = Modifier.fillMaxWidth().height(206.dp).padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                items(Horarios.todos) { valor ->
+                items(horariosDelDia) { valor ->
                     HoraChip(valor, hora == valor, valor in ocupadas || !vm.horaDisponible(valor)) { vm.hora.value = valor }
                 }
             }
@@ -120,13 +130,15 @@ fun PedirCitaScreen(vm: PedirCitaViewModel, onConfirmada: () -> Unit) {
             Card(Modifier.fillMaxWidth().padding(horizontal = 20.dp), shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text("Resumen", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("${mascotaElegida?.nombre ?: "Mascota"} · ${servicio?.nombre ?: "Servicio"} · ${hora.ifEmpty { "Elige hora" }}", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
+                    val resumen = serviciosElegidos.joinToString(" · ") { it.nombre }.ifEmpty { "Elige uno o más servicios" }
+                    Text("${mascotaElegida?.nombre ?: "Mascota"} · $resumen · ${hora.ifEmpty { "Elige hora" }}", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
+                    if (serviciosElegidos.isNotEmpty()) Text("S/ ${"%.2f".format(serviciosElegidos.sumOf { it.precio })}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
                 }
             }
         }
         item {
             Button(
-                onClick = { vm.confirmar(onConfirmada) }, enabled = acepta && mascotaId > 0 && servicioId > 0 && vm.horaDisponible(hora),
+                onClick = { vm.confirmar(onConfirmada) }, enabled = acepta && mascotaId > 0 && serviciosIds.isNotEmpty() && vm.horaDisponible(hora),
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).height(48.dp),
                 shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) { Text("Confirmar cita", fontWeight = FontWeight.SemiBold) }

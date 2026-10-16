@@ -26,7 +26,7 @@ fun CitaCard(detalle: CitaConDetalle, acciones: @Composable () -> Unit = {}) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 MascotaAvatar(detalle.mascota.mascota.especie, tamano = 42.dp)
                 Column(Modifier.weight(1f)) {
-                    Text(detalle.servicio.nombre, fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
+                    Text(detalle.nombresServicios, fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
                     Text("${detalle.mascota.mascota.nombre} · ${detalle.cita.fecha} · ${detalle.cita.hora}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         EstadoCitaChip(detalle.cita.estado)

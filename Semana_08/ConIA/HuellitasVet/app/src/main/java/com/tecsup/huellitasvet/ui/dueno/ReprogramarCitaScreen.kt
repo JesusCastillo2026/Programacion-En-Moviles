@@ -36,7 +36,7 @@ fun ReprogramarCitaScreen(vm: ReprogramarCitaViewModel, onGuardada: () -> Unit) 
     val ocupadas by vm.ocupadas.collectAsStateWithLifecycle()
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { Text("Reprogramar cita", Modifier.padding(20.dp), style = MaterialTheme.typography.headlineMedium) }
-        item { Text("${cita?.mascota?.mascota?.nombre.orEmpty()} · ${cita?.servicio?.nombre.orEmpty()}\nHorario actual: ${cita?.cita?.fecha.orEmpty()} · ${cita?.cita?.hora.orEmpty()}", Modifier.padding(horizontal = 20.dp)) }
+        item { Text("${cita?.mascota?.mascota?.nombre.orEmpty()} · ${cita?.nombresServicios.orEmpty()}\nHorario actual: ${cita?.cita?.fecha.orEmpty()} · ${cita?.cita?.hora.orEmpty()}", Modifier.padding(horizontal = 20.dp)) }
         item { Text("Puedes cambiarla con más de 2 horas de anticipación.", Modifier.padding(horizontal = 20.dp)) }
         item {
             LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -47,7 +47,8 @@ fun ReprogramarCitaScreen(vm: ReprogramarCitaViewModel, onGuardada: () -> Unit) 
         }
         item {
             LazyVerticalGrid(GridCells.Fixed(3), Modifier.fillMaxWidth().height(320.dp).padding(horizontal = 20.dp)) {
-                items(Horarios.todos) { valor ->
+                val duracion = cita?.let { (it.servicios.ifEmpty { listOf(it.servicio) }).sumOf { servicio -> servicio.duracionMin } }?.coerceAtLeast(30) ?: 30
+                items(Horarios.paraFecha(LocalDate.parse(fecha), duracion)) { valor ->
                     HoraChip(valor, hora == valor, valor in ocupadas || !vm.disponible(valor)) { vm.hora.value = valor }
                 }
             }
