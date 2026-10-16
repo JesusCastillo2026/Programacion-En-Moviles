@@ -57,6 +57,36 @@ class SesionViewModel(
         }
     }
 
+    fun registrarCliente(nombre: String, correo: String, clave: String, onExito: () -> Unit) {
+        val email = correo.trim()
+        if (nombre.isBlank() || email.isBlank() || clave.isBlank()) {
+            _error.value = "Completa todos los campos"
+            return
+        }
+        if (!email.matches(Regex("^[A-Za-z0-9+._%\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}$"))) {
+            _error.value = "Escribe un correo válido"
+            return
+        }
+        if (!clave.matches(Regex("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^A-Za-z0-9\\s])\\S{8,}$"))) {
+            _error.value = "La contraseña no cumple los requisitos de seguridad"
+            return
+        }
+        viewModelScope.launch {
+            runCatching {
+                repo.registrarUsuario(Usuario(nombre = nombre.trim(), correo = email, clave = clave, rol = Rol.CLIENTE.name))
+            }.onSuccess { registrado ->
+                if (registrado) {
+                    _error.value = null
+                    onExito()
+                } else {
+                    _error.value = "Ya existe una cuenta con ese correo"
+                }
+            }.onFailure {
+                _error.value = "No se pudo crear la cuenta. Inténtalo nuevamente"
+            }
+        }
+    }
+
     fun cambiarPerfil() {
         viewModelScope.launch {
             val id = if (_usuarioActual.value?.rol == Rol.ADMIN.name) 1 else 3

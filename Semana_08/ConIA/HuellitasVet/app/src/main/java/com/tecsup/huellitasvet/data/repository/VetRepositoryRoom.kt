@@ -18,9 +18,13 @@ import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.util.Locale
 
 class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
-    override suspend fun login(correo: String, clave: String): Usuario? = db.usuarioDao().login(correo.trim(), clave)
+    override suspend fun login(correo: String, clave: String): Usuario? =
+        db.usuarioDao().login(correo.trim().lowercase(Locale.ROOT), clave)
+    override suspend fun registrarUsuario(usuario: Usuario): Boolean =
+        db.usuarioDao().registrar(usuario.copy(nombre = usuario.nombre.trim(), correo = usuario.correo.trim().lowercase(Locale.ROOT))) > 0
     override suspend fun obtenerUsuario(id: Int): Usuario? = db.usuarioDao().obtener(id)
     override fun observarServicios(): Flow<List<Servicio>> = db.servicioDao().observarTodos()
     override fun observarServiciosActivos(): Flow<List<Servicio>> = db.servicioDao().observarActivos()

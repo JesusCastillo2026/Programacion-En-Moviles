@@ -40,6 +40,14 @@ Los siguientes prompts se redactaron para dejar por escrito criterios de revisi�
 
 **Qué se debe validar:** Ejecutar en el dispositivo el cierre de sesión desde Perfil y probar Atrás y el inicio de sesión posterior para confirmar que cada cuenta ve únicamente su propia sesión.
 
+### Prompt 5 — Registro y requisitos de contraseña
+
+**Texto solicitado por el usuario (redacción profesional):** «Mejora el inicio de sesión para que los clientes puedan acceder también a un formulario de registro. Al enfocar el campo de contraseña durante el registro, muestra una ventana con los requisitos y su estado: mínimo ocho caracteres, mayúscula, minúscula, número, símbolo y sin espacios. Valida que las contraseñas coincidan y que el correo no esté registrado. Al completar el registro, guarda la cuenta localmente, no inicies sesión automáticamente y devuelve al usuario al formulario de inicio de sesión con un mensaje para que acceda de forma explícita».
+
+**Respuesta resumida:** Se añadió el formulario de registro de cliente desde la pantalla de acceso, el diálogo con validación visible de contraseña, confirmación de clave y control de correo duplicado. Tras registrarse, se vuelve al login sin crear una sesión automáticamente.
+
+**Qué se corrigió al integrar:** Se normalizó el correo a minúsculas tanto al registrar como al iniciar sesión, y se agregó el alta a la interfaz del repositorio y a Room. El registro conserva la sesión cerrada y muestra el mensaje de confirmación en el login.
+
 ## Reflexión (5 líneas)
 
 - La asistencia aceleró la integración de tres funciones entre datos, reglas y pantallas.
