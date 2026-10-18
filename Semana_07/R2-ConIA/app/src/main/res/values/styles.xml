@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.GymTracker" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#2864B8</item>
+        <item name="android:statusBarColor">#24589E</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>
