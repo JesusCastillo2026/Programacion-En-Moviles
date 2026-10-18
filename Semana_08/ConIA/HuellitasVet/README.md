@@ -2,6 +2,16 @@
 
 Aplicación Android de práctica para la gestión local de una veterinaria. Un dueño registra mascotas, solicita y cancela citas y consulta su historial clínico. El veterinario revisa su agenda, confirma citas, registra atenciones y administra servicios. Ambos perfiles usan la misma base Room del dispositivo.
 
+## Mejoras de la fase ConIA
+
+Esta versión conserva todas las funciones base y añade tres mejoras del laboratorio:
+
+1. **Evolución del peso:** la ficha muestra un gráfico de líneas con los pesos de citas atendidas. Una consulta de `CitaDao` alimenta el repositorio, `MascotaViewModel` expone `StateFlow` y Compose lo dibuja con `Canvas`. Sin atenciones, se muestra un mensaje explicativo.
+2. **Reprogramación:** en Mis citas aparece la acción para citas pendientes o confirmadas con más de dos horas de anticipación. La nueva pantalla permite elegir fecha y hora en los próximos siete días. El repositorio vuelve a validar propiedad, plazo, horario libre y fecha futura dentro de una transacción; la mascota, servicio y precio histórico no cambian.
+3. **Calendario mensual:** la agenda veterinaria muestra un mes navegable. Un punto identifica días con citas no canceladas; al tocar un día se filtra la agenda diaria. Los conteos se actualizan mediante `Flow` cuando cambian las citas.
+
+El buscador de pacientes por mascota o dueño junto con el filtro por especie, implementado en la base, también permanece operativo. La aplicación `ConIA` usa un `applicationId` distinto para poder instalarse junto a `SinIA` sin reemplazar sus datos locales. No se añadieron entidades, por lo que la versión de Room se mantiene en 1. El historial de indicaciones reales se encuentra en `PROMPTS.md`.
+
 ## Abrir el proyecto
 
 Abre esta carpeta `HuellitasVet` desde Android Studio, espera la sincronización de Gradle y ejecuta el módulo `app` en un dispositivo con API 26 o superior. No abras únicamente `MainActivity.kt`: Android Studio necesita la carpeta que contiene `settings.gradle.kts`.
@@ -81,7 +91,7 @@ Espacios para insertar capturas reales tomadas del emulador:
 
 ## Pruebas de aceptación
 
-La compilación del APK de depuración terminó correctamente. Las doce pruebas funcionales de la página 26 del laboratorio y las seis capturas requieren ejecutarse en un emulador o teléfono; no se marcan como superadas hasta comprobarlas allí.
+La compilación del APK de depuración terminó correctamente. Las doce pruebas funcionales de la página 26 del laboratorio, las mejoras nuevas y las seis capturas requieren ejecutarse en un emulador o teléfono; no se marcan como superadas hasta comprobarlas allí.
 
 1. Clave incorrecta: mostrar error sin entrar.
 2. Mascota sin nombre: mostrar error y no guardar.
@@ -95,6 +105,9 @@ La compilación del APK de depuración terminó correctamente. Las doce pruebas 
 10. Servicio inactivo: no ofrecerlo al reservar.
 11. Servicio con citas: impedir eliminarlo.
 12. Reiniciar app: conservar citas, perfil y modo oscuro.
+13. Atender dos o más citas de la misma mascota: la línea de peso sigue el orden cronológico.
+14. Reprogramar a una hora ocupada o a menos de dos horas: la operación se rechaza.
+15. Cambiar de mes en la agenda: los indicadores y citas coinciden con el mes elegido.
 
 ## Para pensar
 
