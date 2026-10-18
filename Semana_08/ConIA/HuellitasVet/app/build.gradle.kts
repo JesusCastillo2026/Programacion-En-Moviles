@@ -9,7 +9,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.tecsup.huellitasvet"
+        applicationId = "com.tecsup.huellitasvet.conia"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

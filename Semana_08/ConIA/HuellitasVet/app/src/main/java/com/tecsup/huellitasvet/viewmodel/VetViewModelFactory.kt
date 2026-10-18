@@ -22,6 +22,9 @@ class VetViewModelFactory(private val app: VetApp, private val usuarioId: Int = 
         if (modelClass.isAssignableFrom(MisCitasViewModel::class.java)) {
             return MisCitasViewModel(app.repository, usuarioId) as T
         }
+        if (modelClass.isAssignableFrom(ReprogramarCitaViewModel::class.java)) {
+            return ReprogramarCitaViewModel(app.repository, usuarioId, itemId) as T
+        }
         if (modelClass.isAssignableFrom(PanelViewModel::class.java)) return PanelViewModel(app.repository) as T
         if (modelClass.isAssignableFrom(AgendaViewModel::class.java)) return AgendaViewModel(app.repository) as T
         if (modelClass.isAssignableFrom(AtenderCitaViewModel::class.java)) return AtenderCitaViewModel(app.repository, itemId) as T

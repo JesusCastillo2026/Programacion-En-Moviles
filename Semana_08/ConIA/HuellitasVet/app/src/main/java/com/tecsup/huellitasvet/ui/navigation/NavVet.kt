@@ -36,6 +36,8 @@ import com.tecsup.huellitasvet.ui.dueno.FormularioMascotaScreen
 import com.tecsup.huellitasvet.ui.dueno.FichaMascotaScreen
 import com.tecsup.huellitasvet.ui.dueno.PedirCitaScreen
 import com.tecsup.huellitasvet.ui.dueno.MisCitasScreen
+import com.tecsup.huellitasvet.ui.dueno.ReprogramarCitaScreen
+import com.tecsup.huellitasvet.viewmodel.ReprogramarCitaViewModel
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
 import com.tecsup.huellitasvet.viewmodel.InicioViewModel
 import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
@@ -84,6 +86,7 @@ fun NavVet(sesion: SesionViewModel, app: VetApp) {
             Rutas.FICHA -> "Ficha de mascota"
             Rutas.FORM_MASCOTA -> "Mascota"
             Rutas.PEDIR_CITA -> "Pedir cita"
+            Rutas.REPROGRAMAR -> "Reprogramar cita"
             Rutas.ATENDER -> "Atender cita"
             Rutas.FORM_SERVICIO -> "Servicio"
             else -> null
@@ -126,7 +129,7 @@ fun NavVet(sesion: SesionViewModel, app: VetApp) {
             }
             composable(Rutas.CITAS) {
                 val vm: MisCitasViewModel = viewModel(key = "citas-${usuario?.id}", factory = VetViewModelFactory(app, usuario?.id ?: 0))
-                MisCitasScreen(vm) { nav.navigate("pedir_cita/0") }
+                MisCitasScreen(vm, { nav.navigate("pedir_cita/0") }, { nav.navigate("reprogramar/$it") })
             }
             composable(Rutas.PANEL) {
                 val vm: PanelViewModel = viewModel(factory = VetViewModelFactory(app))
@@ -176,6 +179,11 @@ fun NavVet(sesion: SesionViewModel, app: VetApp) {
                 val id = destino.arguments?.getString("id")?.toIntOrNull() ?: 0
                 val vm: PedirCitaViewModel = viewModel(key = "pedir-$id", factory = VetViewModelFactory(app, usuario?.id ?: 0, id))
                 PedirCitaScreen(vm) { nav.navigate(Rutas.CITAS) { popUpTo(Rutas.INICIO) } }
+            }
+            composable(Rutas.REPROGRAMAR) { destino ->
+                val id = destino.arguments?.getString("id")?.toIntOrNull() ?: 0
+                val vm: ReprogramarCitaViewModel = viewModel(key = "reprogramar-$id", factory = VetViewModelFactory(app, usuario?.id ?: 0, id))
+                ReprogramarCitaScreen(vm) { nav.popBackStack() }
             }
         }
     }

@@ -13,6 +13,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -27,7 +28,7 @@ import com.tecsup.huellitasvet.ui.components.CitaCard
 import com.tecsup.huellitasvet.viewmodel.MisCitasViewModel
 
 @Composable
-fun MisCitasScreen(vm: MisCitasViewModel, onPedir: () -> Unit) {
+fun MisCitasScreen(vm: MisCitasViewModel, onPedir: () -> Unit, onReprogramar: (Int) -> Unit) {
     val proximas by vm.proximas.collectAsStateWithLifecycle()
     val historial by vm.historial.collectAsStateWithLifecycle()
     val mensaje by vm.mensaje.collectAsStateWithLifecycle()
@@ -43,11 +44,14 @@ fun MisCitasScreen(vm: MisCitasViewModel, onPedir: () -> Unit) {
             val lista = if (pestana == 0) proximas else historial
             LazyColumn(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (mensaje != null) item { Text(mensaje.orEmpty(), color = MaterialTheme.colorScheme.error) }
-                if (pestana == 0) item { Text("Puedes cancelar hasta 2 horas antes") }
+                if (pestana == 0) item { Text("Puedes cancelar o reprogramar hasta 2 horas antes") }
                 if (lista.isEmpty()) item { Text("No hay citas para mostrar") }
                 items(lista, key = { it.cita.id }) { detalle ->
                     CitaCard(detalle) {
-                        if (vm.puedeCancelar(detalle)) TextButton(onClick = { seleccion = detalle }) { Text("Cancelar") }
+                        if (vm.puedeCancelar(detalle)) Row {
+                            TextButton(onClick = { onReprogramar(detalle.cita.id) }) { Text("Reprogramar") }
+                            TextButton(onClick = { seleccion = detalle }) { Text("Cancelar") }
+                        }
                     }
                 }
             }

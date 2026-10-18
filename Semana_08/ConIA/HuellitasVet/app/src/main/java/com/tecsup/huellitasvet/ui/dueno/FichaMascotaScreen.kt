@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tecsup.huellitasvet.ui.components.HistorialItem
 import com.tecsup.huellitasvet.ui.components.MascotaAvatar
+import com.tecsup.huellitasvet.ui.components.GraficoPeso
 import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
 import java.time.LocalDate
 
@@ -34,6 +35,7 @@ import java.time.LocalDate
 fun FichaMascotaScreen(vm: MascotaViewModel, editable: Boolean, onEditar: () -> Unit, onPedir: () -> Unit, onEliminado: () -> Unit) {
     val mascota by vm.mascota.collectAsStateWithLifecycle()
     val historial by vm.historial.collectAsStateWithLifecycle()
+    val pesos by vm.pesos.collectAsStateWithLifecycle()
     val mensaje by vm.mensaje.collectAsStateWithLifecycle()
     var pestana by remember { mutableIntStateOf(0) }
     var confirmar by remember { mutableStateOf(false) }
@@ -58,6 +60,7 @@ fun FichaMascotaScreen(vm: MascotaViewModel, editable: Boolean, onEditar: () -> 
         }
         if (pestana == 0) Text("${actual.nombre} · ${actual.sexo.lowercase()} · ${actual.raza}", Modifier.padding(20.dp))
         else LazyColumn(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            item { GraficoPeso(pesos) }
             if (historial.isEmpty()) item { Text("Aún no tiene atenciones") }
             items(historial, key = { it.cita.id }) { HistorialItem(it) }
         }

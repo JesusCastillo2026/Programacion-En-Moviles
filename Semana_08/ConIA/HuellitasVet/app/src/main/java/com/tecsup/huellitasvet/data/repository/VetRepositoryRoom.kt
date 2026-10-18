@@ -12,6 +12,8 @@ import com.tecsup.huellitasvet.model.ConteoServicio
 import com.tecsup.huellitasvet.model.EstadoCita
 import com.tecsup.huellitasvet.model.Horarios
 import com.tecsup.huellitasvet.model.UltimaVisita
+import com.tecsup.huellitasvet.model.PuntoPeso
+import com.tecsup.huellitasvet.model.DiaAgenda
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -60,6 +62,25 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
     override fun observarCitasPorFecha(fecha: String): Flow<List<CitaConDetalle>> = db.citaDao().observarPorFecha(fecha)
     override fun observarCita(id: Int): Flow<CitaConDetalle?> = db.citaDao().observarUna(id)
     override fun observarHistorial(mascotaId: Int): Flow<List<CitaConDetalle>> = db.citaDao().observarHistorial(mascotaId)
+    override fun observarPesos(mascotaId: Int): Flow<List<PuntoPeso>> = db.citaDao().observarPesos(mascotaId)
+    override fun observarAgendaMensual(inicio: String, fin: String): Flow<List<DiaAgenda>> = db.citaDao().observarAgendaMensual(inicio, fin)
+
+    /** Verifica propiedad, plazo y disponibilidad dentro de una única transacción. */
+    override suspend fun reprogramarCita(id: Int, duenoId: Int, fecha: String, hora: String) = db.withTransaction {
+        val cita = db.citaDao().obtener(id) ?: error("Cita no encontrada")
+        val mascota = db.mascotaDao().obtener(cita.mascotaId) ?: error("Mascota no encontrada")
+        require(mascota.duenoId == duenoId) { "La cita no pertenece a esta cuenta" }
+        require(cita.estado in listOf("PENDIENTE", "CONFIRMADA")) { "La cita ya está cerrada" }
+        val ahora = LocalDateTime.now()
+        val original = LocalDateTime.of(LocalDate.parse(cita.fecha), LocalTime.parse(cita.hora))
+        require(original.isAfter(ahora.plusHours(2))) { "Solo se puede reprogramar con más de 2 horas de anticipación" }
+        val dia = LocalDate.parse(fecha)
+        require(!dia.isBefore(ahora.toLocalDate()) && !dia.isAfter(ahora.toLocalDate().plusDays(7))) { "Fecha fuera de rango" }
+        require(hora in Horarios.todos && LocalDateTime.of(dia, LocalTime.parse(hora)).isAfter(ahora)) { "Elige una hora futura" }
+        require(fecha != cita.fecha || hora != cita.hora) { "Selecciona un horario distinto" }
+        require(db.citaDao().contarOcupadas(fecha, hora) == 0) { "Horario ocupado" }
+        db.citaDao().reprogramar(id, fecha, hora)
+    }
     override suspend fun cambiarEstadoCita(id: Int, estado: EstadoCita) {
         val cita = db.citaDao().obtener(id) ?: error("Cita no encontrada")
         val actual = EstadoCita.valueOf(cita.estado)

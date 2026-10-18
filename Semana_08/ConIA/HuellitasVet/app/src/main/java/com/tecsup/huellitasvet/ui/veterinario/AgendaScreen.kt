@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tecsup.huellitasvet.ui.components.CitaCard
+import com.tecsup.huellitasvet.ui.components.CalendarioMensual
 import com.tecsup.huellitasvet.ui.components.FechaChip
 import com.tecsup.huellitasvet.viewmodel.AgendaViewModel
 import java.time.LocalDate
@@ -26,8 +27,11 @@ fun AgendaScreen(vm: AgendaViewModel, onAtender: (Int) -> Unit) {
     val fecha by vm.fechaSeleccionada.collectAsStateWithLifecycle()
     val citas by vm.citas.collectAsStateWithLifecycle()
     val mensaje by vm.mensaje.collectAsStateWithLifecycle()
+    val mes by vm.mes.collectAsStateWithLifecycle()
+    val calendario by vm.calendario.collectAsStateWithLifecycle()
     Column(Modifier.fillMaxSize()) {
-        Text("Agenda diaria", Modifier.padding(20.dp), style = MaterialTheme.typography.headlineMedium)
+        Text("Agenda clínica", Modifier.padding(20.dp), style = MaterialTheme.typography.headlineMedium)
+        CalendarioMensual(mes, fecha, calendario, vm::moverMes, vm::seleccionarDia)
         LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items((0..7).map { LocalDate.now().plusDays(it.toLong()) }) { dia -> FechaChip(dia, fecha == dia.toString()) { vm.fechaSeleccionada.value = dia.toString() } }
         }
