@@ -16,6 +16,9 @@ class VetViewModelFactory(private val app: VetApp, private val usuarioId: Int = 
         if (modelClass.isAssignableFrom(MascotaViewModel::class.java)) {
             return MascotaViewModel(app.repository, usuarioId, itemId) as T
         }
+        if (modelClass.isAssignableFrom(PedirCitaViewModel::class.java)) {
+            return PedirCitaViewModel(app.repository, app.preferencias, usuarioId, itemId) as T
+        }
         throw IllegalArgumentException("ViewModel no registrado: ${modelClass.name}")
     }
 }
