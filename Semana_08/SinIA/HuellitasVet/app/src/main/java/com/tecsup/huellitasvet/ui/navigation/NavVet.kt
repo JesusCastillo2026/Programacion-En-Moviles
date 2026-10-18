@@ -1,0 +1,65 @@
+package com.tecsup.huellitasvet.ui.navigation
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.tecsup.huellitasvet.VetApp
+import com.tecsup.huellitasvet.ui.dueno.LoginScreen
+import com.tecsup.huellitasvet.ui.dueno.SplashScreen
+import com.tecsup.huellitasvet.viewmodel.SesionViewModel
+
+@Composable
+fun NavVet(sesion: SesionViewModel, app: VetApp) {
+    val nav = rememberNavController()
+    val usuario by sesion.usuarioActual.collectAsStateWithLifecycle()
+    val cargando by sesion.cargando.collectAsStateWithLifecycle()
+    val entrada by nav.currentBackStackEntryAsState()
+    val ruta = entrada?.destination?.route
+    val dueno = listOf(Rutas.INICIO to "Inicio", Rutas.MASCOTAS to "Mascotas", Rutas.CITAS to "Citas", Rutas.PERFIL to "Perfil")
+    val veterinario = listOf(Rutas.PANEL to "Panel", Rutas.AGENDA to "Agenda", Rutas.PACIENTES to "Pacientes", Rutas.SERVICIOS to "Servicios", Rutas.AJUSTES to "Ajustes")
+    val destinos = if (usuario?.rol == "ADMIN") veterinario else dueno
+
+    LaunchedEffect(cargando, usuario?.id, usuario?.rol) {
+        if (!cargando) {
+            nav.navigate(if (usuario == null) Rutas.LOGIN else if (usuario?.rol == "ADMIN") Rutas.PANEL else Rutas.INICIO) {
+                popUpTo(nav.graph.id) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
+    }
+
+    Scaffold(bottomBar = {
+        if (ruta in destinos.map { it.first }) NavigationBar {
+            destinos.forEach { (destino, titulo) ->
+                NavigationBarItem(
+                    selected = ruta == destino,
+                    onClick = { nav.navigate(destino) { popUpTo(destinos.first().first); launchSingleTop = true; restoreState = true } },
+                    icon = { Text(titulo.take(1)) },
+                    label = { Text(titulo) }
+                )
+            }
+        }
+    }) { margen ->
+        NavHost(navController = nav, startDestination = Rutas.SPLASH, modifier = Modifier.padding(margen)) {
+            composable(Rutas.SPLASH) { SplashScreen() }
+            composable(Rutas.LOGIN) { LoginScreen(sesion) }
+            (dueno + veterinario).forEach { (destino, titulo) ->
+                composable(destino) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(titulo) } }
+            }
+        }
+    }
+}
