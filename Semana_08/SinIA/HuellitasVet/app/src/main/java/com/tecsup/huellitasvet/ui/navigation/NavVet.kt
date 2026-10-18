@@ -13,14 +13,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.tecsup.huellitasvet.VetApp
 import com.tecsup.huellitasvet.ui.dueno.LoginScreen
+import com.tecsup.huellitasvet.ui.dueno.InicioScreen
+import com.tecsup.huellitasvet.ui.dueno.MascotasScreen
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
+import com.tecsup.huellitasvet.viewmodel.InicioViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
+import com.tecsup.huellitasvet.viewmodel.VetViewModelFactory
 
 @Composable
 fun NavVet(sesion: SesionViewModel, app: VetApp) {
@@ -57,9 +62,20 @@ fun NavVet(sesion: SesionViewModel, app: VetApp) {
         NavHost(navController = nav, startDestination = Rutas.SPLASH, modifier = Modifier.padding(margen)) {
             composable(Rutas.SPLASH) { SplashScreen() }
             composable(Rutas.LOGIN) { LoginScreen(sesion) }
-            (dueno + veterinario).forEach { (destino, titulo) ->
+            composable(Rutas.INICIO) {
+                val vm: InicioViewModel = viewModel(key = "inicio-${usuario?.id}", factory = VetViewModelFactory(app, usuario?.id ?: 0))
+                InicioScreen(usuario?.nombre.orEmpty(), vm, { nav.navigate("ficha/$it") }, { nav.navigate("mascota_form/0") }, { nav.navigate("pedir_cita/0") })
+            }
+            composable(Rutas.MASCOTAS) {
+                val vm: InicioViewModel = viewModel(key = "mascotas-${usuario?.id}", factory = VetViewModelFactory(app, usuario?.id ?: 0))
+                MascotasScreen(vm, { nav.navigate("ficha/$it") }, { nav.navigate("mascota_form/0") })
+            }
+            (dueno + veterinario).filterNot { it.first in listOf(Rutas.INICIO, Rutas.MASCOTAS) }.forEach { (destino, titulo) ->
                 composable(destino) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(titulo) } }
             }
+            composable(Rutas.FICHA) { Text("Ficha") }
+            composable(Rutas.FORM_MASCOTA) { Text("Mascota") }
+            composable(Rutas.PEDIR_CITA) { Text("Pedir cita") }
         }
     }
 }
