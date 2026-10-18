@@ -7,6 +7,16 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +49,13 @@ import com.tecsup.huellitasvet.ui.veterinario.AtenderCitaScreen
 import com.tecsup.huellitasvet.ui.veterinario.PacientesScreen
 import com.tecsup.huellitasvet.viewmodel.AtenderCitaViewModel
 import com.tecsup.huellitasvet.viewmodel.PacientesViewModel
+import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
+import com.tecsup.huellitasvet.viewmodel.PerfilViewModel
+import com.tecsup.huellitasvet.ui.veterinario.ServiciosScreen
+import com.tecsup.huellitasvet.ui.veterinario.FormularioServicioScreen
+import com.tecsup.huellitasvet.ui.veterinario.AjustesScreen
+import com.tecsup.huellitasvet.ui.dueno.PerfilScreen
+import com.tecsup.huellitasvet.ui.components.AppTopBar
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 import com.tecsup.huellitasvet.viewmodel.VetViewModelFactory
 
@@ -56,19 +73,41 @@ fun NavVet(sesion: SesionViewModel, app: VetApp) {
     LaunchedEffect(cargando, usuario?.id, usuario?.rol) {
         if (!cargando) {
             nav.navigate(if (usuario == null) Rutas.LOGIN else if (usuario?.rol == "ADMIN") Rutas.PANEL else Rutas.INICIO) {
-                popUpTo(nav.graph.id) { inclusive = true }
+                popUpTo(nav.graph.id) { inclusive = false }
                 launchSingleTop = true
             }
         }
     }
 
-    Scaffold(bottomBar = {
+    Scaffold(topBar = {
+        val titulo = when (ruta) {
+            Rutas.FICHA -> "Ficha de mascota"
+            Rutas.FORM_MASCOTA -> "Mascota"
+            Rutas.PEDIR_CITA -> "Pedir cita"
+            Rutas.ATENDER -> "Atender cita"
+            Rutas.FORM_SERVICIO -> "Servicio"
+            else -> null
+        }
+        if (titulo != null) AppTopBar(titulo) { nav.popBackStack() }
+    }, bottomBar = {
         if (ruta in destinos.map { it.first }) NavigationBar {
             destinos.forEach { (destino, titulo) ->
                 NavigationBarItem(
                     selected = ruta == destino,
                     onClick = { nav.navigate(destino) { popUpTo(destinos.first().first); launchSingleTop = true; restoreState = true } },
-                    icon = { Text(titulo.take(1)) },
+                    icon = {
+                        val icono = when (destino) {
+                            Rutas.INICIO -> Icons.Default.Home
+                            Rutas.MASCOTAS, Rutas.PACIENTES -> Icons.Default.Pets
+                            Rutas.CITAS -> Icons.Default.CalendarMonth
+                            Rutas.PERFIL -> Icons.Default.Person
+                            Rutas.PANEL -> Icons.Default.Dashboard
+                            Rutas.AGENDA -> Icons.Default.Event
+                            Rutas.SERVICIOS -> Icons.Default.MedicalServices
+                            else -> Icons.Default.Settings
+                        }
+                        Icon(icono, contentDescription = titulo)
+                    },
                     label = { Text(titulo) }
                 )
             }
@@ -106,8 +145,22 @@ fun NavVet(sesion: SesionViewModel, app: VetApp) {
                 val vm: PacientesViewModel = viewModel(factory = VetViewModelFactory(app))
                 PacientesScreen(vm) { nav.navigate("ficha/$it") }
             }
-            (dueno + veterinario).filterNot { it.first in listOf(Rutas.INICIO, Rutas.MASCOTAS, Rutas.CITAS, Rutas.PANEL, Rutas.AGENDA, Rutas.PACIENTES) }.forEach { (destino, titulo) ->
-                composable(destino) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(titulo) } }
+            composable(Rutas.SERVICIOS) {
+                val vm: ServiciosViewModel = viewModel(factory = VetViewModelFactory(app))
+                ServiciosScreen(vm) { nav.navigate("servicio_form/$it") }
+            }
+            composable(Rutas.FORM_SERVICIO) { destino ->
+                val id = destino.arguments?.getString("id")?.toIntOrNull() ?: 0
+                val vm: ServiciosViewModel = viewModel(key = "servicios-form", factory = VetViewModelFactory(app))
+                FormularioServicioScreen(vm, id) { nav.popBackStack() }
+            }
+            composable(Rutas.PERFIL) {
+                val vm: PerfilViewModel = viewModel(key = "perfil-${usuario?.id}", factory = VetViewModelFactory(app, usuario?.id ?: 0))
+                PerfilScreen(usuario?.nombre.orEmpty(), usuario?.correo.orEmpty(), vm, sesion)
+            }
+            composable(Rutas.AJUSTES) {
+                val vm: PerfilViewModel = viewModel(key = "ajustes-${usuario?.id}", factory = VetViewModelFactory(app, usuario?.id ?: 0))
+                AjustesScreen(usuario?.nombre.orEmpty(), usuario?.correo.orEmpty(), vm, sesion)
             }
             composable(Rutas.FICHA) { destino ->
                 val id = destino.arguments?.getString("id")?.toIntOrNull() ?: 0
