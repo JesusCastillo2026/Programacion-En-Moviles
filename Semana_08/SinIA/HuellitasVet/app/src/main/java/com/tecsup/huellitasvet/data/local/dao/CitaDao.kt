@@ -7,6 +7,7 @@ import androidx.room.Transaction
 import com.tecsup.huellitasvet.data.local.entity.Cita
 import com.tecsup.huellitasvet.data.local.relation.CitaConDetalle
 import com.tecsup.huellitasvet.model.ConteoServicio
+import com.tecsup.huellitasvet.model.UltimaVisita
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -56,4 +57,7 @@ interface CitaDao {
 
     @Query("SELECT COALESCE(SUM(precio), 0.0) FROM citas WHERE estado = 'ATENDIDA' AND fecha >= :fechaInicio")
     fun ingresosDesde(fechaInicio: String): Flow<Double>
+
+    @Query("SELECT m.id AS mascotaId, MAX(c.fecha) AS fecha FROM mascotas m LEFT JOIN citas c ON c.mascotaId = m.id AND c.estado = 'ATENDIDA' GROUP BY m.id")
+    fun observarUltimasVisitas(): Flow<List<UltimaVisita>>
 }

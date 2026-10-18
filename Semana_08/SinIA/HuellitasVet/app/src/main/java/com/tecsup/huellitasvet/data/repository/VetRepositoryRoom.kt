@@ -11,6 +11,7 @@ import com.tecsup.huellitasvet.data.local.relation.MascotaConDueno
 import com.tecsup.huellitasvet.model.ConteoServicio
 import com.tecsup.huellitasvet.model.EstadoCita
 import com.tecsup.huellitasvet.model.Horarios
+import com.tecsup.huellitasvet.model.UltimaVisita
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -79,4 +80,5 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
     override fun observarCantidadPorEstado(estado: EstadoCita): Flow<Int> = db.citaDao().contarPorEstado(estado.name)
     override fun observarCitasPorServicio(): Flow<List<ConteoServicio>> = db.citaDao().contarPorServicio()
     override fun observarIngresosDesde(fechaInicio: String): Flow<Double> = db.citaDao().ingresosDesde(fechaInicio)
+    override fun observarUltimasVisitas(): Flow<List<UltimaVisita>> = db.citaDao().observarUltimasVisitas()
 }

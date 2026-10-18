@@ -35,6 +35,10 @@ import com.tecsup.huellitasvet.viewmodel.PanelViewModel
 import com.tecsup.huellitasvet.viewmodel.AgendaViewModel
 import com.tecsup.huellitasvet.ui.veterinario.PanelScreen
 import com.tecsup.huellitasvet.ui.veterinario.AgendaScreen
+import com.tecsup.huellitasvet.ui.veterinario.AtenderCitaScreen
+import com.tecsup.huellitasvet.ui.veterinario.PacientesScreen
+import com.tecsup.huellitasvet.viewmodel.AtenderCitaViewModel
+import com.tecsup.huellitasvet.viewmodel.PacientesViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 import com.tecsup.huellitasvet.viewmodel.VetViewModelFactory
 
@@ -93,7 +97,16 @@ fun NavVet(sesion: SesionViewModel, app: VetApp) {
                 val vm: AgendaViewModel = viewModel(factory = VetViewModelFactory(app))
                 AgendaScreen(vm) { nav.navigate("atender/$it") }
             }
-            (dueno + veterinario).filterNot { it.first in listOf(Rutas.INICIO, Rutas.MASCOTAS, Rutas.CITAS, Rutas.PANEL, Rutas.AGENDA) }.forEach { (destino, titulo) ->
+            composable(Rutas.ATENDER) { destino ->
+                val id = destino.arguments?.getString("id")?.toIntOrNull() ?: 0
+                val vm: AtenderCitaViewModel = viewModel(key = "atender-$id", factory = VetViewModelFactory(app, itemId = id))
+                AtenderCitaScreen(vm) { nav.popBackStack() }
+            }
+            composable(Rutas.PACIENTES) {
+                val vm: PacientesViewModel = viewModel(factory = VetViewModelFactory(app))
+                PacientesScreen(vm) { nav.navigate("ficha/$it") }
+            }
+            (dueno + veterinario).filterNot { it.first in listOf(Rutas.INICIO, Rutas.MASCOTAS, Rutas.CITAS, Rutas.PANEL, Rutas.AGENDA, Rutas.PACIENTES) }.forEach { (destino, titulo) ->
                 composable(destino) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(titulo) } }
             }
             composable(Rutas.FICHA) { destino ->

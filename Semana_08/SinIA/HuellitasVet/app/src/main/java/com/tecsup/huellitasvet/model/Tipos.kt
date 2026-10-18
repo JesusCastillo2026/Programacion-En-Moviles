@@ -8,6 +8,7 @@ enum class EstadoCita { PENDIENTE, CONFIRMADA, ATENDIDA, CANCELADA }
 enum class Especie { PERRO, GATO, OTRO }
 enum class Sexo { MACHO, HEMBRA }
 data class ConteoServicio(val nombre: String, val cantidad: Int)
+data class UltimaVisita(val mascotaId: Int, val fecha: String?)
 data class DatoGrafico(val etiqueta: String, val valor: Float)
 
 object Horarios {
