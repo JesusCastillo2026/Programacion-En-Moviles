@@ -12,7 +12,7 @@ Repositorio de trabajos y laboratorios del curso de Programación en Móviles.
 | 04 | Listas y formularios en Compose | Carrito TECSUP con `LazyColumn`, eliminación de productos, IGV y totales reactivos. |
 | 05 | Navegación en aplicaciones Compose | Aplicaciones de Clínica Salud+ y TECSUP Fit con pantallas, rutas y navegación entre detalles. |
 | 06 | Pendiente de desarrollo | Carpeta preparada para el siguiente laboratorio. |
-| 07 | Pendiente de desarrollo | Carpeta preparada para el siguiente laboratorio. |
+| 07 | Persistencia local y CRUD con Room | GymTracker Pro: registro e inicio de sesión, gestión de rutinas de ejercicio, consultas reactivas, edición, eliminación y perfil. Incluye versiones `SinIA` y `ConIA`. |
 | 08 | Pendiente de desarrollo | Carpeta preparada para el siguiente laboratorio. |
 | 09 | Pendiente de desarrollo | Carpeta preparada para el siguiente laboratorio. |
 | 10 | Pendiente de desarrollo | Carpeta preparada para el siguiente laboratorio. |
