@@ -22,8 +22,11 @@ import com.tecsup.huellitasvet.VetApp
 import com.tecsup.huellitasvet.ui.dueno.LoginScreen
 import com.tecsup.huellitasvet.ui.dueno.InicioScreen
 import com.tecsup.huellitasvet.ui.dueno.MascotasScreen
+import com.tecsup.huellitasvet.ui.dueno.FormularioMascotaScreen
+import com.tecsup.huellitasvet.ui.dueno.FichaMascotaScreen
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
 import com.tecsup.huellitasvet.viewmodel.InicioViewModel
+import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 import com.tecsup.huellitasvet.viewmodel.VetViewModelFactory
 
@@ -73,8 +76,16 @@ fun NavVet(sesion: SesionViewModel, app: VetApp) {
             (dueno + veterinario).filterNot { it.first in listOf(Rutas.INICIO, Rutas.MASCOTAS) }.forEach { (destino, titulo) ->
                 composable(destino) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(titulo) } }
             }
-            composable(Rutas.FICHA) { Text("Ficha") }
-            composable(Rutas.FORM_MASCOTA) { Text("Mascota") }
+            composable(Rutas.FICHA) { destino ->
+                val id = destino.arguments?.getString("id")?.toIntOrNull() ?: 0
+                val vm: MascotaViewModel = viewModel(key = "ficha-$id", factory = VetViewModelFactory(app, usuario?.id ?: 0, id))
+                FichaMascotaScreen(vm, usuario?.rol == "CLIENTE", { nav.navigate("mascota_form/$id") }, { nav.navigate("pedir_cita/$id") }, { nav.popBackStack() })
+            }
+            composable(Rutas.FORM_MASCOTA) { destino ->
+                val id = destino.arguments?.getString("id")?.toIntOrNull() ?: 0
+                val vm: MascotaViewModel = viewModel(key = "form-$id", factory = VetViewModelFactory(app, usuario?.id ?: 0, id))
+                FormularioMascotaScreen(vm) { nav.popBackStack() }
+            }
             composable(Rutas.PEDIR_CITA) { Text("Pedir cita") }
         }
     }
