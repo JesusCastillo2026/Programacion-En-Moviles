@@ -5,6 +5,7 @@ import java.time.LocalDate
 data class Cita(
     val id: String,
     val usuarioId: String,
+    val sedeId: String,
     val medicoId: String,
     val especialidadId: String,
     val fecha: LocalDate,

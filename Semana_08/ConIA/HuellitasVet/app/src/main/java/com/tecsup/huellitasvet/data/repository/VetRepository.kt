@@ -1,0 +1,48 @@
+package com.tecsup.huellitasvet.data.repository
+
+import com.tecsup.huellitasvet.data.local.entity.Mascota
+import com.tecsup.huellitasvet.data.local.entity.Servicio
+import com.tecsup.huellitasvet.data.local.entity.Usuario
+import com.tecsup.huellitasvet.data.local.relation.CitaConDetalle
+import com.tecsup.huellitasvet.data.local.relation.MascotaConDueno
+import com.tecsup.huellitasvet.model.ConteoServicio
+import com.tecsup.huellitasvet.model.EstadoCita
+import com.tecsup.huellitasvet.model.UltimaVisita
+import com.tecsup.huellitasvet.model.PuntoPeso
+import com.tecsup.huellitasvet.model.DiaAgenda
+import kotlinx.coroutines.flow.Flow
+
+interface VetRepository {
+    suspend fun login(correo: String, clave: String): Usuario?
+    suspend fun registrarUsuario(usuario: Usuario): Boolean
+    suspend fun obtenerUsuario(id: Int): Usuario?
+    fun observarVeterinarios(): Flow<List<Usuario>>
+    fun observarServicios(): Flow<List<Servicio>>
+    fun observarServiciosActivos(): Flow<List<Servicio>>
+    suspend fun guardarServicio(servicio: Servicio)
+    suspend fun eliminarServicio(servicio: Servicio)
+    suspend fun cambiarActivo(id: Int, activo: Boolean)
+    suspend fun servicioTieneCitas(id: Int): Boolean
+    fun observarMascotasDeDueno(duenoId: Int): Flow<List<Mascota>>
+    fun observarMascota(id: Int): Flow<Mascota?>
+    fun observarTodasLasMascotas(): Flow<List<MascotaConDueno>>
+    suspend fun guardarMascota(mascota: Mascota)
+    suspend fun eliminarMascota(mascota: Mascota)
+    suspend fun mascotaTieneCitas(id: Int): Boolean
+    fun observarHorasOcupadas(fecha: String): Flow<List<String>>
+    suspend fun crearCita(mascotaId: Int, serviciosIds: List<Int>, fecha: String, hora: String, nota: String): Long
+    fun observarCitasDeDueno(duenoId: Int): Flow<List<CitaConDetalle>>
+    fun observarCitasPorFecha(fecha: String): Flow<List<CitaConDetalle>>
+    fun observarCita(id: Int): Flow<CitaConDetalle?>
+    fun observarHistorial(mascotaId: Int): Flow<List<CitaConDetalle>>
+    fun observarPesos(mascotaId: Int): Flow<List<PuntoPeso>>
+    fun observarAgendaMensual(inicio: String, fin: String): Flow<List<DiaAgenda>>
+    suspend fun reprogramarCita(id: Int, duenoId: Int, fecha: String, hora: String)
+    suspend fun cambiarEstadoCita(id: Int, estado: EstadoCita)
+    suspend fun registrarAtencion(citaId: Int, diagnostico: String, tratamiento: String, peso: Double)
+    fun observarCitasDeFecha(fecha: String): Flow<Int>
+    fun observarCantidadPorEstado(estado: EstadoCita): Flow<Int>
+    fun observarCitasPorServicio(): Flow<List<ConteoServicio>>
+    fun observarIngresosDesde(fechaInicio: String): Flow<Double>
+    fun observarUltimasVisitas(): Flow<List<UltimaVisita>>
+}

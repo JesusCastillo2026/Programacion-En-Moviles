@@ -31,6 +31,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
+/** Convierte las próximas citas locales en recordatorios de demostración. */
 fun NotificacionesScreen(onBack: () -> Unit, onOpenAppointment: (String) -> Unit) {
     val citas = Repositorio.citasDelUsuario()
     Column(modifier = Modifier.fillMaxSize()) {
