@@ -38,10 +38,10 @@ private fun MisCursosApp() {
 
     MaterialTheme(
         colorScheme = lightColorScheme(
-            primary = Color(0xFF2457C5),
-            secondary = Color(0xFF4779E6),
-            background = Color(0xFFF4F7FC),
-            surface = Color.White
+            primary = Color(0xFF6650A4),
+            secondary = Color(0xFF00A9D6),
+            background = Color(0xFFFCFCFD),
+            surface = Color(0xFFFFFFFF)
         )
     ) {
         Surface {

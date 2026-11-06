@@ -85,13 +85,29 @@ fun CursosScreen(user: FirebaseUser, onCerrarSesion: () -> Unit) {
                 .padding(padding)
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            Text("Mis Cursos", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-            Text("Bienvenido, ${user.email.orEmpty()}", style = MaterialTheme.typography.bodyMedium)
-            Spacer(Modifier.height(16.dp))
-            Button(onClick = onCerrarSesion, modifier = Modifier.fillMaxWidth()) {
+            Spacer(Modifier.height(14.dp))
+            Text(
+                "Bienvenido/a 🎉",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                "Sesión iniciada como: ${user.email.orEmpty()}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(18.dp))
+            Button(
+                onClick = onCerrarSesion,
+                shape = MaterialTheme.shapes.extraLarge,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text("Cerrar sesión")
             }
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(24.dp))
+            Text("Mis Cursos", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(12.dp))
 
             when {
                 cargando -> Column(
