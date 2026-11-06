@@ -1,6 +1,7 @@
 package com.jesuscastillo.miscursos.data
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
 
 class RepositorioCursos(private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()) {
@@ -31,5 +32,31 @@ class RepositorioCursos(private val firestore: FirebaseFirestore = FirebaseFires
                     )
                 }
             }
+    }
+
+    fun guardarCurso(uid: String, curso: Curso, alCompletar: (Exception?) -> Unit) {
+        val datos = hashMapOf<String, Any>(
+            "titulo" to curso.titulo.trim(),
+            "docente" to curso.docente.trim(),
+            "creditos" to curso.creditos,
+            "descripcion" to curso.descripcion.trim()
+        )
+
+        val operacion = if (curso.id.isBlank()) {
+            datos["creadoEn"] = FieldValue.serverTimestamp()
+            cursosDe(uid).document().set(datos)
+        } else {
+            cursosDe(uid).document(curso.id).update(datos)
+        }
+
+        operacion.addOnCompleteListener { tarea ->
+            alCompletar(if (tarea.isSuccessful) null else tarea.exception ?: Exception("No se pudo guardar el curso."))
+        }
+    }
+
+    fun eliminarCurso(uid: String, cursoId: String, alCompletar: (Exception?) -> Unit) {
+        cursosDe(uid).document(cursoId).delete().addOnCompleteListener { tarea ->
+            alCompletar(if (tarea.isSuccessful) null else tarea.exception ?: Exception("No se pudo eliminar el curso."))
+        }
     }
 }
