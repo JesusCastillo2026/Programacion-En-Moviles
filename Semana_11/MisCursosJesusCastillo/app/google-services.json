@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "532115934749",
+    "project_id": "miscursosjesuscastillo",
+    "storage_bucket": "miscursosjesuscastillo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:532115934749:android:26a28783dfe9b43eb600f4",
+        "android_client_info": {
+          "package_name": "com.jesuscastillo.miscursos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnPFJaFAPf1x1NpjIus7FG-qECR1zUmTg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

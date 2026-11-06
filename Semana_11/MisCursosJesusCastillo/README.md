@@ -6,8 +6,10 @@ Proyecto Android con Kotlin y Jetpack Compose para el laboratorio de autenticaci
 
 Abre la carpeta que contiene este README. Android Studio debe reconocer `settings.gradle.kts` y sincronizar Gradle.
 
-## Preparacion de Firebase
+## Firebase configurado
 
-El laboratorio requiere crear un proyecto Firebase y registrar la aplicacion Android con el identificador `com.jesuscastillo.miscursos`. Descarga el archivo `google-services.json` y colocalo dentro de `app/`. Luego habilita Email/Password en Firebase Authentication y Cloud Firestore.
+La aplicacion Android está registrada con el identificador `com.jesuscastillo.miscursos`. El proyecto usa Firebase Authentication, Cloud Firestore y el plugin de Google Services. El archivo `app/google-services.json` contiene la configuración del proyecto Firebase enlazado.
 
-Este inicio contiene la estructura base Compose. La autenticacion y el CRUD se implementaran en los siguientes pasos del laboratorio.
+En Firebase, habilita el proveedor de acceso Correo electrónico/contraseña. Firestore se creó en modo de producción; sus reglas iniciales deniegan lecturas y escrituras hasta configurar las reglas para aislar los cursos de cada usuario.
+
+La autenticación y el CRUD de cursos se implementarán en los siguientes hitos del laboratorio.
