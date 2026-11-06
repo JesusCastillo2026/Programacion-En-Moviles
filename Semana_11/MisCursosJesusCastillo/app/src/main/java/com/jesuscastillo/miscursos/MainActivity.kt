@@ -3,57 +3,54 @@ package com.jesuscastillo.miscursos
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import com.google.firebase.auth.FirebaseAuth
+import com.jesuscastillo.miscursos.data.AuthRepository
+import com.jesuscastillo.miscursos.ui.AuthScreen
+import com.jesuscastillo.miscursos.ui.CursosScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            MaterialTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    InicioMisCursos()
-                }
-            }
-        }
+        setContent { MisCursosApp() }
     }
 }
 
-@Composable
-private fun InicioMisCursos() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+@androidx.compose.runtime.Composable
+private fun MisCursosApp() {
+    val auth = remember { FirebaseAuth.getInstance() }
+    val repository = remember { AuthRepository(auth) }
+    var currentUser by remember { mutableStateOf(auth.currentUser) }
+
+    DisposableEffect(auth) {
+        val listener = FirebaseAuth.AuthStateListener { currentUser = it.currentUser }
+        auth.addAuthStateListener(listener)
+        onDispose { auth.removeAuthStateListener(listener) }
+    }
+
+    MaterialTheme(
+        colorScheme = lightColorScheme(
+            primary = Color(0xFF2457C5),
+            secondary = Color(0xFF4779E6),
+            background = Color(0xFFF4F7FC),
+            surface = Color.White
+        )
     ) {
-        Text(
-            text = "Mis Cursos",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Organiza tus cursos en un solo lugar.",
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Button(onClick = {}) {
-            Text("Proyecto listo para configurar")
+        Surface {
+            val user = currentUser
+            if (user == null) {
+                AuthScreen(repository)
+            } else {
+                CursosScreen(user, onCerrarSesion = repository::cerrarSesion)
+            }
         }
     }
 }
