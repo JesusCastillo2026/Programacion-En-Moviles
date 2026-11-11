@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,11 +29,13 @@ import com.tecsup.lab09.ui.screens.FavoritesScreen
 import com.tecsup.lab09.ui.screens.HomeScreen
 import com.tecsup.lab09.ui.screens.PostDetailScreen
 import com.tecsup.lab09.ui.screens.TodosScreen
+import com.tecsup.lab09.ui.screens.AmphibiansScreen
 import com.tecsup.lab09.viewmodel.PostViewModel
 
 private const val HOME = "home"
 private const val TODOS = "todos"
 private const val FAVORITES = "favorites"
+private const val AMPHIBIANS = "amphibians"
 private const val DETAIL = "detail/{id}"
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
@@ -41,11 +44,12 @@ fun AppNavigation(viewModel: PostViewModel) {
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val route = backStack?.destination?.route ?: HOME
-    val isRoot = route in setOf(HOME, TODOS, FAVORITES)
+    val isRoot = route in setOf(HOME, TODOS, FAVORITES, AMPHIBIANS)
     val title = when {
         route.startsWith("detail/") -> "Detalle"
         route == TODOS -> "Tareas"
         route == FAVORITES -> "Favoritos"
+        route == AMPHIBIANS -> "Explorar especies"
         else -> "JSONPlaceholder Access"
     }
 
@@ -88,6 +92,12 @@ fun AppNavigation(viewModel: PostViewModel) {
                         icon = { Icon(Icons.Filled.Favorite, contentDescription = null) },
                         label = { Text("Favoritos") }
                     )
+                    NavigationBarItem(
+                        selected = route == AMPHIBIANS,
+                        onClick = { navController.navigate(AMPHIBIANS) { launchSingleTop = true; popUpTo(HOME) { saveState = true }; restoreState = true } },
+                        icon = { Icon(Icons.Filled.Pets, contentDescription = null) },
+                        label = { Text("Especies") }
+                    )
                 }
             }
         }
@@ -100,6 +110,7 @@ fun AppNavigation(viewModel: PostViewModel) {
             composable(FAVORITES) {
                 FavoritesScreen(viewModel) { id -> navController.navigate("detail/$id") }
             }
+            composable(AMPHIBIANS) { AmphibiansScreen(viewModel) }
             composable(
                 route = DETAIL,
                 arguments = listOf(navArgument("id") { type = NavType.IntType })
