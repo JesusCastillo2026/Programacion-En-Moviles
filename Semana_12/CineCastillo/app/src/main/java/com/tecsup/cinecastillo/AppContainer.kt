@@ -19,8 +19,9 @@ class AppContainer(context: Context) {
     ).build()
 
     private val client = OkHttpClient.Builder().addInterceptor { chain ->
+        val url = chain.request().url.newBuilder().addQueryParameter("api_key", BuildConfig.TMDB_API_KEY).build()
         val request = chain.request().newBuilder()
-            .header("Authorization", "Bearer ${BuildConfig.TMDB_TOKEN}")
+            .url(url)
             .header("Accept", "application/json")
             .build()
         chain.proceed(request)

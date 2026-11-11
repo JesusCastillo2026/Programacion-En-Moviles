@@ -23,7 +23,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-        buildConfigField("String", "TMDB_TOKEN", "\"${local.getProperty("TMDB_TOKEN", "")}\"")
+        buildConfigField("String", "TMDB_API_KEY", "\"${local.getProperty("TMDB_API_KEY", "")}\"")
         buildConfigField("boolean", "FIREBASE_CONFIGURED", firebaseConfig.exists().toString())
     }
     compileOptions {
