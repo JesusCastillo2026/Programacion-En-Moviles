@@ -4,8 +4,10 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
-    id("com.google.gms.google-services")
 }
+
+val firebaseConfig = file("google-services.json")
+if (firebaseConfig.exists()) apply(plugin = "com.google.gms.google-services")
 
 val local = Properties().apply {
     val file = rootProject.file("local.properties")
@@ -22,6 +24,7 @@ android {
         versionCode = 1
         versionName = "1.0"
         buildConfigField("String", "TMDB_TOKEN", "\"${local.getProperty("TMDB_TOKEN", "")}\"")
+        buildConfigField("boolean", "FIREBASE_CONFIGURED", firebaseConfig.exists().toString())
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -51,7 +54,6 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2")
-    implementation("androidx.core:core-ktx:1.19.0")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     debugImplementation("androidx.compose.ui:ui-tooling")
