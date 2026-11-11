@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function esPropietario(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function cursoValido() {
+      return request.resource.data.keys().hasAll([
+          'titulo', 'docente', 'creditos', 'descripcion', 'creadoEn'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'titulo', 'docente', 'creditos', 'descripcion', 'creadoEn'
+        ])
+        && request.resource.data.titulo is string
+        && request.resource.data.titulo.size() > 0
+        && request.resource.data.docente is string
+        && request.resource.data.creditos is int
+        && request.resource.data.creditos > 0
+        && request.resource.data.descripcion is string
+        && request.resource.data.creadoEn is timestamp;
+    }
+
+    match /usuarios/{uid}/cursos/{cursoId} {
+      allow read, delete: if esPropietario(uid);
+      allow create: if esPropietario(uid) && cursoValido();
+      allow update: if esPropietario(uid)
+        && cursoValido()
+        && request.resource.data.creadoEn == resource.data.creadoEn;
+    }
+  }
+}

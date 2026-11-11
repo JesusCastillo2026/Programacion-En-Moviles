@@ -1,6 +1,11 @@
-# Semana 08 · HuellitasVet
+# Semana 08 · Gestión veterinaria
 
-- `SinIA/HuellitasVet`: proyecto base del laboratorio.
-- `ConIA/HuellitasVet`: proyecto mejorado con gráfico de peso, reprogramación de citas y calendario mensual.
+## Proyecto: HuellitasVet
 
-Cada carpeta `HuellitasVet` es un proyecto Android Studio independiente; abre la que contiene `settings.gradle.kts`. La versión `ConIA` incluye su propio `README.md` y `PROMPTS.md`.
+`HuellitasVet/` contiene la aplicación de gestión veterinaria: perfiles de dueño y veterinario, mascotas, servicios, agenda y citas.
+
+La rama `main` contiene la versión base; `mejora-ia` presenta la versión ampliada en la misma ruta, con sus propios recursos y documentación.
+
+## Abrir en Android Studio
+
+Abre `HuellitasVet/` (la carpeta que contiene `settings.gradle.kts`). Consulta su README para credenciales de demostración, requisitos y alcance local.
