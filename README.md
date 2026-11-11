@@ -26,7 +26,7 @@ Así, al cambiar de rama se ve el proyecto de esa versión sin carpetas duplicad
 | [09](Semana_09/README.md) | Consumo de API con Retrofit, persistencia de favoritos con Room y Jetpack Compose | Disponible |
 | [10](Semana_10/README.md) | Semana reservada para la siguiente entrega | Pendiente |
 | [11](Semana_11/README.md) | Mis Cursos: autenticación y gestión de cursos con Firebase | Disponible |
-| [12](Semana_12/README.md) | Semana reservada para la siguiente entrega | Pendiente |
+| [12](Semana_12/README.md) | Cine Castillo: catálogo de películas con TMDB, Room y Firebase | Disponible |
 | [13](Semana_13/README.md) | Semana reservada para la siguiente entrega | Pendiente |
 | [14](Semana_14/README.md) | Semana reservada para la siguiente entrega | Pendiente |
 | [15](Semana_15/README.md) | Semana reservada para la siguiente entrega | Pendiente |
