@@ -5,8 +5,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,7 +60,7 @@ fun AppNavigation(viewModel: PostViewModel) {
                 navigationIcon = {
                     if (!isRoot) {
                         IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(Icons.Filled.KeyboardArrowLeft, contentDescription = "Volver")
+                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Volver")
                         }
                     }
                 },
