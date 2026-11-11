@@ -1,5 +1,15 @@
 # Semana 12 · Cine Castillo
 
-Laboratorio individual de **Jesús Castillo Sumire** (C24D). La aplicación Android consulta películas en TMDB, guarda una copia local con Room y permite marcar favoritas. Firebase Authentication identifica a cada usuario y Firestore determina si accede como `usuario` o `admin`.
+Laboratorio individual de **Jesús Castillo Sumire**, sección **C24D**. Aplicación Android de películas con **Kotlin, Jetpack Compose, Firebase, TMDB, Room y MVVM**.
 
-Abre [CineCastillo](CineCastillo/) en Android Studio. La versión base está en `main`; la versión ampliada se encuentra en `mejora-ia`. El [README del proyecto](CineCastillo/README.md) describe la configuración, el flujo y las pruebas.
+| Entregable | Acceso |
+|---|---|
+| Proyecto Android | [CineCastillo](CineCastillo/) |
+| Arquitectura, configuración y capturas | [README](CineCastillo/README.md) |
+| 14 pruebas de aceptación aprobadas | [Registro y evidencias](CineCastillo/PRUEBAS_ACEPTACION.md) |
+| Indicaciones y aprendizaje | [PROMPTS](CineCastillo/PROMPTS.md) |
+| APK | [Versiones publicadas](https://github.com/JesusCastillo2026/Programacion-En-Moviles/releases) |
+
+**Verificación del 11/11/2026:** APK compilado, 8 pruebas unitarias aprobadas y comprobación en Pixel 8 de acceso por roles, favoritos, caché, recuperación sin red, notificaciones, administración y rotación.
+
+Abre la carpeta **CineCastillo** en Android Studio. La fase base permanece en `main`; la versión ampliada está en `mejora-ia`, manteniendo la misma ubicación del proyecto.

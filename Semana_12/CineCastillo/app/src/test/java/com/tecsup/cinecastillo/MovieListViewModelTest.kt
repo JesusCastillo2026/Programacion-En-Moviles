@@ -1,5 +1,7 @@
 package com.tecsup.cinecastillo
 
+import com.tecsup.cinecastillo.ui.lista.MovieListViewModel
+import com.tecsup.cinecastillo.ui.lista.MovieSort
 import com.tecsup.cinecastillo.domain.model.Movie
 import com.tecsup.cinecastillo.data.repository.MovieRepository
 import com.tecsup.cinecastillo.notification.Notificador
@@ -20,7 +22,7 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MovieListViewModelTest {
-    private val film = Movie(11, "Película de prueba", "Historia", null, "2026-01-01", 8.2)
+    private val film = Movie(11, "PelÃ­cula de prueba", "Historia", null, "2026-01-01", 8.2)
 
     @Test fun cargaExitosaMuestraPeliculas() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
@@ -63,7 +65,7 @@ class MovieListViewModelTest {
             advanceUntilIdle()
             vm.search("inexistente")
             assertTrue(vm.uiState.value.visible.isEmpty())
-            vm.search("película")
+            vm.search("pelÃ­cula")
             assertEquals(1, vm.uiState.value.visible.size)
         } finally { Dispatchers.resetMain() }
     }
@@ -80,6 +82,35 @@ class MovieListViewModelTest {
             assertEquals(listOf(12), vm.uiState.value.visible.map { it.id })
         } finally { Dispatchers.resetMain() }
     }
+
+    @Test fun volverAObservarNoDescargaOtraVez() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val fake = FakeMovies(remote = listOf(film))
+            val vm = MovieListViewModel(fake, FakeNotificador())
+            advanceUntilIdle()
+            vm.search("prueba")
+            assertEquals("prueba", vm.uiState.value.query)
+            assertEquals(1, fake.descargas)
+            assertTrue(vm.estado.value is com.tecsup.cinecastillo.ui.UiState.Exito)
+            advanceUntilIdle()
+            assertEquals(1, fake.descargas)
+        } finally { Dispatchers.resetMain() }
+    }
+
+    @Test fun notificaCantidadSoloSiSincroniza() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val avisos = FakeNotificador()
+            MovieListViewModel(FakeMovies(remote = listOf(film)), avisos)
+            advanceUntilIdle()
+            assertEquals(listOf("Se guardaron 1 elementos"), avisos.avisos)
+            val fallidos = FakeNotificador()
+            MovieListViewModel(FakeMovies(fail = true), fallidos)
+            advanceUntilIdle()
+            assertTrue(fallidos.avisos.isEmpty())
+        } finally { Dispatchers.resetMain() }
+    }
 }
 
 private class FakeNotificador : Notificador {
@@ -92,19 +123,23 @@ private class FakeMovies(
     private val remote: List<Movie> = emptyList(),
     private val fail: Boolean = false
 ) : MovieRepository {
+    var descargas = 0
     private val items = MutableStateFlow(cached)
     override val movies: Flow<List<Movie>> = items
     override val favorites = items.map { list -> list.filter { it.favorite } }
     override fun movie(id: Int): Flow<Movie?> = items.map { list -> list.firstOrNull { it.id == id } }
-    override suspend fun sync(): Int {
-        if (fail) throw IllegalStateException("red desconectada")
+    override suspend fun refrescar(): Result<Int> {
+        descargas++
+        if (fail) return Result.failure(java.io.IOException("red desconectada"))
         items.value = remote
-        return remote.size
+        return Result.success(remote.size)
     }
-    override suspend fun refreshDetail(id: Int) = Unit
-    override suspend fun setFavorite(id: Int, favorite: Boolean) {
-        items.value = items.value.map { if (it.id == id) it.copy(favorite = favorite) else it }
+    override suspend fun obtenerDetalle(id: Int): Result<Movie> = Result.success(items.value.first { it.id == id })
+    override suspend fun alternarFavorito(id: Int) {
+        items.value = items.value.map { if (it.id == id) it.copy(favorite = !it.favorite) else it }
     }
-    override suspend fun clearCache() { items.value = emptyList() }
+    override suspend fun cantidadGuardada() = items.value.size
+    override suspend fun cantidadFavoritos() = items.value.count { it.favorite }
+    override suspend fun limpiarCache() { items.value = emptyList() }
 }
 

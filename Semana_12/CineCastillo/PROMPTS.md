@@ -1,32 +1,49 @@
-# Registro de indicaciones y mejoras · Cine Castillo
+# Registro de indicaciones - Cine Castillo
 
-Este archivo resume las indicaciones recibidas para la fase de mejora y las decisiones comprobables en el proyecto. No contiene contraseñas ni la clave de TMDB.
+**Herramienta:** ChatGPT mediante Codex. **Registro consolidado:** 11/11/2026.
 
-| Indicación recibida | Respuesta aplicada | Ajuste o corrección |
-|---|---|---|
-| “El tema tratará sobre PELÍCULAS”; trabajo individual y proyecto nuevo en Firebase. | Se creó Cine Castillo con Firebase Authentication, roles en Firestore y catálogo de películas. | Se registró el paquete exacto `com.tecsup.cinecastillo` para enlazar el archivo Android correcto. |
-| El docente indicó no considerar las API básicas del documento. | Se eligió TMDB para catálogo, detalle, imágenes y valoración, con créditos dentro de la app. | La clave queda en `local.properties`, fuera de Git. Se añadió el aviso y logotipo oficiales de TMDB. |
-| Completar la guía y mantener avances en GitHub. | La fase base está en `main` y la ampliación en `mejora-ia`. | Se añadieron filtros de orden y una prueba que comprueba la combinación de orden y favoritos. |
+Se documentan indicaciones reales del estudiante, resumidas para evitar repetir mensajes extensos. Cuando no se dispone de la fecha exacta de una consulta anterior, se indica expresamente. No se inventan conversaciones ni se alteran fechas de commits. No se incluyen contraseñas o claves.
 
-## Correcciones durante el desarrollo
+## 1. Tema, modalidad y servicio remoto
 
-- Se ajustaron las versiones de Kotlin y KSP para que Gradle compilara.
-- Se comprobó que el archivo de Firebase descargado correspondiera a este proyecto y paquete; otro archivo descargado no era JSON válido.
-- Se configuraron dos usuarios de prueba con roles distintos en Firestore y reglas que impiden modificar el propio rol desde la aplicación.
-- Se evitó perder la notificación cuando la sincronización termina mientras Android todavía pregunta por el permiso.
+- **Fecha de consulta:** anterior a la consolidación; fecha exacta no registrada.
+- **Prompt:** desarrollar el laboratorio con temática de películas, de forma individual y con un proyecto nuevo de Firebase. El docente indicó no utilizar las API básicas del documento.
+- **Respuesta resumida:** construir Cine Castillo con TMDB para catálogo, detalle e imágenes; Firebase Authentication para acceso y Firestore para roles.
+- **Corrección aplicada:** registrar el paquete Android exacto y utilizar el archivo JSON del nuevo proyecto; el de Semana 11 no corresponde.
+- **Aprendizaje:** el identificador del paquete y el proyecto Firebase deben coincidir con la aplicación configurada.
 
-## Consulta y revisión final — 11/11/2026
+## 2. Repositorio y publicación
 
-**Herramienta:** ChatGPT Astra.
+- **Fecha de consulta:** anterior a la consolidación; fecha exacta no registrada.
+- **Prompt:** completar el trabajo, subir los avances al repositorio del curso y publicar el APK.
+- **Respuesta resumida:** mantener el proyecto en Semana_12/CineCastillo, conservar las fases main y mejora-ia y publicar versiones descargables.
+- **Corrección aplicada:** excluir de Git la configuración local y la clave de TMDB; conservar los releases anteriores. Se informó que la clave integrada puede extraerse del APK y el estudiante autorizó publicarlo.
+- **Aprendizaje:** excluir una clave del código versionado no la convierte en un secreto de servidor cuando está incluida en una app distribuida.
 
-**Indicación del estudiante:** completar el Laboratorio 12 con temática de películas, trabajo individual y un proyecto nuevo de Firebase; sustituir las API básicas sugeridas por el documento. También se solicitó subir los avances y publicar el APK.
+## 3. Pruebas reales y evidencia
 
-**Respuesta resumida:** se construyó Cine Castillo con autenticación, roles, catálogo TMDB, caché Room, favoritos, panel de administración, notificación de sincronización y atribución de la fuente. Se organizaron las fuentes en capas y se compiló el proyecto.
+- **Fecha de consulta:** anterior o igual al 11/11/2026; se consolida en esta fecha.
+- **Prompt:** ejecutar los 14 casos de aceptación en el emulador y documentarlos con capturas; explicar mejor los bloques importantes de código en el PDF.
+- **Respuesta resumida:** ejecutar acceso por roles, validaciones, sincronización, detalle, favoritas, modo avión, limpieza de caché, cierre de sesión, rotación y permisos.
+- **Corrección aplicada:** diferenciar evidencia visual de verificación interna: se guardó una traza de rutas HTTP para demostrar el segundo endpoint y la ausencia de descarga adicional al girar.
+- **Aprendizaje:** una captura de pantalla no demuestra por sí sola que se llamó a un endpoint; necesita complementarse con resultados observables y trazas.
 
-**Qué se corrigió:** compatibilidad de Kotlin y KSP, archivo correcto de configuración Firebase, conservación de favoritos al sincronizar, ordenamiento rotulado según su función real y notificación al resolverse el permiso de Android.
+## 4. Completar la entrega sin pruebas parciales
 
-**Qué aprendí:** la clave de una API integrada en un APK puede extraerse; por ello no se debe tratar como un secreto de servidor. También comprobé que las pruebas unitarias y la compilación no reemplazan las pruebas visuales y de conectividad en el emulador.
+- **Fecha de consulta:** retomada el 11/11/2026.
+- **Prompt:** completar las faltas de la entrega y corregir los casos parciales antes de entregar el PDF con evidencias y conclusiones.
+- **Respuesta resumida:** revisar la guía y corregir la implementación antes de cambiar el resultado documentado.
+- **Corrección aplicada:** separar navegación, autenticación e implementaciones de repositorios; añadir UiState común y ViewModel propios de Favoritos y Admin; mantener las factories con AppContainer y la observación ligada al ciclo de vida.
+- **Aprendizaje:** marcar un requisito como terminado requiere comprobar tanto su comportamiento como la responsabilidad de cada capa.
 
-## Límites de la verificación
+## 5. Continuación y correcciones verificadas
 
-La compilación y las pruebas unitarias no sustituyen la revisión visual en el emulador. Las capturas de esa revisión se agregan al informe después de ejecutar la app en Android Studio.
+- **Fecha:** 11/11/2026.
+- **Prompt:** «puedes continuar en donde te quedaste».
+- **Respuesta resumida:** retomar las pruebas del emulador y completar las comprobaciones restantes del informe.
+- **Corrección aplicada:** colocar encabezado y tarjetas en una sola lista desplazable para la orientación horizontal; conservar el contenedor en Application; añadir error con Reintentar al abrir sin sesión ni red; cancelar la observación anterior antes de reintentar. Se verificó el flujo sin caché, su recuperación y los contadores del administrador después de sincronizar.
+- **Aprendizaje:** el estado de una instalación nueva sin conexión necesita un tratamiento distinto al de un catálogo ya descargado. El reintento debe recuperar el acceso sin duplicar listeners ni saltarse la autenticación.
+
+## Resultado de esta revisión
+
+La compilación y las ocho pruebas unitarias finalizaron correctamente. Los catorce casos de aceptación se ejecutaron en el emulador y están documentados en [PRUEBAS_ACEPTACION.md](PRUEBAS_ACEPTACION.md). El PDF explica los bloques importantes y reúne las capturas reales. Las mejoras de búsqueda y orden actúan sobre el catálogo local; no se describen como consultas remotas que no se utilizan.

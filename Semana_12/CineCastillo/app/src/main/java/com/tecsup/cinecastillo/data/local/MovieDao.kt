@@ -29,6 +29,13 @@ interface MovieDao {
     @Query("UPDATE movies SET favorite = :favorite WHERE id = :id")
     suspend fun setFavorite(id: Int, favorite: Boolean)
 
+    @Query("UPDATE movies SET favorite = NOT favorite WHERE id = :id")
+    suspend fun alternarFavorito(id: Int)
+    @Query("SELECT COUNT(*) FROM movies")
+    suspend fun contar(): Int
+    @Query("SELECT COUNT(*) FROM movies WHERE favorite = 1")
+    suspend fun contarFavoritos(): Int
+
     @Query("DELETE FROM movies")
     suspend fun clear()
 }

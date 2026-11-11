@@ -1,0 +1,3 @@
+--------- beginning of main
+11-11 18:54:33.292 25504  7770 I CineNetwork: GET /3/discover/movie
+11-11 18:57:30.306 25504  9971 I CineNetwork: GET /3/movie/1507696

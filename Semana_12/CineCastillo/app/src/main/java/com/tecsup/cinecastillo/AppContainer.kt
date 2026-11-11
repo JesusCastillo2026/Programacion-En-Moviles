@@ -20,22 +20,16 @@ class AppContainer(context: Context) {
         "cine_castillo.db"
     ).build()
 
-    private val client = OkHttpClient.Builder().addInterceptor { chain ->
-        val url = chain.request().url.newBuilder().addQueryParameter("api_key", BuildConfig.TMDB_API_KEY).build()
-        val request = chain.request().newBuilder()
-            .url(url)
-            .header("Accept", "application/json")
-            .build()
-        chain.proceed(request)
-    }.build()
-
-    private val api = Retrofit.Builder()
-        .baseUrl("https://api.themoviedb.org/3/")
-        .client(client)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build().create(MovieApi::class.java)
+    private val api = com.tecsup.cinecastillo.data.remote.RetrofitClient.api
 
     val movies = RoomMovieRepository(api, database)
-    val auth by lazy { FirebaseAuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance()) }
+    val auth by lazy {
+        FirebaseAuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance()) {
+            val manager = context.applicationContext.getSystemService(android.net.ConnectivityManager::class.java)
+            val network = manager.activeNetwork
+            val capabilities = manager.getNetworkCapabilities(network)
+            capabilities?.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+        }
+    }
 }
 

@@ -1,4 +1,4 @@
-package com.tecsup.cinecastillo.ui
+package com.tecsup.cinecastillo.ui.detalle
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.tecsup.cinecastillo.MovieDetailUiState
+import com.tecsup.cinecastillo.ui.detalle.MovieDetailUiState
 
 @Composable
 fun DetailScreen(state: MovieDetailUiState, onBack: () -> Unit, onRefresh: () -> Unit, onFavorite: (Boolean) -> Unit) {

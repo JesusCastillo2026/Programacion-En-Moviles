@@ -21,8 +21,8 @@ android {
         applicationId = "com.tecsup.cinecastillo"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.0.2"
         buildConfigField("String", "TMDB_API_KEY", "\"${local.getProperty("TMDB_API_KEY", "")}\"")
         buildConfigField("boolean", "FIREBASE_CONFIGURED", firebaseConfig.exists().toString())
     }

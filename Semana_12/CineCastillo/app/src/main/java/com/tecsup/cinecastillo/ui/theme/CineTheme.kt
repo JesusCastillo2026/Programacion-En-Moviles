@@ -1,4 +1,4 @@
-package com.tecsup.cinecastillo.ui
+package com.tecsup.cinecastillo.ui.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme

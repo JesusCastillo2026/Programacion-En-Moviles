@@ -1,4 +1,4 @@
-package com.tecsup.cinecastillo.ui
+package com.tecsup.cinecastillo.ui.login
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -1,5 +1,10 @@
-package com.tecsup.cinecastillo
+package com.tecsup.cinecastillo.ui.lista
 
+import com.tecsup.cinecastillo.AppContainer
+import com.tecsup.cinecastillo.ui.UiState
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -41,6 +46,7 @@ data class MovieListUiState(
 class MovieListViewModel(private val repository: MovieRepository, private val notificador: Notificador) : ViewModel() {
     private val mutable = MutableStateFlow(MovieListUiState())
     val uiState: StateFlow<MovieListUiState> = mutable.asStateFlow()
+    val estado = mutable.map { if (it.loading && it.movies.isEmpty()) UiState.Cargando else if (it.error != null) UiState.Error(it.error) else UiState.Exito(it) }.stateIn(viewModelScope, SharingStarted.Eagerly, UiState.Cargando)
 
     init {
         viewModelScope.launch {
@@ -53,9 +59,11 @@ class MovieListViewModel(private val repository: MovieRepository, private val no
         viewModelScope.launch {
             mutable.update { it.copy(loading = true, error = null, syncCount = null) }
             try {
-                val count = repository.sync()
+                val count = repository.refrescar().getOrThrow()
                 mutable.update { it.copy(loading = false, offline = false, syncCount = count) }
                 notificador.mostrar("Datos actualizados", "Se guardaron $count elementos")
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 mutable.update {
                     it.copy(
@@ -73,12 +81,12 @@ class MovieListViewModel(private val repository: MovieRepository, private val no
     fun showFavorites(only: Boolean) = mutable.update { it.copy(favoritesOnly = only) }
 
     fun setFavorite(id: Int, favorite: Boolean) {
-        viewModelScope.launch { repository.setFavorite(id, favorite) }
+        viewModelScope.launch { repository.alternarFavorito(id) }
     }
 
     fun clearCache() {
         viewModelScope.launch {
-            repository.clearCache()
+            repository.limpiarCache()
             mutable.update { it.copy(offline = false, syncCount = null) }
         }
     }

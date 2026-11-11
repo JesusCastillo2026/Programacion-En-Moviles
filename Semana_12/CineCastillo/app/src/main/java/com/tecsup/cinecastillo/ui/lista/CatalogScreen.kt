@@ -1,4 +1,4 @@
-package com.tecsup.cinecastillo.ui
+package com.tecsup.cinecastillo.ui.lista
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,8 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.tecsup.cinecastillo.MovieListUiState
-import com.tecsup.cinecastillo.MovieSort
+import com.tecsup.cinecastillo.ui.lista.MovieListUiState
+import com.tecsup.cinecastillo.ui.lista.MovieSort
 import com.tecsup.cinecastillo.domain.model.Movie
 
 @Composable
@@ -44,13 +44,16 @@ fun CatalogScreen(
     onFavorites: (Boolean) -> Unit,
     onSync: () -> Unit,
     onDetail: (Int) -> Unit,
-    onFavorite: (Int, Boolean) -> Unit
+    onFavorite: (Int, Boolean) -> Unit,
+    soloFavoritos: Boolean = false
 ) {
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Películas", style = MaterialTheme.typography.headlineMedium)
+    LazyColumn(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+      item {
+       Column {
+        Text(if (soloFavoritos) "Mis favoritos" else "Películas", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(8.dp))
-        OutlinedTextField(value = state.query, onValueChange = onSearch, label = { Text("Buscar en el catálogo") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (!soloFavoritos) OutlinedTextField(value = state.query, onValueChange = onSearch, label = { Text("Buscar en el catálogo") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        if (!soloFavoritos) LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
           item {
             FilterChip(selected = state.sort == MovieSort.TITLE, onClick = { onSort(MovieSort.TITLE) }, label = { Text("A-Z") })
           }
@@ -61,7 +64,7 @@ fun CatalogScreen(
             FilterChip(selected = state.sort == MovieSort.NEWEST, onClick = { onSort(MovieSort.NEWEST) }, label = { Text("Recientes") })
           }
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        if (!soloFavoritos) Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = { onFavorites(false) }) { Text("Todas") }
             TextButton(onClick = { onFavorites(true) }) { Text("Favoritas") }
             Spacer(Modifier.weight(1f))
@@ -76,11 +79,11 @@ fun CatalogScreen(
         if (!state.loading && state.error == null && state.visible.isEmpty()) {
             Text(if (state.movies.isEmpty()) "No hay películas guardadas." else "No se encontraron resultados.")
         }
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+       }
+      }
             items(state.visible, key = { it.id }) { movie ->
                 MovieCard(movie, onDetail = { onDetail(movie.id) }, onFavorite = { onFavorite(movie.id, !movie.favorite) })
             }
-        }
     }
 }
 
