@@ -1,15 +1,9 @@
-# Tarea Evaluativa — Semana 5
+# Tarea evaluativa · Semana 05
 
-Dos temas: Clínica Salud+ y TECSUP Fit, con Kotlin y Jetpack Compose, sin ViewModel ni MVVM.
+Esta entrega reúne dos aplicaciones Android desarrolladas con Kotlin y Jetpack Compose:
 
-- `main`: proyectos de referencia en `SinIA/ClinicaSalud` y `SinIA/TecsupFit`.
-- `mejora-ia`: conserva la base e incorpora `ConIA/ClinicaSalud` y `ConIA/TecsupFit`.
+- `ClinicaSalud/`: catálogo de profesionales y flujo de atención clínica.
+- `TecsupFit/`: consulta de clases y actividad física.
+- `SUSTENTACION.md`: guía de presentación de los proyectos.
 
-Abrir cada carpeta de proyecto por separado en Android Studio y ejecutar el módulo app. Usan JDK 17 o superior, SDK 37 y Gradle 9.5.0.
-
-## Autoría y alcance
-
-Los nombres SinIA y ConIA organizan las versiones solicitadas. La versión SinIA mantiene el código base sin documentación adicional dentro del código. La versión ConIA incorpora mejoras funcionales y documentación técnica.
-
-La guía permite elegir un tema; aquí se incluyen ambos por solicitud del alumno. Los datos de pacientes, profesionales y clases son demostrativos. El estado está en memoria y se reinicia al cerrar el proceso.
-
+Las mismas rutas se utilizan en `main` y `mejora-ia`; cambia de rama para consultar la versión correspondiente. Abre cada carpeta de aplicación de forma independiente en Android Studio.
