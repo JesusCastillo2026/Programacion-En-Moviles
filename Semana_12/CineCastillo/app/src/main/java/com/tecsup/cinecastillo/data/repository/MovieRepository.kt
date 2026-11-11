@@ -1,6 +1,12 @@
-package com.tecsup.cinecastillo.data
+package com.tecsup.cinecastillo.data.repository
 
 import androidx.room.withTransaction
+import com.tecsup.cinecastillo.data.local.MovieDatabase
+import com.tecsup.cinecastillo.data.local.MovieEntity
+import com.tecsup.cinecastillo.data.mapper.toEntity
+import com.tecsup.cinecastillo.data.mapper.toMovie
+import com.tecsup.cinecastillo.data.remote.MovieApi
+import com.tecsup.cinecastillo.domain.model.Movie
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -53,3 +59,4 @@ class RoomMovieRepository(
     override suspend fun setFavorite(id: Int, favorite: Boolean) = dao.setFavorite(id, favorite)
     override suspend fun clearCache() = dao.clear()
 }
+

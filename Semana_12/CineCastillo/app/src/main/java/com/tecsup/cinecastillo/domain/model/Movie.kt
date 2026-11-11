@@ -1,4 +1,4 @@
-package com.tecsup.cinecastillo.data
+package com.tecsup.cinecastillo.domain.model
 
 data class Movie(
     val id: Int,
@@ -12,3 +12,4 @@ data class Movie(
 ) {
     val posterUrl: String? get() = posterPath?.let { "https://image.tmdb.org/t/p/w500$it" }
 }
+

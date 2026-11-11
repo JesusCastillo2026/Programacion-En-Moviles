@@ -1,7 +1,7 @@
 package com.tecsup.cinecastillo
 
-import com.tecsup.cinecastillo.data.Movie
-import com.tecsup.cinecastillo.data.MovieRepository
+import com.tecsup.cinecastillo.domain.model.Movie
+import com.tecsup.cinecastillo.data.repository.MovieRepository
 import com.tecsup.cinecastillo.notification.Notificador
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -107,3 +107,4 @@ private class FakeMovies(
     }
     override suspend fun clearCache() { items.value = emptyList() }
 }
+

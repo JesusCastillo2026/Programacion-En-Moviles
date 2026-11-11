@@ -3,8 +3,8 @@ package com.tecsup.cinecastillo
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.tecsup.cinecastillo.data.Movie
-import com.tecsup.cinecastillo.data.MovieRepository
+import com.tecsup.cinecastillo.domain.model.Movie
+import com.tecsup.cinecastillo.data.repository.MovieRepository
 import com.tecsup.cinecastillo.notification.Notificador
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /** Orden aplicado sobre las películas disponibles localmente. */
-enum class MovieSort { POPULAR, RATING, NEWEST }
+enum class MovieSort { TITLE, RATING, NEWEST }
 
 data class MovieListUiState(
     val movies: List<Movie> = emptyList(),
@@ -23,7 +23,7 @@ data class MovieListUiState(
     val query: String = "",
     val favoritesOnly: Boolean = false,
     val syncCount: Int? = null,
-    val sort: MovieSort = MovieSort.POPULAR
+    val sort: MovieSort = MovieSort.TITLE
 ) {
     val visible: List<Movie> get() {
         val filtered = movies.filter { movie ->
@@ -31,7 +31,7 @@ data class MovieListUiState(
                 (query.isBlank() || movie.title.contains(query.trim(), ignoreCase = true))
         }
         return when (sort) {
-            MovieSort.POPULAR -> filtered
+            MovieSort.TITLE -> filtered.sortedBy { it.title }
             MovieSort.RATING -> filtered.sortedByDescending { it.rating }
             MovieSort.NEWEST -> filtered.sortedByDescending { it.releaseDate }
         }
@@ -88,3 +88,4 @@ class MovieListViewModel(private val repository: MovieRepository, private val no
         override fun <T : ViewModel> create(modelClass: Class<T>): T = MovieListViewModel(container.movies, container.notificador) as T
     }
 }
+

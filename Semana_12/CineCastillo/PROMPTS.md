@@ -15,6 +15,18 @@ Este archivo resume las indicaciones recibidas para la fase de mejora y las deci
 - Se configuraron dos usuarios de prueba con roles distintos en Firestore y reglas que impiden modificar el propio rol desde la aplicación.
 - Se evitó perder la notificación cuando la sincronización termina mientras Android todavía pregunta por el permiso.
 
+## Consulta y revisión final — 11/11/2026
+
+**Herramienta:** ChatGPT Astra.
+
+**Indicación del estudiante:** completar el Laboratorio 12 con temática de películas, trabajo individual y un proyecto nuevo de Firebase; sustituir las API básicas sugeridas por el documento. También se solicitó subir los avances y publicar el APK.
+
+**Respuesta resumida:** se construyó Cine Castillo con autenticación, roles, catálogo TMDB, caché Room, favoritos, panel de administración, notificación de sincronización y atribución de la fuente. Se organizaron las fuentes en capas y se compiló el proyecto.
+
+**Qué se corrigió:** compatibilidad de Kotlin y KSP, archivo correcto de configuración Firebase, conservación de favoritos al sincronizar, ordenamiento rotulado según su función real y notificación al resolverse el permiso de Android.
+
+**Qué aprendí:** la clave de una API integrada en un APK puede extraerse; por ello no se debe tratar como un secreto de servidor. También comprobé que las pruebas unitarias y la compilación no reemplazan las pruebas visuales y de conectividad en el emulador.
+
 ## Límites de la verificación
 
 La compilación y las pruebas unitarias no sustituyen la revisión visual en el emulador. Las capturas de esa revisión se agregan al informe después de ejecutar la app en Android Studio.

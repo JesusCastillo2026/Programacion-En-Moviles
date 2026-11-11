@@ -1,4 +1,4 @@
-package com.tecsup.cinecastillo.data
+package com.tecsup.cinecastillo.data.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -15,4 +15,4 @@ data class MovieEntity(
     val detailLoaded: Boolean
 )
 
-fun MovieEntity.toMovie() = Movie(id, title, overview, posterPath, releaseDate, rating, favorite, detailLoaded)
+

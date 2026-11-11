@@ -1,5 +1,7 @@
-package com.tecsup.cinecastillo.data
+package com.tecsup.cinecastillo.data.remote
 
+import com.tecsup.cinecastillo.data.remote.dto.MovieDto
+import com.tecsup.cinecastillo.data.remote.dto.MoviePageDto
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -14,3 +16,4 @@ interface MovieApi {
     @GET("search/movie")
     suspend fun search(@Query("query") query: String, @Query("language") language: String = "es-PE"): MoviePageDto
 }
+

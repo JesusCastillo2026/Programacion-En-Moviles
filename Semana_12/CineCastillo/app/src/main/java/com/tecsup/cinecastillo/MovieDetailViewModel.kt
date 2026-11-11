@@ -3,8 +3,8 @@ package com.tecsup.cinecastillo
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.tecsup.cinecastillo.data.Movie
-import com.tecsup.cinecastillo.data.MovieRepository
+import com.tecsup.cinecastillo.domain.model.Movie
+import com.tecsup.cinecastillo.data.repository.MovieRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,3 +47,4 @@ class MovieDetailViewModel(private val id: Int, private val repository: MovieRep
         override fun <T : ViewModel> create(modelClass: Class<T>): T = MovieDetailViewModel(id, repository) as T
     }
 }
+

@@ -1,4 +1,4 @@
-package com.tecsup.cinecastillo.data
+package com.tecsup.cinecastillo.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -7,3 +7,4 @@ import androidx.room.RoomDatabase
 abstract class MovieDatabase : RoomDatabase() {
     abstract fun movieDao(): MovieDao
 }
+

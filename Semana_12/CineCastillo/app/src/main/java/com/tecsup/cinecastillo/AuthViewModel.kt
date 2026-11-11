@@ -3,8 +3,8 @@ package com.tecsup.cinecastillo
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.tecsup.cinecastillo.data.AuthRepository
-import com.tecsup.cinecastillo.data.SessionState
+import com.tecsup.cinecastillo.data.auth.AuthRepository
+import com.tecsup.cinecastillo.data.auth.SessionState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,3 +46,4 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         override fun <T : ViewModel> create(modelClass: Class<T>): T = AuthViewModel(repository) as T
     }
 }
+

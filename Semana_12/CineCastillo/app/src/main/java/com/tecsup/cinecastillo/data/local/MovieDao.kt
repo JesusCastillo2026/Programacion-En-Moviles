@@ -1,4 +1,4 @@
-package com.tecsup.cinecastillo.data
+package com.tecsup.cinecastillo.data.local
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -32,3 +32,4 @@ interface MovieDao {
     @Query("DELETE FROM movies")
     suspend fun clear()
 }
+

@@ -11,11 +11,11 @@ Aplicación Android de películas para el Laboratorio 12 de Programación en Mó
 - Panel de administración para ver estadísticas locales, sincronizar y vaciar la caché con confirmación.
 - Notificación después de sincronizar, si el permiso correspondiente está concedido.
 - Pantalla de créditos con atribución y logotipo oficial de TMDB.
-- Filtros locales para ordenar el catálogo por popularidad, valoración o fecha.
+- Filtros locales para ordenar el catálogo por título, valoración o fecha.
 
 ## Estructura y flujo
 
-`data/` contiene los modelos, la API, el DAO, la base de datos y los repositorios. Los ViewModel convierten esos datos en estados de interfaz. `ui/` contiene las pantallas Compose. `MainActivity.kt` conecta la sesión con el catálogo, detalle, favoritos y panel de administración.
+`data/remote` contiene la API y los DTO; `data/local`, Room y sus entidades; `data/mapper`, las conversiones; `data/auth` y `data/repository`, el acceso a las fuentes. `domain/model` contiene el modelo usado por la interfaz. Los ViewModel exponen estados observables. `notification` encapsula las notificaciones y `ui/` contiene las pantallas Compose. `MainActivity.kt` conecta la sesión con el catálogo, detalle, favoritos y panel de administración.
 
 ```text
 Login → Catálogo → Detalle → Favoritos
@@ -38,6 +38,8 @@ Proyecto Firebase usado en el laboratorio: `cine-castillo-semana-12`. Su archivo
 ## Verificación y evidencia
 
 Compilación: `./gradlew :app:assembleDebug`. Pruebas de ViewModel: `./gradlew :app:testDebugUnitTest`. La verificación visual y las capturas de inicio de sesión, catálogo, detalle, favoritos y panel admin corresponden a la ejecución en Android Studio y deben agregarse al informe después de probar la app en el emulador.
+
+En esta entrega se comprobó la compilación y las pruebas unitarias. Quedan pendientes las pruebas de aceptación visuales y de notificación en un dispositivo o emulador; no se incluyen capturas no realizadas.
 
 ## Alcance
 

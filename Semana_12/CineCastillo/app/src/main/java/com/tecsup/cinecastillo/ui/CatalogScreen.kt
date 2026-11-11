@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.tecsup.cinecastillo.MovieListUiState
 import com.tecsup.cinecastillo.MovieSort
-import com.tecsup.cinecastillo.data.Movie
+import com.tecsup.cinecastillo.domain.model.Movie
 
 @Composable
 fun CatalogScreen(
@@ -52,7 +52,7 @@ fun CatalogScreen(
         OutlinedTextField(value = state.query, onValueChange = onSearch, label = { Text("Buscar en el catálogo") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
         LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
           item {
-            FilterChip(selected = state.sort == MovieSort.POPULAR, onClick = { onSort(MovieSort.POPULAR) }, label = { Text("Populares") })
+            FilterChip(selected = state.sort == MovieSort.TITLE, onClick = { onSort(MovieSort.TITLE) }, label = { Text("A-Z") })
           }
           item {
             FilterChip(selected = state.sort == MovieSort.RATING, onClick = { onSort(MovieSort.RATING) }, label = { Text("Mejor valoradas") })
@@ -100,3 +100,4 @@ private fun MovieCard(movie: Movie, onDetail: () -> Unit, onFavorite: () -> Unit
         }
     }
 }
+

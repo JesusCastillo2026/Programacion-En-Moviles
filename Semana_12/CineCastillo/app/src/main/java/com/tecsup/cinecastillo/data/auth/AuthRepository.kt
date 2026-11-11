@@ -1,4 +1,4 @@
-package com.tecsup.cinecastillo.data
+package com.tecsup.cinecastillo.data.auth
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -62,8 +62,8 @@ class FirebaseAuthRepository(
 
     override suspend fun login(email: String, password: String): Result<Unit> = runCatching {
         auth.signInWithEmailAndPassword(email.trim(), password).await()
-        Unit
     }
 
     override fun signOut() = auth.signOut()
 }
+

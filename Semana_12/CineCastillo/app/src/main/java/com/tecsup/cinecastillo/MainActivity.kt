@@ -36,8 +36,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.tecsup.cinecastillo.data.Role
-import com.tecsup.cinecastillo.data.SessionState
+import com.tecsup.cinecastillo.data.auth.Role
+import com.tecsup.cinecastillo.data.auth.SessionState
 import com.tecsup.cinecastillo.ui.AdminScreen
 import com.tecsup.cinecastillo.ui.CatalogScreen
 import com.tecsup.cinecastillo.ui.CineTheme
@@ -136,3 +136,4 @@ private fun SignedInApp(container: AppContainer, role: Role, email: String, onSi
         }
     }
 }
+
