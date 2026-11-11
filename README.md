@@ -23,7 +23,7 @@ Así, al cambiar de rama se ve el proyecto de esa versión sin carpetas duplicad
 | [06](Semana_06/README.md) | Carrito TECSUP y aplicación de citas SaludPlus para pacientes | Disponible |
 | [07](Semana_07/README.md) | GymTracker Pro: persistencia local y operaciones CRUD con Room | Disponible |
 | [08](Semana_08/README.md) | HuellitasVet: gestión veterinaria y de mascotas | Disponible |
-| [09](Semana_09/README.md) | Semana reservada para la siguiente entrega | Pendiente |
+| [09](Semana_09/README.md) | Consumo de API con Retrofit, persistencia de favoritos con Room y Jetpack Compose | Disponible |
 | [10](Semana_10/README.md) | Semana reservada para la siguiente entrega | Pendiente |
 | [11](Semana_11/README.md) | Mis Cursos: autenticación y gestión de cursos con Firebase | Disponible |
 | [12](Semana_12/README.md) | Semana reservada para la siguiente entrega | Pendiente |
