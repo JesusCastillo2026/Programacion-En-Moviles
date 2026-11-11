@@ -22,8 +22,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -78,13 +83,22 @@ private fun SignedInApp(container: AppContainer, role: Role, email: String, onSi
     val entry by nav.currentBackStackEntryAsState()
     val route = entry?.destination?.route
     val context = androidx.compose.ui.platform.LocalContext.current
-    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    var notificationsAllowed by remember {
+        mutableStateOf(Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
+    }
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        notificationsAllowed = granted
+    }
 
     LaunchedEffect(Unit) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) permission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !notificationsAllowed) {
+            permission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
-    LaunchedEffect(state.syncCount) {
-        state.syncCount?.let { SyncNotifications.show(context, it) }
+    // La sincronización puede terminar antes de que el usuario responda al permiso.
+    LaunchedEffect(state.syncCount, notificationsAllowed) {
+        if (notificationsAllowed) state.syncCount?.let { SyncNotifications.show(context, it) }
     }
     LaunchedEffect(route) { listVm.showFavorites(route == "favorites") }
 
