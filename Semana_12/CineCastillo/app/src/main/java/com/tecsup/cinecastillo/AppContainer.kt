@@ -7,11 +7,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.tecsup.cinecastillo.data.FirebaseAuthRepository
 import com.tecsup.cinecastillo.data.MovieApi
 import com.tecsup.cinecastillo.data.RoomMovieRepository
+import com.tecsup.cinecastillo.notification.NotificadorAndroid
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class AppContainer(context: Context) {
+    val notificador = NotificadorAndroid(context.applicationContext)
     private val database = Room.databaseBuilder(
         context.applicationContext,
         com.tecsup.cinecastillo.data.MovieDatabase::class.java,

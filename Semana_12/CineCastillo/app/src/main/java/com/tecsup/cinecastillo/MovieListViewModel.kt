@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.tecsup.cinecastillo.data.Movie
 import com.tecsup.cinecastillo.data.MovieRepository
+import com.tecsup.cinecastillo.notification.Notificador
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,7 +38,7 @@ data class MovieListUiState(
     }
 }
 
-class MovieListViewModel(private val repository: MovieRepository) : ViewModel() {
+class MovieListViewModel(private val repository: MovieRepository, private val notificador: Notificador) : ViewModel() {
     private val mutable = MutableStateFlow(MovieListUiState())
     val uiState: StateFlow<MovieListUiState> = mutable.asStateFlow()
 
@@ -54,6 +55,7 @@ class MovieListViewModel(private val repository: MovieRepository) : ViewModel() 
             try {
                 val count = repository.sync()
                 mutable.update { it.copy(loading = false, offline = false, syncCount = count) }
+                notificador.mostrar("Datos actualizados", "Se guardaron $count elementos")
             } catch (e: Exception) {
                 mutable.update {
                     it.copy(
@@ -81,8 +83,8 @@ class MovieListViewModel(private val repository: MovieRepository) : ViewModel() 
         }
     }
 
-    class Factory(private val repository: MovieRepository) : ViewModelProvider.Factory {
+    class Factory(private val container: AppContainer) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T = MovieListViewModel(repository) as T
+        override fun <T : ViewModel> create(modelClass: Class<T>): T = MovieListViewModel(container.movies, container.notificador) as T
     }
 }

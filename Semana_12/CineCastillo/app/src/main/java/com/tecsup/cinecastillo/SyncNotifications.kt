@@ -22,7 +22,7 @@ object SyncNotifications {
         }
     }
 
-    fun show(context: Context, count: Int) {
+    fun show(context: Context, title: String, message: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         ) return
@@ -32,8 +32,8 @@ object SyncNotifications {
         )
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_menu_save)
-            .setContentTitle("Cine Castillo")
-            .setContentText("Se guardaron $count elementos")
+            .setContentTitle(title)
+            .setContentText(message)
             .setContentIntent(intent)
             .setAutoCancel(true)
             .build()

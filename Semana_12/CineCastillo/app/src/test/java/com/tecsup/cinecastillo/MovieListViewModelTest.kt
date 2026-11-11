@@ -2,6 +2,7 @@ package com.tecsup.cinecastillo
 
 import com.tecsup.cinecastillo.data.Movie
 import com.tecsup.cinecastillo.data.MovieRepository
+import com.tecsup.cinecastillo.notification.Notificador
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -25,7 +26,7 @@ class MovieListViewModelTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
             val fake = FakeMovies(remote = listOf(film))
-            val vm = MovieListViewModel(fake)
+            val vm = MovieListViewModel(fake, FakeNotificador())
             advanceUntilIdle()
             assertEquals(1, vm.uiState.value.movies.size)
             assertFalse(vm.uiState.value.loading)
@@ -36,7 +37,7 @@ class MovieListViewModelTest {
     @Test fun falloSinCacheMuestraReintento() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
-            val vm = MovieListViewModel(FakeMovies(fail = true))
+            val vm = MovieListViewModel(FakeMovies(fail = true), FakeNotificador())
             advanceUntilIdle()
             assertTrue(vm.uiState.value.movies.isEmpty())
             assertTrue(vm.uiState.value.error != null)
@@ -47,7 +48,7 @@ class MovieListViewModelTest {
     @Test fun falloConCacheMuestraModoSinConexion() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
-            val vm = MovieListViewModel(FakeMovies(cached = listOf(film), fail = true))
+            val vm = MovieListViewModel(FakeMovies(cached = listOf(film), fail = true), FakeNotificador())
             advanceUntilIdle()
             assertEquals(1, vm.uiState.value.visible.size)
             assertTrue(vm.uiState.value.offline)
@@ -58,7 +59,7 @@ class MovieListViewModelTest {
     @Test fun filtroLocalEncuentraTitulo() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
-            val vm = MovieListViewModel(FakeMovies(remote = listOf(film)))
+            val vm = MovieListViewModel(FakeMovies(remote = listOf(film)), FakeNotificador())
             advanceUntilIdle()
             vm.search("inexistente")
             assertTrue(vm.uiState.value.visible.isEmpty())
@@ -71,7 +72,7 @@ class MovieListViewModelTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
             val low = film.copy(id = 12, title = "B", rating = 4.0, favorite = true)
-            val vm = MovieListViewModel(FakeMovies(remote = listOf(low, film)))
+            val vm = MovieListViewModel(FakeMovies(remote = listOf(low, film)), FakeNotificador())
             advanceUntilIdle()
             vm.sort(MovieSort.RATING)
             assertEquals(listOf(11, 12), vm.uiState.value.visible.map { it.id })
@@ -79,6 +80,11 @@ class MovieListViewModelTest {
             assertEquals(listOf(12), vm.uiState.value.visible.map { it.id })
         } finally { Dispatchers.resetMain() }
     }
+}
+
+private class FakeNotificador : Notificador {
+    val avisos = mutableListOf<String>()
+    override fun mostrar(titulo: String, texto: String) { avisos += texto }
 }
 
 private class FakeMovies(

@@ -20,7 +20,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -63,9 +63,9 @@ private fun CineApp(container: AppContainer) {
         return
     }
     val auth: AuthViewModel = viewModel(factory = AuthViewModel.Factory(container.auth))
-    val session by auth.session.collectAsState()
-    val busy by auth.busy.collectAsState()
-    val error by auth.error.collectAsState()
+    val session by auth.session.collectAsStateWithLifecycle()
+    val busy by auth.busy.collectAsStateWithLifecycle()
+    val error by auth.error.collectAsStateWithLifecycle()
     when (val current = session) {
         SessionState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         SessionState.SignedOut -> LoginScreen(busy, error, auth::login)
@@ -77,8 +77,8 @@ private fun CineApp(container: AppContainer) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SignedInApp(container: AppContainer, role: Role, email: String, onSignOut: () -> Unit) {
-    val listVm: MovieListViewModel = viewModel(factory = MovieListViewModel.Factory(container.movies))
-    val state by listVm.uiState.collectAsState()
+    val listVm: MovieListViewModel = viewModel(factory = MovieListViewModel.Factory(container))
+    val state by listVm.uiState.collectAsStateWithLifecycle()
     val nav = rememberNavController()
     val entry by nav.currentBackStackEntryAsState()
     val route = entry?.destination?.route
@@ -89,16 +89,13 @@ private fun SignedInApp(container: AppContainer, role: Role, email: String, onSi
     }
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         notificationsAllowed = granted
+        container.notificador.permisoActualizado(granted)
     }
 
     LaunchedEffect(Unit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !notificationsAllowed) {
             permission.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
-    }
-    // La sincronización puede terminar antes de que el usuario responda al permiso.
-    LaunchedEffect(state.syncCount, notificationsAllowed) {
-        if (notificationsAllowed) state.syncCount?.let { SyncNotifications.show(context, it) }
     }
     LaunchedEffect(route) { listVm.showFavorites(route == "favorites") }
 
@@ -133,7 +130,7 @@ private fun SignedInApp(container: AppContainer, role: Role, email: String, onSi
             composable("detail/{id}", arguments = listOf(navArgument("id") { type = NavType.IntType })) { backStack ->
                 val id = backStack.arguments?.getInt("id") ?: return@composable
                 val detail: MovieDetailViewModel = viewModel(key = "detail_$id", factory = MovieDetailViewModel.Factory(id, container.movies))
-                val detailState by detail.uiState.collectAsState()
+                val detailState by detail.uiState.collectAsStateWithLifecycle()
                 DetailScreen(detailState, onBack = { nav.popBackStack() }, onRefresh = detail::refresh, onFavorite = detail::setFavorite)
             }
         }
