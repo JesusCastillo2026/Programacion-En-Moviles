@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** Orden aplicado sobre las películas disponibles localmente. */
+enum class MovieSort { POPULAR, RATING, NEWEST }
+
 data class MovieListUiState(
     val movies: List<Movie> = emptyList(),
     val loading: Boolean = true,
@@ -18,11 +21,19 @@ data class MovieListUiState(
     val error: String? = null,
     val query: String = "",
     val favoritesOnly: Boolean = false,
-    val syncCount: Int? = null
+    val syncCount: Int? = null,
+    val sort: MovieSort = MovieSort.POPULAR
 ) {
-    val visible: List<Movie> get() = movies.filter { movie ->
-        (!favoritesOnly || movie.favorite) &&
-            (query.isBlank() || movie.title.contains(query.trim(), ignoreCase = true))
+    val visible: List<Movie> get() {
+        val filtered = movies.filter { movie ->
+            (!favoritesOnly || movie.favorite) &&
+                (query.isBlank() || movie.title.contains(query.trim(), ignoreCase = true))
+        }
+        return when (sort) {
+            MovieSort.POPULAR -> filtered
+            MovieSort.RATING -> filtered.sortedByDescending { it.rating }
+            MovieSort.NEWEST -> filtered.sortedByDescending { it.releaseDate }
+        }
     }
 }
 
@@ -56,6 +67,7 @@ class MovieListViewModel(private val repository: MovieRepository) : ViewModel() 
     }
 
     fun search(query: String) = mutable.update { it.copy(query = query) }
+    fun sort(mode: MovieSort) = mutable.update { it.copy(sort = mode) }
     fun showFavorites(only: Boolean) = mutable.update { it.copy(favoritesOnly = only) }
 
     fun setFavorite(id: Int, favorite: Boolean) {

@@ -66,6 +66,19 @@ class MovieListViewModelTest {
             assertEquals(1, vm.uiState.value.visible.size)
         } finally { Dispatchers.resetMain() }
     }
+
+    @Test fun ordenarPorNotaNoAlteraFavoritos() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val low = film.copy(id = 12, title = "B", rating = 4.0, favorite = true)
+            val vm = MovieListViewModel(FakeMovies(remote = listOf(low, film)))
+            advanceUntilIdle()
+            vm.sort(MovieSort.RATING)
+            assertEquals(listOf(11, 12), vm.uiState.value.visible.map { it.id })
+            vm.showFavorites(true)
+            assertEquals(listOf(12), vm.uiState.value.visible.map { it.id })
+        } finally { Dispatchers.resetMain() }
+    }
 }
 
 private class FakeMovies(

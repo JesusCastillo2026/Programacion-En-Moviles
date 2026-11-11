@@ -106,10 +106,10 @@ private fun SignedInApp(container: AppContainer, role: Role, email: String, onSi
     ) { padding ->
         NavHost(navController = nav, startDestination = "catalog", modifier = Modifier.padding(padding)) {
             composable("catalog") {
-                CatalogScreen(state, listVm::search, listVm::showFavorites, listVm::sync, { nav.navigate("detail/$it") }, listVm::setFavorite)
+                CatalogScreen(state, listVm::search, listVm::sort, listVm::showFavorites, listVm::sync, { nav.navigate("detail/$it") }, listVm::setFavorite)
             }
             composable("favorites") {
-                CatalogScreen(state, listVm::search, listVm::showFavorites, listVm::sync, { nav.navigate("detail/$it") }, listVm::setFavorite)
+                CatalogScreen(state, listVm::search, listVm::sort, listVm::showFavorites, listVm::sync, { nav.navigate("detail/$it") }, listVm::setFavorite)
             }
             composable("admin") {
                 if (role == Role.ADMIN) AdminScreen(state, listVm::sync, listVm::clearCache)

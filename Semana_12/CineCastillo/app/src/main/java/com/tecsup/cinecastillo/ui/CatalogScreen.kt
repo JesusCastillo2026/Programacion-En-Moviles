@@ -11,12 +11,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,12 +33,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.tecsup.cinecastillo.MovieListUiState
+import com.tecsup.cinecastillo.MovieSort
 import com.tecsup.cinecastillo.data.Movie
 
 @Composable
 fun CatalogScreen(
     state: MovieListUiState,
     onSearch: (String) -> Unit,
+    onSort: (MovieSort) -> Unit,
     onFavorites: (Boolean) -> Unit,
     onSync: () -> Unit,
     onDetail: (Int) -> Unit,
@@ -46,6 +50,17 @@ fun CatalogScreen(
         Text("Películas", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(value = state.query, onValueChange = onSearch, label = { Text("Buscar en el catálogo") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+          item {
+            FilterChip(selected = state.sort == MovieSort.POPULAR, onClick = { onSort(MovieSort.POPULAR) }, label = { Text("Populares") })
+          }
+          item {
+            FilterChip(selected = state.sort == MovieSort.RATING, onClick = { onSort(MovieSort.RATING) }, label = { Text("Mejor valoradas") })
+          }
+          item {
+            FilterChip(selected = state.sort == MovieSort.NEWEST, onClick = { onSort(MovieSort.NEWEST) }, label = { Text("Recientes") })
+          }
+        }
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = { onFavorites(false) }) { Text("Todas") }
             TextButton(onClick = { onFavorites(true) }) { Text("Favoritas") }
