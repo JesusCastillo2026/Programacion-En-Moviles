@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.tecsup.lab09.data.local.FavoritePostEntity
 import com.tecsup.lab09.data.model.PostModel
 import com.tecsup.lab09.data.model.TodoModel
+import com.tecsup.lab09.data.model.AmphibianModel
 import com.tecsup.lab09.data.repository.PostRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +34,12 @@ data class TodosUiState(
     val error: String? = null
 )
 
+data class AmphibiansUiState(
+    val isLoading: Boolean = false,
+    val animals: List<AmphibianModel> = emptyList(),
+    val error: String? = null
+)
+
 class PostViewModel(private val repository: PostRepository) : ViewModel() {
     private val _posts = MutableStateFlow(PostsUiState(isLoading = true))
     val posts: StateFlow<PostsUiState> = _posts.asStateFlow()
@@ -43,6 +50,9 @@ class PostViewModel(private val repository: PostRepository) : ViewModel() {
     private val _todos = MutableStateFlow(TodosUiState(isLoading = true))
     val todos: StateFlow<TodosUiState> = _todos.asStateFlow()
 
+    private val _amphibians = MutableStateFlow(AmphibiansUiState(isLoading = true))
+    val amphibians: StateFlow<AmphibiansUiState> = _amphibians.asStateFlow()
+
     val favorites: StateFlow<List<FavoritePostEntity>> = repository.observeFavorites()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
@@ -51,6 +61,7 @@ class PostViewModel(private val repository: PostRepository) : ViewModel() {
     init {
         loadPosts()
         loadTodos()
+        loadAmphibians()
     }
 
     fun loadPosts() {
@@ -96,6 +107,15 @@ class PostViewModel(private val repository: PostRepository) : ViewModel() {
             runCatching { repository.getTodos() }
                 .onSuccess { _todos.value = TodosUiState(todos = it) }
                 .onFailure { _todos.value = TodosUiState(error = it.message ?: "No se pudieron cargar las tareas.") }
+        }
+    }
+
+    fun loadAmphibians() {
+        viewModelScope.launch {
+            _amphibians.value = _amphibians.value.copy(isLoading = true, error = null)
+            runCatching { repository.getAmphibians() }
+                .onSuccess { _amphibians.value = AmphibiansUiState(animals = it) }
+                .onFailure { _amphibians.value = AmphibiansUiState(error = it.message ?: "No se pudo cargar el catálogo.") }
         }
     }
 }
