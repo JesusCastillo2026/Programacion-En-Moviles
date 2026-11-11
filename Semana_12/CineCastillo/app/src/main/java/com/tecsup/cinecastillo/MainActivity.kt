@@ -36,6 +36,7 @@ import com.tecsup.cinecastillo.data.SessionState
 import com.tecsup.cinecastillo.ui.AdminScreen
 import com.tecsup.cinecastillo.ui.CatalogScreen
 import com.tecsup.cinecastillo.ui.CineTheme
+import com.tecsup.cinecastillo.ui.CreditsScreen
 import com.tecsup.cinecastillo.ui.DetailScreen
 import com.tecsup.cinecastillo.ui.LoginScreen
 
@@ -99,6 +100,7 @@ private fun SignedInApp(container: AppContainer, role: Role, email: String, onSi
                 NavigationBarItem(selected = route == "catalog", onClick = { nav.navigate("catalog") { launchSingleTop = true; popUpTo("catalog") } }, icon = { Text("🎬") }, label = { Text("Catálogo") })
                 NavigationBarItem(selected = route == "favorites", onClick = { nav.navigate("favorites") { launchSingleTop = true } }, icon = { Text("♥") }, label = { Text("Favoritos") })
                 if (role == Role.ADMIN) NavigationBarItem(selected = route == "admin", onClick = { nav.navigate("admin") { launchSingleTop = true } }, icon = { Text("⚙") }, label = { Text("Admin") })
+                NavigationBarItem(selected = route == "credits", onClick = { nav.navigate("credits") { launchSingleTop = true } }, icon = { Text("ⓘ") }, label = { Text("Créditos") })
             }
         }
     ) { padding ->
@@ -113,6 +115,7 @@ private fun SignedInApp(container: AppContainer, role: Role, email: String, onSi
                 if (role == Role.ADMIN) AdminScreen(state, listVm::sync, listVm::clearCache)
                 else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Acceso restringido") }
             }
+            composable("credits") { CreditsScreen() }
             composable("detail/{id}", arguments = listOf(navArgument("id") { type = NavType.IntType })) { backStack ->
                 val id = backStack.arguments?.getInt("id") ?: return@composable
                 val detail: MovieDetailViewModel = viewModel(key = "detail_$id", factory = MovieDetailViewModel.Factory(id, container.movies))

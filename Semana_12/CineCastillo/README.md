@@ -10,6 +10,7 @@ Aplicación Android de películas para el Laboratorio 12 de Programación en Mó
 - Favoritos persistentes en el dispositivo, conservados al actualizar el catálogo.
 - Panel de administración para ver estadísticas locales, sincronizar y vaciar la caché con confirmación.
 - Notificación después de sincronizar, si el permiso correspondiente está concedido.
+- Pantalla de créditos con atribución y logotipo oficial de TMDB.
 
 ## Estructura y flujo
 
