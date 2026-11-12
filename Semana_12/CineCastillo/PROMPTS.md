@@ -47,3 +47,12 @@ Se documentan indicaciones reales del estudiante, resumidas para evitar repetir 
 ## Resultado de esta revisión
 
 La compilación y las ocho pruebas unitarias finalizaron correctamente. Los catorce casos de aceptación se ejecutaron en el emulador y están documentados en [PRUEBAS_ACEPTACION.md](PRUEBAS_ACEPTACION.md). El PDF explica los bloques importantes y reúne las capturas reales. Las mejoras de búsqueda y orden actúan sobre el catálogo local; no se describen como consultas remotas que no se utilizan.
+
+## 6. Rediseño cinematográfico
+
+- **Fecha:** 11/11/2026.
+- **Prompt:** mejorar toda la app con acabado profesional, tipografía consistente, catálogo y detalle más cuidados, estados claros y rojo como color principal, sin alterar los requisitos del Laboratorio 12.
+- **Respuesta resumida:** tema oscuro cinematográfico, escala tipográfica fija, portada local, película destacada y tarjetas renovadas.
+- **Corrección aplicada:** mantener los controles de búsqueda, sincronización, favoritos y administración y conservar los estados de carga, error y falta de conexión.
+- **Aprendizaje:** un cambio de tema solo funciona cuando las pantallas comparten jerarquía, espaciado y colores.
+

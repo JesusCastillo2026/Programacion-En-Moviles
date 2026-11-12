@@ -14,6 +14,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -41,21 +45,23 @@ fun DetailScreen(state: MovieDetailUiState, onBack: () -> Unit, onRefresh: () ->
             return@Column
         }
         if (state.offline) Text("Detalle guardado · sin conexión", color = MaterialTheme.colorScheme.primary)
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            AsyncImage(model = movie.posterUrl, contentDescription = "Póster de ${movie.title}", modifier = Modifier.size(width = 115.dp, height = 172.dp), contentScale = ContentScale.Crop)
+        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh), shape = RoundedCornerShape(24.dp)) {
+        Row(Modifier.fillMaxWidth().padding(14.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            AsyncImage(model = movie.posterUrl, contentDescription = "Póster de ${movie.title}", modifier = Modifier.size(width = 130.dp, height = 194.dp).clip(RoundedCornerShape(16.dp)), contentScale = ContentScale.Crop)
             Column {
-                Text(movie.title, style = MaterialTheme.typography.headlineSmall)
+                Text(movie.title, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(Modifier.height(8.dp))
                 Text(movie.releaseDate.ifEmpty { "Fecha no disponible" })
                 Text("★ %.1f / 10".format(movie.rating))
             }
+        }
         }
         Spacer(Modifier.height(20.dp))
         Text("Sinopsis", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(8.dp))
         Text(movie.overview.ifEmpty { "Sin sinopsis disponible en español." }, style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(22.dp))
-        Button(onClick = { onFavorite(!movie.favorite) }, modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = { onFavorite(!movie.favorite) }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(16.dp)) {
             androidx.compose.material3.Icon(if (movie.favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder, contentDescription = null)
             Text(if (movie.favorite) " Quitar de favoritos" else " Guardar en favoritos")
         }

@@ -29,16 +29,16 @@ import androidx.compose.ui.unit.dp
 @Composable
 private fun CinemaArtwork() {
     Box(Modifier.fillMaxWidth().height(210.dp).clip(RoundedCornerShape(28.dp))
-        .background(Brush.linearGradient(listOf(Color(0xFF102C48), Color(0xFF176D78))))) {
+        .background(Brush.linearGradient(listOf(Color(0xFF100B16), Color(0xFF8C1F35))))) {
         Canvas(Modifier.fillMaxSize().semantics { contentDescription = "Ilustración de una sala de cine con pantalla y luces" }) {
             val w=size.width; val h=size.height
             val beam=Path().apply { moveTo(w*.5f,h*.1f);lineTo(w*.05f,h);lineTo(w*.95f,h);close() }
-            drawPath(beam,Color(0xFFFFD58B).copy(alpha=.12f))
-            drawRoundRect(Color(0xFFF7E9CF),Offset(w*.2f,h*.16f),Size(w*.6f,h*.46f),androidx.compose.ui.geometry.CornerRadius(18f))
+            drawPath(beam,Color(0xFFFFC878).copy(alpha=.12f))
+            drawRoundRect(Color(0xFFFFE9E9),Offset(w*.2f,h*.16f),Size(w*.6f,h*.46f),androidx.compose.ui.geometry.CornerRadius(18f))
             val play=Path().apply { moveTo(w*.46f,h*.28f);lineTo(w*.46f,h*.5f);lineTo(w*.58f,h*.39f);close() }
-            drawPath(play,Color(0xFF176D78))
+            drawPath(play,Color(0xFFE83B4F))
             for(row in 0..1) for(col in 0..5) drawRoundRect(Color(if(row==0) 0xFFCF805A else 0xFFF1AD72),Offset(w*(.1f+col*.14f),h*(.7f+row*.17f)),Size(w*.11f,h*.14f),androidx.compose.ui.geometry.CornerRadius(12f))
-            for(i in 0..6) drawCircle(Color(0xFFFFD58B),3f,Offset(w*(.08f+i*.14f),h*.08f))
+            for(i in 0..6) drawCircle(Color(0xFFFFC878),3f,Offset(w*(.08f+i*.14f),h*.08f))
         }
     }
 }
@@ -71,3 +71,4 @@ fun LoginScreen(busy: Boolean, error: String?, onLogin: (String, String) -> Unit
         Text("EXPLORA · DESCUBRE · GUARDA",style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.primary,modifier=Modifier.align(Alignment.CenterHorizontally))
     }
 }
+

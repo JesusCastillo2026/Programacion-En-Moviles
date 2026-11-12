@@ -95,3 +95,8 @@ En Windows se utiliza `gradlew.bat`. Las pruebas automatizadas cubren carga, fal
 La caché y las favoritas pertenecen al dispositivo. Firebase conserva la identidad y Firestore el rol; no se sincronizan favoritas entre teléfonos. Las imágenes remotas dependen de su caché de carga. La clave de lectura se mantiene fuera de Git, aunque puede extraerse del APK de demostración publicado con autorización.
 
 This product uses the TMDB API but is not endorsed or certified by TMDB.
+
+## Diseño cinematográfico
+
+La fase mejorada utiliza un tema oscuro con rojo como color principal, tipografía de tamaños consistentes, portada de acceso dibujada localmente, película destacada y tarjetas de catálogo y detalle adaptadas al tema. El rediseño conserva el flujo y los requisitos del laboratorio.
+

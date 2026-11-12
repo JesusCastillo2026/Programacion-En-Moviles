@@ -30,14 +30,14 @@ fun AdminScreen(state: MovieListUiState, onSync: () -> Unit, onClear: () -> Unit
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Text("Panel de administración", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(16.dp))
-        Card(Modifier.fillMaxWidth()) {
-            Row(Modifier.padding(20.dp), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+        Card(Modifier.fillMaxWidth(), colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)) {
+            Row(Modifier.fillMaxWidth().padding(20.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
-                    Text("${state.movies.size}", style = MaterialTheme.typography.headlineLarge)
+                    Text("${state.movies.size}", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary)
                     Text("Películas guardadas")
                 }
                 Column {
-                    Text("${state.movies.count { it.favorite }}", style = MaterialTheme.typography.headlineLarge)
+                    Text("${state.movies.count { it.favorite }}", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary)
                     Text("Favoritas")
                 }
             }
