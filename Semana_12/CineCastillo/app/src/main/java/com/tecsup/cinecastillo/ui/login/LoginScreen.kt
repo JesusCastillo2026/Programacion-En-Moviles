@@ -53,7 +53,7 @@ fun LoginScreen(busy: Boolean, error: String?, onLogin: (String, String) -> Unit
         Text("CINE CASTILLO", style=MaterialTheme.typography.labelLarge, color=MaterialTheme.colorScheme.primary, fontWeight=FontWeight.Bold)
         CinemaArtwork()
         Column(verticalArrangement=Arrangement.spacedBy(6.dp)) {
-            Text("Tu próxima gran historia", style=MaterialTheme.typography.headlineMedium, fontWeight=FontWeight.Bold)
+            Text("Tu próxima gran historia", style=MaterialTheme.typography.headlineMedium, color=MaterialTheme.colorScheme.onBackground, fontWeight=FontWeight.Bold)
             Text("Descubre películas que te acompañan. Guarda las que quieres volver a ver.", color=MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Surface(shape=RoundedCornerShape(24.dp),color=MaterialTheme.colorScheme.surface,tonalElevation=1.dp) {
