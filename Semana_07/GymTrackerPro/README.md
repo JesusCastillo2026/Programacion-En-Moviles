@@ -1,16 +1,18 @@
-# GymTracker Pro · Laboratorio 07
+# GymTracker Pro - ConIA
 
-Aplicación Android para crear una cuenta local y gestionar rutinas de ejercicio. Está desarrollada con Kotlin, Jetpack Compose y Room.
+Versión ampliada del Laboratorio 07 para Android Studio, Kotlin, Jetpack Compose y Room. Abre directamente esta carpeta en Android Studio.
 
 ## Funciones
 
-- Registro e inicio de sesión de demostración.
-- Creación, consulta, edición y eliminación de rutinas.
-- Almacenamiento local mediante Room.
-- Perfil y resumen de rutinas del usuario activo.
+- Registro y autenticación local con Navigation Compose y paso de `usuarioId`.
+- Room/SQLite como fuente persistente offline para las tablas `Usuario` y `Rutina`.
+- Operaciones CREATE, READ, UPDATE y DELETE asociadas al usuario autenticado.
+- Búsqueda y filtro por grupo muscular en el historial, con confirmación antes de borrar.
+- Perfil con estadísticas reactivas: cantidad de rutinas y volumen calculado por SQL.
+- Interfaz Material 3 con una portada gráfica propia, tarjetas de progreso, estados vacíos y campos validados.
 
-`main` contiene la versión base y `mejora-ia` la versión ampliada, ambas en esta misma ruta. Los datos se guardan localmente en el dispositivo.
+Los datos se guardan localmente en `gymtracker.db`. La contraseña sigue el esquema académico simplificado del PDF; esta app es una demostración offline y no debe usarse como sistema real de autenticación.
 
 ## Abrir
 
-Abre esta carpeta en Android Studio; espera la sincronización de Gradle antes de ejecutar `app`.
+En Android Studio selecciona **Open** y elige esta carpeta. Ejecuta la configuración `app` en un emulador o dispositivo Android API 24 o superior.

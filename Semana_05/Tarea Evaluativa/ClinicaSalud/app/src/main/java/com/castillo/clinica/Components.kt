@@ -19,10 +19,12 @@ import androidx.compose.ui.unit.sp
 val accent = Color(if (clinic) 0xFF5B2A83 else 0xFF10715C)
 val tint = Color(if (clinic) 0xFFEEE6F6 else 0xFFDFF5ED)
 val cardColor = Color(if (clinic) 0xFFF3F0F7 else 0xFFF0F0F0)
-const val enhanced = false
+// Activa la presentación enriquecida sin introducir ViewModel ni MVVM.
+const val enhanced = true
 
 @Composable
 fun AppTheme(content: @Composable () -> Unit) {
+    // Una paleta por tema conserva la identidad de la versión de referencia.
     MaterialTheme(colorScheme = lightColorScheme(primary = accent, onPrimary = Color.White,
         primaryContainer = tint, background = Color.White, surface = Color.White,
         onSurface = Color(0xFF222222)), content = content)
@@ -88,4 +90,3 @@ fun EmptyMessage(title: String, body: String) {
         Text(body, Modifier.padding(top=8.dp), color=Color.Gray)
     }
 }
-

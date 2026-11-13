@@ -1,7 +1,11 @@
 # CampusNav · Semana 05
 
-Aplicación Android de navegación académica desarrollada con Kotlin y Jetpack Compose.
+Aplicación Android para explorar un directorio académico y navegar entre sus secciones, desarrollada con Kotlin y Jetpack Compose.
 
-## Abrir
+## Funciones destacadas
 
-Abre esta carpeta en Android Studio y ejecuta el módulo `app`. `main` contiene la versión base y `mejora-ia` la versión ampliada en la misma ruta.
+- Búsqueda de estudiantes por nombre, carrera o código.
+- Filtros por tecnología y favoritos.
+- Navegación entre inicio, directorio, detalle y perfil.
+
+Abre esta carpeta en Android Studio y ejecuta el módulo `app`.

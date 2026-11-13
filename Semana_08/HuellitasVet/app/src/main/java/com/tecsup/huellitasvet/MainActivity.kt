@@ -20,7 +20,12 @@ class MainActivity : ComponentActivity() {
             val sesion: SesionViewModel = viewModel(factory = VetViewModelFactory(app))
             val usuario by sesion.usuarioActual.collectAsStateWithLifecycle()
             val oscuro by sesion.modoOscuro.collectAsStateWithLifecycle()
-            VetTheme(if (usuario?.rol == "ADMIN") Rol.ADMIN else Rol.CLIENTE, oscuro) {
+            val rolTema = when (usuario?.rol) {
+                "ADMIN" -> Rol.ADMIN
+                "VETERINARIO" -> Rol.VETERINARIO
+                else -> Rol.CLIENTE
+            }
+            VetTheme(rolTema, oscuro) {
                 NavVet(sesion, app)
             }
         }

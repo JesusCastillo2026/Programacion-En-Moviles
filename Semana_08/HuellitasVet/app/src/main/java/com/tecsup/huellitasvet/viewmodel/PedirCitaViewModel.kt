@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -23,7 +24,9 @@ class PedirCitaViewModel(
     private val repo: VetRepository,
     prefs: PreferenciasStore,
     duenoId: Int,
-    mascotaInicial: Int
+    mascotaInicial: Int,
+    servicioInicial: Int = 0,
+    serviciosIniciales: List<Int> = listOf(servicioInicial).filter { it > 0 }
 ) : ViewModel() {
     val mascotas: StateFlow<List<Mascota>> = repo.observarMascotasDeDueno(duenoId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -31,28 +34,56 @@ class PedirCitaViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     val fecha = MutableStateFlow(LocalDate.now().toString())
     val mascotaId = MutableStateFlow(mascotaInicial)
-    val servicioId = MutableStateFlow(0)
+    val servicioId = MutableStateFlow(servicioInicial)
+    val serviciosSeleccionados = MutableStateFlow(serviciosIniciales.toSet())
     val hora = MutableStateFlow("")
     val nota = MutableStateFlow("")
     val mensaje = MutableStateFlow<String?>(null)
     val aceptarCitas: StateFlow<Boolean> = prefs.aceptarCitas
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
-    val horasOcupadas: StateFlow<List<String>> = fecha.flatMapLatest { repo.observarHorasOcupadas(it) }
+    val horasOcupadas: StateFlow<List<String>> = fecha.flatMapLatest { dia ->
+        repo.observarCitasPorFecha(dia).map { citas ->
+            citas.filter { it.cita.estado != "CANCELADA" }.flatMap { cita ->
+                val minutos = (cita.servicios.ifEmpty { listOf(cita.servicio) }).sumOf { it.duracionMin }.coerceAtLeast(30)
+                val inicio = LocalTime.parse(cita.cita.hora)
+                generateSequence(inicio) { it.plusMinutes(30) }
+                    .takeWhile { it.isBefore(inicio.plusMinutes(minutos.toLong())) }
+                    .map { it.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")) }
+                    .toList()
+            }.distinct()
+        }
+    }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun elegirFecha(valor: String) { fecha.value = valor; hora.value = "" }
 
+    fun alternarServicio(id: Int) {
+        val nueva = serviciosSeleccionados.value.toMutableSet().apply {
+            if (!add(id)) remove(id)
+        }
+        serviciosSeleccionados.value = nueva
+        servicioId.value = nueva.firstOrNull() ?: 0
+        hora.value = ""
+    }
+
     fun horaDisponible(valor: String): Boolean {
+        if (valor.isBlank()) return false
         val dia = LocalDate.parse(fecha.value)
-        return valor in Horarios.todos && valor !in horasOcupadas.value &&
+        val duracion = servicios.value.filter { it.id in serviciosSeleccionados.value }.sumOf { it.duracionMin }.coerceAtLeast(30)
+        val inicio = LocalTime.parse(valor)
+        val slots = (duracion + 29) / 30
+        val seCruza = (0 until slots).any { paso ->
+            inicio.plusMinutes(paso * 30L).format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")) in horasOcupadas.value
+        }
+        return valor in Horarios.paraFecha(dia, duracion) && !seCruza &&
             LocalDateTime.of(dia, LocalTime.parse(valor)).isAfter(LocalDateTime.now())
     }
 
     fun confirmar(onExito: () -> Unit) {
         val mascota = mascotas.value.find { it.id == mascotaId.value }
-        val servicio = servicios.value.find { it.id == servicioId.value }
+        val seleccionados = servicios.value.filter { it.id in serviciosSeleccionados.value }
         if (!aceptarCitas.value) { mensaje.value = "La clínica no está recibiendo citas"; return }
-        if (mascota == null || servicio == null || !horaDisponible(hora.value)) {
+        if (mascota == null || seleccionados.isEmpty() || !horaDisponible(hora.value)) {
             mensaje.value = "Elige mascota, servicio y un horario disponible"
             return
         }
@@ -62,7 +93,7 @@ class PedirCitaViewModel(
             return
         }
         viewModelScope.launch {
-            runCatching { repo.crearCita(mascota.id, servicio.id, fecha.value, hora.value, nota.value) }
+            runCatching { repo.crearCita(mascota.id, seleccionados.map { it.id }, fecha.value, hora.value, nota.value) }
                 .onSuccess { mensaje.value = null; onExito() }
                 .onFailure { mensaje.value = it.message ?: "No se pudo registrar la cita" }
         }

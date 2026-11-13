@@ -8,7 +8,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.tecsup.gymtracker.sinia"
+        applicationId = "com.tecsup.gymtracker.conia"
         minSdk = 24
         targetSdk = 35
         versionCode = 1

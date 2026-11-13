@@ -16,7 +16,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val database = AppDatabase.getInstance(applicationContext)
-        val repository = PostRepository(ApiClient.service, database.favoritePostDao())
+        val repository = PostRepository(ApiClient.service, database.favoritePostDao(), ApiClient.amphibiansService)
 
         setContent {
             val viewModel: PostViewModel = viewModel(factory = PostViewModelFactory(repository))

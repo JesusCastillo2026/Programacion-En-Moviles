@@ -33,6 +33,7 @@ fun DetailScreen(item: Item, onAction: () -> Unit) {
 
 @Composable
 fun ChoiceRow(options: List<String>, value: String, onChoose: (String) -> Unit) {
+    // Un valor por grupo asegura exclusión mutua y semántica accesible de RadioButton.
     Row(Modifier.fillMaxWidth().selectableGroup(), horizontalArrangement=Arrangement.spacedBy(8.dp)) {
         options.forEach { option ->
             Surface(color=if(value==option) accent else cardColor,
@@ -47,6 +48,7 @@ fun ChoiceRow(options: List<String>, value: String, onChoose: (String) -> Unit) 
 
 @Composable
 fun BookingScreen(item: Item, bookings: List<Booking>, onConfirm: (String, String) -> Unit) {
+    // Las claves evitan arrastrar selecciones al abrir otro médico o clase.
     var date by rememberSaveable(item.id) { mutableStateOf("") }
     var time by rememberSaveable(item.id) { mutableStateOf("") }
     val dateOptions = if(clinic) dates else listOf("Hoy", "Mañana", "Sábado")
@@ -71,6 +73,7 @@ fun BookingScreen(item: Item, bookings: List<Booking>, onConfirm: (String, Strin
 
 @Composable
 fun ConfirmationScreen(booking: Booking?, onBookings: () -> Unit, onHome: () -> Unit) {
+    // El resumen usa el registro recién creado, no campos globales editables.
     Column(Modifier.fillMaxSize().padding(32.dp), verticalArrangement=Arrangement.Center,
         horizontalAlignment=Alignment.CenterHorizontally) {
         Symbol(Modifier.size(80.dp), success=true)
@@ -84,4 +87,3 @@ fun ConfirmationScreen(booking: Booking?, onBookings: () -> Unit, onHome: () -> 
         TextButton(onClick=onHome) {Text("Volver al inicio")}
     }
 }
-

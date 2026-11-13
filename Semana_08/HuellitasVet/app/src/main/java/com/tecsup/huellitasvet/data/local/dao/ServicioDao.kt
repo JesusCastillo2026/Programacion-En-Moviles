@@ -38,6 +38,6 @@ interface ServicioDao {
     @Query("UPDATE servicios SET activo = :activo WHERE id = :id")
     suspend fun cambiarActivo(id: Int, activo: Boolean)
 
-    @Query("SELECT COUNT(*) FROM citas WHERE servicioId = :id")
+    @Query("SELECT COUNT(*) FROM cita_servicios WHERE servicioId = :id")
     suspend fun contarCitas(id: Int): Int
 }

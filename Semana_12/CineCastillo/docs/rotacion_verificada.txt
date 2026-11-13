@@ -1,0 +1,1 @@
+GET discover antes=7; después=7. Filtro Coco conservado y tarjeta visible en horizontal.

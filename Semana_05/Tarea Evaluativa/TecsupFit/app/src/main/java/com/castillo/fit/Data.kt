@@ -1,6 +1,8 @@
 package com.castillo.fit
 
+/** Elemento inmutable del catálogo. Su id es el parámetro que viaja entre destinos. */
 data class Item(val id: Int, val name: String, val category: String, val subtitle: String, val description: String, val rating: String = "", val capacity: Int = 12)
+/** Copia de los datos elegidos al confirmar; cancelar conserva el registro en el historial. */
 data class Booking(val id: Int, val itemId: Int, val name: String, val date: String, val time: String, val status: String = "Confirmada")
 val clinic = false
 val appTitle = "TECSUP Fit"
@@ -16,8 +18,9 @@ fun initialBookings() = listOf(
     Booking(1, 2, "Cross Training", "Hoy", "6:00 pm"),
     Booking(2, 1, "Yoga funcional", "Ayer", "7:00 am", "Completada")
 )
+/** Solo una reserva confirmada bloquea volver a elegir el mismo horario. */
 fun isDuplicate(bookings: List<Booking>, item: Item, date: String, time: String) =
     bookings.any { it.itemId == item.id && it.date == date && it.time == time && it.status == "Confirmada" }
+/** Simula cuatro cupos externos ocupados. Los cancelados liberan su cupo local. */
 fun availableSeats(bookings: List<Booking>, item: Item, date: String, time: String) =
     (item.capacity - 4 - bookings.count { it.itemId == item.id && it.date == date && it.time == time && it.status == "Confirmada" }).coerceAtLeast(0)
-

@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.jesuscastillo.myapplication"
+    namespace = "com.jesuscastillo.myapplication.ia"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "com.jesuscastillo.myapplication"
+        applicationId = "com.jesuscastillo.myapplication.ia"
         minSdk = 24
         targetSdk = 37
         versionCode = 1

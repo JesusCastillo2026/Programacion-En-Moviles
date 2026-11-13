@@ -7,6 +7,8 @@ object Rutas {
     const val REGISTRO = "registro"
     const val LOGIN = "login"
     const val INICIO = "inicio"
+    const val SEDES = "sedes"
+    const val DOCTORES = "doctores"
     const val ESPECIALIDADES = "especialidades"
     const val MEDICOS = "medicos/{especialidadId}"
     const val FECHA_HORA = "fecha-hora/{especialidadId}/{medicoId}"

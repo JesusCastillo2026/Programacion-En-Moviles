@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "GymTrackerSinIA"
+rootProject.name = "GymTrackerConIA"
 include(":app")

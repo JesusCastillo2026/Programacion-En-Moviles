@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UsuarioDao {
+    // Ignorar conflictos permite informar al formulario cuando el usuario o correo ya existe.
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertar(usuario: Usuario): Long
 
@@ -25,6 +26,7 @@ interface UsuarioDao {
 
 @Dao
 interface RutinaDao {
+    // La lista es un Flow para que Compose observe inmediatamente los cambios CRUD.
     @Insert
     suspend fun insertar(rutina: Rutina): Long
 

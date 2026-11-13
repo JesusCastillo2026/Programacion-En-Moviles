@@ -1,15 +1,30 @@
-# Carrito de compras · Kotlin
+# Laboratorio 02: Sistema de Carrito de Compras en Kotlin
 
-Aplicación académica para practicar el manejo de productos y los cálculos de una compra.
+**Estudiante:** Jesús José Castillo Sumire  
+**Institución:** Tecsup
 
-## Contenidos
+## 1. Descripción del Proyecto
+Este programa simula la gestión y facturación de un carrito de compras para una tienda tecnológica.
 
-- Colecciones y funciones para registrar y recorrer productos.
-- Cálculo de subtotales, descuentos e importes de compra.
-- Organización de la solución en módulos Android y de consola.
+**Funciones implementadas:**
+* **Gestión de Stock:** Reducción y reposición dinámica de inventario.
+* **Cálculos Financieros:** Funciones para calcular el Subtotal, el IGV (18%) y aplicar descuentos escalonados (5% o 10%) usando la estructura `when`.
+* **Programación Orientada a Objetos (Rama 2):** Implementación de una clase base abstracta (`Producto`) con clases hijas (`ProductoFisico` y `ProductoDigital`) demostrando herencia y polimorfismo.
+* **Búsqueda y Eliminación:** Uso de las funciones de colección `find` para buscar productos y `removeIf` para eliminarlos dinámicamente del carrito.
 
-La rama `main` contiene la versión base. La versión ampliada se encuentra en `mejora-ia`, en esta misma ruta.
+## 2. Respuesta a la pregunta de la Parte 2
+**¿Por qué `nombre` y `precio` son inmutables (`val`) mientras que `stock` o `cantidad` son mutables (`var`)?**
+* Se usa **`val`** en `nombre` y `precio` porque son características fijas del producto. No deben cambiar accidentalmente mientras el cliente realiza la compra.
+* Se usa **`var`** en `stock` y `cantidad` porque son valores dinámicos que aumentan o disminuyen constantemente a medida que el usuario agrega o quita productos de su carrito.
 
-## Abrir
+## Prompt Utilizado
+Consulta el prompt y las instrucciones del asistente en [PROMPT.md](PROMPT.md).
 
-Abre esta carpeta en Android Studio para trabajar con la aplicación Android. El módulo `console` corresponde al ejercicio de consola.
+## 3. Captura de la Consola
+
+![Captura del resultado 1](img.png)
+
+![Captura del resultado 2](img_1.png)
+
+![Captura del resultado 3](img_2.png)
+

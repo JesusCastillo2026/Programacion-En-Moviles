@@ -4,8 +4,10 @@ Laboratorio de integración de servicios REST en Android con Kotlin, Retrofit, J
 
 ## Proyecto
 
-- `Laboratorio09/`: posts desde JSONPlaceholder, navegación a detalle por ID, favoritos persistidos localmente y un ejercicio adicional con el recurso `/todos`.
+- `Laboratorio09/`: publicaciones de JSONPlaceholder, detalle por ID, favoritos locales con Room y recurso adicional `/todos`.
 - En `main` está la versión base. `mejora-ia` presenta la versión ampliada en la misma ruta.
+
+La rama ampliada agrega búsqueda de publicaciones y un catálogo visual de anfibios obtenido desde una segunda API REST.
 
 ## Abrir en Android Studio
 

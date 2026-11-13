@@ -6,6 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+// La llave foránea vincula cada entrenamiento con su dueño y elimina sus rutinas al borrar la cuenta.
 @Entity(
     tableName = "Rutina",
     foreignKeys = [ForeignKey(entity = Usuario::class, parentColumns = ["id"], childColumns = ["usuario_id"], onDelete = ForeignKey.CASCADE)],

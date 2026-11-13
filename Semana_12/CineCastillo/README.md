@@ -1,42 +1,121 @@
 # Cine Castillo
 
-Aplicación Android de películas para el Laboratorio 12 de Programación en Móviles. Autor: **Jesús Castillo Sumire**, sección **C24D**.
+Aplicación de películas del **Laboratorio 12 de Programación en Móviles**. Desarrollada por **Jesús Castillo Sumire**, sección **C24D**, con Kotlin y Jetpack Compose.
+
+## Entrega
+
+- **Versión mejorada:** `mejora-ia` · **Versión base:** `main`.
+- **Verificación:** 14 pruebas de aceptación en Pixel 8 y 8 pruebas unitarias aprobadas el 11/11/2026.
+- [Registro de pruebas y evidencias](PRUEBAS_ACEPTACION.md) · [Indicaciones y reflexión](PROMPTS.md).
+- [APK y versiones publicadas](https://github.com/JesusCastillo2026/Programacion-En-Moviles/releases).
+- Proyecto individual alojado en el repositorio del curso. TMDB reemplaza las API básicas sugeridas en la guía según la indicación del docente.
 
 ## Funciones
 
-- Inicio de sesión con Firebase Authentication y rol `usuario` o `admin` leído de Firestore.
-- Catálogo y detalle obtenidos de TMDB con Retrofit. La búsqueda filtra las películas disponibles en la copia local.
-- Películas guardadas en Room como fuente de datos para la interfaz. Se pueden consultar sin conexión después de una sincronización correcta.
-- Favoritos persistentes en el dispositivo, conservados al actualizar el catálogo.
-- Panel de administración para ver estadísticas locales, sincronizar y vaciar la caché con confirmación.
-- Notificación después de sincronizar, si el permiso correspondiente está concedido.
+- Firebase Authentication con registro por correo y contraseña; cada registro crea en Firestore un perfil propio con rol fijo `usuario`. Los roles `admin` se asignan por consola.
+- Catálogo y detalle desde dos endpoints TMDB. Carteles, título, fecha, valoración y sinopsis.
+- Búsqueda local y orden por título, valoración o fecha sobre la copia disponible.
+- Room como fuente de la interfaz; favoritas persistentes que se conservan al sincronizar.
+- Estados Cargando, Error con Reintentar y Vacío. Catálogo disponible sin conexión después de descargarlo.
+- Arranque sin datos ni red con error recuperable; al recuperar Internet se permite iniciar sesión.
+- Panel exclusivo del administrador: totales, sincronización y vaciado confirmado de la caché.
+- Canal y permiso de notificaciones; aviso con cantidad guardada que abre la app al tocarlo.
+- Estado conservado al girar y encabezado desplazable para mantener visibles las tarjetas en horizontal.
+- Créditos y atribución de TMDB dentro de la aplicación.
+- Flujo de reserva de demostración: sede → película → cantidad de entradas y butacas → formato compatible → fecha y horario → resumen y ticket estimado. Se limita a cinco asientos y se deshabilitan fechas pasadas y funciones que ya iniciaron.
+- Cartelera con tres estrenos en un carrusel automático; tocar un póster abre el detalle TMDB.
+- Perfil con nombre, correo, teléfono, DNI y estado de socio; la afiliación y sus puntos son demostrativos.
+- Menú lateral con información del proyecto, créditos y guía ilustrada de salas 2D, 3D, IMAX y 4DX.
+- Login centrado con logo original de Cine Castillo y tarjeta de acceso adaptada al tema oscuro rojo.
 
-## Estructura y flujo
+La reserva es una simulación local para ampliar la experiencia de Cine Castillo. Las sedes, compatibilidad, horarios, aforo, tarifas, estado de socio y ticket son demostrativos; no se bloquean butacas en servidores ni se procesa un pago.
 
-`data/` contiene los modelos, la API, el DAO, la base de datos y los repositorios. Los ViewModel convierten esos datos en estados de interfaz. `ui/` contiene las pantallas Compose. `MainActivity.kt` conecta la sesión con el catálogo, detalle, favoritos y panel de administración.
+## Estructura
 
 ```text
-Login → Catálogo → Detalle → Favoritos
-                  ↘ Panel de administración (solo admin)
-TMDB → Retrofit → Repositorio → Room → ViewModel → Compose
-Firebase Auth → usuarios/{uid} en Firestore → rol de la sesión
+app/src/main/java/com/tecsup/cinecastillo/
+├── MainActivity.kt, CineApplication.kt, AppContainer.kt
+├── data/
+│   ├── auth/          interfaz AuthRepository e implementación Firebase
+│   ├── remote/        MovieApi, RetrofitClient y dto/
+│   ├── local/         Entity, Dao y Database de Room
+│   ├── repository/    interfaz MovieRepository e implementación Room
+│   └── mapper/        conversiones DTO → Entity → Movie
+├── domain/model/      Movie y Sesion
+├── notification/      interfaz Notificador e implementación Android
+└── ui/
+    ├── UiState.kt
+    ├── navigation/    AppNav
+    ├── login/         pantalla y ViewModel
+    ├── lista/         pantalla y ViewModel
+    ├── detalle/       pantalla y ViewModel
+    ├── favoritos/     pantalla y ViewModel
+    ├── admin/         pantalla y ViewModel
+    ├── booking/       flujo simulado de compra y guía de salas
+    ├── profile/       perfil y membresía demostrativa
+    ├── components/    Cargando y ErrorView
+    └── theme/         tema Compose
 ```
 
-## Configuración local
+`Movie` y `MovieApi` adaptan los nombres genéricos Item y ApiService al tema. Se conservan los métodos de contrato `iniciarSesion`, `sesionActual`, `cerrarSesion`, `refrescar`, `obtenerDetalle`, `alternarFavorito`, `cantidadGuardada`, `cantidadFavoritos` y `limpiarCache`.
 
-1. Abre esta carpeta en Android Studio.
-2. Registra en Firebase una app Android con paquete `com.tecsup.cinecastillo` y copia su `google-services.json` a `app/`.
-3. Habilita el proveedor Correo/contraseña en Firebase Authentication.
-4. Crea en Firestore documentos `usuarios/{uid}` con un campo de texto `rol` igual a `admin` o `usuario`. Las reglas de lectura están en [firestore.rules](firestore.rules). El cliente no puede modificar su propio rol.
-5. Añade `TMDB_API_KEY=tu_clave` a `local.properties`, junto a la ruta local del Android SDK. La clave y el JSON se excluyen del repositorio.
-6. Sincroniza Gradle y ejecuta `app`. Se necesita Internet para iniciar sesión y descargar películas; la copia local funciona después sin red.
+## Flujo
 
-Proyecto Firebase usado en el laboratorio: `cine-castillo-semana-12`. Su archivo de configuración debe descargarse de ese proyecto específico; el JSON de otra semana no sirve.
+```text
+Firebase Auth → usuarios/{uid} en Firestore → sesión con rol
+Login ↔ Registro Firebase → Catálogo → Detalle → Favoritos
+                                  ↘ Entradas: Sede → Película → Fecha y horario → Butacas → Formato → Confirmación guardada
+                                  ↘ Perfil · Menú: Quiénes somos, Formatos y Créditos
+                                  ↘ Admin (solo administrador)
+TMDB → Retrofit → Repositorio → Room → ViewModel → Compose
+```
 
-## Verificación y evidencia
+Los ViewModel reciben interfaces mediante factories y publican `StateFlow<UiState<T>>`. Compose observa con `collectAsStateWithLifecycle`. `CineApplication` mantiene un contenedor por proceso; los ViewModel no contienen Context. Los eventos de pantalla pasan al ViewModel, que delega operaciones al repositorio.
 
-Compilación: `./gradlew :app:assembleDebug`. Pruebas de ViewModel: `./gradlew :app:testDebugUnitTest`. La verificación visual y las capturas de inicio de sesión, catálogo, detalle, favoritos y panel admin corresponden a la ejecución en Android Studio y deben agregarse al informe después de probar la app en el emulador.
+## Abrir y configurar
 
-## Alcance
+1. Abre **esta carpeta** en Android Studio y utiliza JDK 17 o el JDK compatible configurado por Android Studio.
+2. Registra en Firebase el paquete `com.tecsup.cinecastillo` y copia `google-services.json` dentro de `app/`.
+3. Habilita Correo/contraseña en Authentication. Los usuarios pueden registrarse desde la aplicación; el documento `usuarios/{uid}` se crea con rol `usuario`.
+4. Publica [firestore.rules](firestore.rules) en Firebase → Firestore → Reglas. Las reglas permiten que cada persona cree su documento con `rol: usuario`, editar únicamente su teléfono y DNI con formato válido, y leer y crear sus propias reservas. El rol no se puede cambiar desde la app. Para crear una cuenta administradora, crea su usuario en Authentication y su documento `usuarios/{uid}` con `rol: admin` desde la consola.
+5. Añade `TMDB_API_KEY=tu_clave` a `local.properties`, además de la ruta local de Android SDK.
+6. Sincroniza Gradle y ejecuta `app` con Internet para el primer acceso y la descarga.
 
-Las películas y favoritos se guardan en Room **en cada dispositivo**, no en la cuenta de Firebase. El rol sí se consulta en Firestore. La caché permite lectura sin conexión, pero la autenticación inicial y la actualización requieren conectividad. Las imágenes de carteles se cargan desde TMDB y pueden faltar sin conexión.
+Firebase del laboratorio: `cine-castillo-semana-12`. El JSON debe pertenecer a este proyecto, no a Semana 11. Las credenciales personales y `local.properties` no se versionan.
+
+## Verificación
+
+```text
+./gradlew :app:assembleDebug :app:testDebugUnitTest
+```
+
+En Windows se utiliza `gradlew.bat`. La compilación, las ocho pruebas unitarias y los catorce casos de aceptación corresponden a la revisión registrada el 11/11/2026. Los cambios de registro, perfil y reserva añadidos el 13/11/2026 aún requieren una nueva ejecución antes de considerarlos verificados. La matriz anterior está en [PRUEBAS_ACEPTACION.md](PRUEBAS_ACEPTACION.md).
+
+## Capturas
+
+| Acceso | Catálogo | Detalle |
+|---|---|---|
+| ![Login](docs/evidencias/PA12.png) | ![Catálogo](docs/evidencias/PA01.png) | ![Detalle](docs/evidencias/PA06.png) |
+
+| Favoritos | Administración | Notificación |
+|---|---|---|
+| ![Favoritos](docs/evidencias/PA07.png) | ![Admin](docs/evidencias/PA11_recuperado.png) | ![Aviso](docs/evidencias/PA05.png) |
+
+## Decisiones de almacenamiento
+
+La caché y las favoritas pertenecen al dispositivo. Firebase conserva la identidad y Firestore el rol; no se sincronizan favoritas entre teléfonos. Las imágenes remotas dependen de su caché de carga. La clave de lectura se mantiene fuera de Git, aunque puede extraerse del APK de demostración publicado con autorización.
+
+This product uses the TMDB API but is not endorsed or certified by TMDB.
+
+## Cartelera, reservas y perfil
+
+Cartelera y Reserva usan la misma lista de horarios, calculada desde la fecha actual y el horario de atención: de lunes a sábado de 10:00 a 18:00; domingos de 10:00 a 13:00. Al reservar desde Cartelera, la sede, la película, el día y la hora seleccionados se conservan. El mapa de butacas muestra disponibilidad simulada por función, y el máximo es de cinco entradas.
+
+Al confirmar, el resumen de entradas se guarda en `usuarios/{uid}/reservas` y se presenta en Mi perfil como historial personal. El perfil permite corregir teléfono y DNI luego de una confirmación. La membresía, los precios, horarios y ocupación de butacas son demostrativos; no hay pago ni bloqueo de asiento real.
+
+Las reglas nuevas están en [firestore.rules](firestore.rules). Deben publicarse en la consola Firebase del proyecto para que los cambios de perfil y las reservas funcionen en la nube. El APK se compiló localmente, pero estas reglas no se publicaron desde esta tarea.
+
+## Diseño cinematográfico
+
+La fase mejorada utiliza un tema oscuro con rojo como color principal, tipografía de tamaños consistentes, portada de acceso dibujada localmente, película destacada y tarjetas de catálogo y detalle adaptadas al tema. El rediseño conserva el flujo y los requisitos del laboratorio.
+

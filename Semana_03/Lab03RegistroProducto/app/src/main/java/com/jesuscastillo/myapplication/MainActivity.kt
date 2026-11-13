@@ -1,4 +1,4 @@
-package com.jesuscastillo.myapplication
+package com.jesuscastillo.myapplication.ia
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +51,7 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
     var precio by remember { mutableStateOf("") }
     var cantidad by remember { mutableStateOf("") }
     var mostrarResumen by remember { mutableStateOf(false) }
+    var mensajeError by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -95,10 +97,40 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { mostrarResumen = true },
+            onClick = {
+                val precioValido = precio.toDoubleOrNull()
+                val cantidadValida = cantidad.toIntOrNull()
+                mensajeError = when {
+                    nombre.isBlank() || precio.isBlank() || cantidad.isBlank() ->
+                        "Completa todos los campos antes de registrar el producto."
+                    precioValido == null || precioValido <= 0 ->
+                        "Ingresa un precio válido mayor que cero."
+                    cantidadValida == null || cantidadValida <= 0 ->
+                        "Ingresa una cantidad entera mayor que cero."
+                    else -> ""
+                }
+                mostrarResumen = mensajeError.isEmpty()
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("AGREGAR PRODUCTO")
+        }
+
+        TextButton(
+            onClick = {
+                nombre = ""
+                precio = ""
+                cantidad = ""
+                mensajeError = ""
+                mostrarResumen = false
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("LIMPIAR FORMULARIO")
+        }
+
+        if (mensajeError.isNotEmpty()) {
+            Text(text = mensajeError, color = Color(0xFFB3261E))
         }
 
         if (mostrarResumen) {

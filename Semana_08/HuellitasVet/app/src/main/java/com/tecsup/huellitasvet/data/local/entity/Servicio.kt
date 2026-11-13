@@ -1,6 +1,7 @@
 package com.tecsup.huellitasvet.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.ColumnInfo
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "servicios")
@@ -11,5 +12,6 @@ data class Servicio(
     val duracionMin: Int,
     val precio: Double,
     val activo: Boolean = true,
-    val icono: String
+    val icono: String,
+    @ColumnInfo(defaultValue = "'Consulta general'") val categorias: String = "Consulta general"
 )

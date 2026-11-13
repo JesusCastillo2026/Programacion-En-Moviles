@@ -1,0 +1,58 @@
+{
+  "PA04": {
+    "estado": "Aprobado",
+    "observado": "Campos vacíos rechazados antes de acceder a Firebase."
+  },
+  "PA03": {
+    "estado": "Aprobado",
+    "observado": "Contraseña incorrecta rechazada con mensaje claro."
+  },
+  "PA01": {
+    "estado": "Aprobado",
+    "observado": "Cuenta usuario accede al catálogo y no tiene opción Admin."
+  },
+  "PA05": {
+    "estado": "Aprobado",
+    "observado": "Primera sesión con Room vacío: carga, catálogo de 20 películas y notificación. Al pulsar el aviso se abre la app."
+  },
+  "PA06": {
+    "estado": "Aprobado",
+    "observado": "Detalle visible y llamada real al segundo endpoint registrada sin credenciales en la traza."
+  },
+  "PA07": {
+    "estado": "Aprobado",
+    "observado": "La película favorita sigue guardada después de detener y reabrir la app."
+  },
+  "PA10": {
+    "estado": "Aprobado",
+    "observado": "El favorito permanece después de sincronizar el catálogo."
+  },
+  "PA08": {
+    "estado": "Aprobado",
+    "observado": "En modo avión se ven las películas de Room y el aviso sin conexión."
+  },
+  "PA12": {
+    "estado": "Aprobado",
+    "observado": "Al cerrar sesión y reabrir se exige autenticación."
+  },
+  "PA02": {
+    "estado": "Aprobado",
+    "observado": "La cuenta admin tiene acceso al catálogo y al panel administrativo."
+  },
+  "PA09": {
+    "estado": "Aprobado",
+    "observado": "Sin datos ni sesión (datos de app limpiados), en modo avión: error con Reintentar. Al activar Internet vuelve al login. También se verificó error y recuperación del catálogo con Room vacío."
+  },
+  "PA11": {
+    "estado": "Aprobado",
+    "observado": "Vaciar deja 0 películas y 0 favoritas; reintentar con red recupera 20 películas y el panel muestra los nuevos totales."
+  },
+  "PA13": {
+    "estado": "Aprobado",
+    "observado": "Filtro y contenido conservados al girar. La tarjeta es accesible mediante scroll. Traza HTTP confirma cero descargas nuevas por rotación."
+  },
+  "PA14": {
+    "estado": "Aprobado",
+    "observado": "Permiso denegado en el diálogo: la sincronización y el catálogo funcionan, sin aviso de Cine Castillo en el panel de notificaciones."
+  }
+}

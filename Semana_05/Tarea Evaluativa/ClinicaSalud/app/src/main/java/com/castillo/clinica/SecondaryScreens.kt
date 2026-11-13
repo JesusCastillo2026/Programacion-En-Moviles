@@ -3,6 +3,7 @@ package com.castillo.clinica
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,11 +18,21 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun BookingsScreen(bookings: List<Booking>, onCancel: (Int) -> Unit = {}) {
+    // El diálogo conserva el objeto seleccionado y solo muta datos al confirmar.
     var pending by remember { mutableStateOf<Booking?>(null) }
+    var status by remember { mutableStateOf("Todas") }
+    val visible = bookings.filter {status == "Todas" || it.status == status}
     LazyColumn(Modifier.fillMaxSize(), contentPadding=PaddingValues(24.dp),
         verticalArrangement=Arrangement.spacedBy(16.dp)) {
-        if(bookings.isEmpty()) item {EmptyMessage("Todavía no hay reservas", "Selecciona una opción en Inicio.")}
-        items(bookings, key={it.id}) { booking ->
+        item { Text("${bookings.count {it.status == "Confirmada"}} próximas · ${bookings.count {it.status == "Completada"}} completadas",
+            fontWeight=FontWeight.Bold, color=accent) }
+        item { LazyRow(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+            items(listOf("Todas","Confirmada","Completada","Cancelada")) { value ->
+                FilterChip(selected=status==value, onClick={status=value}, label={Text(value)})
+            }
+        } }
+        if(visible.isEmpty()) item {EmptyMessage("No hay reservas en esta sección", "Puedes cambiar el filtro o reservar desde Inicio.")}
+        items(visible, key={it.id}) { booking ->
             Surface(color=cardColor, shape=RoundedCornerShape(16.dp)) {
                 Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
                     if(booking.status=="Confirmada") Box(Modifier.width(5.dp).fillMaxHeight().background(accent))
@@ -47,6 +58,7 @@ fun BookingsScreen(bookings: List<Booking>, onCancel: (Int) -> Unit = {}) {
 
 @Composable
 fun ProfileScreen(bookings: List<Booking>) {
+    // Los indicadores se recalculan desde el estado observable; no son contadores separados.
     LazyColumn(Modifier.fillMaxSize(), contentPadding=PaddingValues(24.dp),
         horizontalAlignment=Alignment.CenterHorizontally, verticalArrangement=Arrangement.spacedBy(16.dp)) {
         item { Box(Modifier.size(88.dp).background(tint,CircleShape),contentAlignment=Alignment.Center) {
@@ -85,4 +97,3 @@ fun ExtraScreen(bookings: List<Booking>) {
         }
     }
 }
-

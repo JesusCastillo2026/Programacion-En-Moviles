@@ -22,6 +22,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "My Application"
+rootProject.name = "Lab02CarritoKotlin"
 include(":app")
-include(":console")
+include(":app")
+include(":consola")

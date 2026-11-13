@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.relation.CitaConDetalle
 import com.tecsup.huellitasvet.data.repository.VetRepository
+import com.tecsup.huellitasvet.model.PuntoPeso
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +18,9 @@ class MascotaViewModel(private val repo: VetRepository, private val duenoId: Int
     val mascota: StateFlow<Mascota?> = (if (mascotaId > 0) repo.observarMascota(mascotaId) else flowOf(null))
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
     val historial: StateFlow<List<CitaConDetalle>> = (if (mascotaId > 0) repo.observarHistorial(mascotaId) else flowOf(emptyList()))
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    /** La vista recibe mediciones desde el repositorio, nunca desde Room directamente. */
+    val pesos: StateFlow<List<PuntoPeso>> = (if (mascotaId > 0) repo.observarPesos(mascotaId) else flowOf(emptyList()))
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     private val _errores = MutableStateFlow<Map<String, String>>(emptyMap())
     val errores: StateFlow<Map<String, String>> = _errores

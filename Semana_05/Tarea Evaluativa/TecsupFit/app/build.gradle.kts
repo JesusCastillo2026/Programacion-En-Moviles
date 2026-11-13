@@ -4,7 +4,7 @@ android {
     compileSdk = 37
     buildToolsVersion = "37.0.0"
     defaultConfig {
-        applicationId = "com.castillo.fit.base"
+        applicationId = "com.castillo.fit.ia"
         minSdk = 26
         targetSdk = 37
         versionCode = 1

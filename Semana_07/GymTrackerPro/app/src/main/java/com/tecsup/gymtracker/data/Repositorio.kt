@@ -5,6 +5,7 @@ import androidx.room.Room
 import java.time.LocalDate
 
 object Repositorio {
+    // Esta instancia única centraliza el acceso a Room para todas las pantallas.
     private lateinit var db: GymDatabase
     lateinit var usuarioDao: UsuarioDao
         private set
@@ -20,6 +21,7 @@ object Repositorio {
     }
 
     suspend fun registrar(usuario: Usuario): Boolean {
+        // Se validan campos y duplicados antes de intentar insertar el socio.
         if (usuario.nombreCompleto.isBlank() || usuario.nombreUsuario.isBlank() ||
             !usuario.email.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) ||
             usuario.edad !in 14..100 || usuario.password.length < 6 ||

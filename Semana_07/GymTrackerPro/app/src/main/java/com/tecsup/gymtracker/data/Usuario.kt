@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+// Cada socio se guarda como un registro independiente en SQLite.
 @Entity(tableName = "Usuario", indices = [Index(value = ["nombre_usuario"], unique = true), Index(value = ["email"], unique = true)])
 data class Usuario(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,

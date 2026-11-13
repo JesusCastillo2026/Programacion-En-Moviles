@@ -16,6 +16,7 @@ import com.saludplus.paciente.ui.components.AppBackTopBar
 import com.saludplus.paciente.ui.theme.TextoSecundario
 
 @Composable
+/** Explica el alcance académico y los límites de privacidad de la aplicación local. */
 fun TerminosScreen(onBack: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize()) {
         AppBackTopBar("Términos y condiciones", onBack)

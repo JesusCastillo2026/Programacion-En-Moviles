@@ -3,13 +3,13 @@ plugins {
 }
 
 android {
-    namespace = "com.castillo.myapplication"
+    namespace = "com.example.lab02carritokotlin"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "com.castillo.myapplication"
+        applicationId = "com.example.lab02carritokotlin"
         minSdk = 24
         targetSdk = 37
         versionCode = 1

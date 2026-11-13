@@ -3,11 +3,11 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 android {
-    namespace = "com.castillo.navlab.base"
+    namespace = "com.castillo.campusnav"
     compileSdk = 37
     buildToolsVersion = "37.0.0"
     defaultConfig {
-        applicationId = "com.castillo.navlab.base"
+        applicationId = "com.castillo.campusnav"
         minSdk = 24
         targetSdk = 37
         versionCode = 1
