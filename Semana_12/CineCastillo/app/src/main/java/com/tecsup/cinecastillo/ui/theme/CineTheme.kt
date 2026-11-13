@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 private val cinema = darkColorScheme(
- primary=Color(0xFFE83B4F),onPrimary=Color.White,primaryContainer=Color(0xFF64202C),onPrimaryContainer=Color(0xFFFFD9DD),
+ primary=Color(0xFFB71C1C),onPrimary=Color.White,primaryContainer=Color(0xFF641616),onPrimaryContainer=Color(0xFFFFDADA),
  secondary=Color(0xFFFFC878),onSecondary=Color(0xFF2A140F),secondaryContainer=Color(0xFF543926),
  background=Color(0xFF0D1018),onBackground=Color(0xFFF5F2F2),surface=Color(0xFF181D28),onSurface=Color(0xFFF5F2F2),
  surfaceVariant=Color(0xFF252B38),onSurfaceVariant=Color(0xFFB9C0CC),surfaceContainer=Color(0xFF1C2230),surfaceContainerLow=Color(0xFF151A24),surfaceContainerHigh=Color(0xFF293141),

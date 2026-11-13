@@ -3,7 +3,35 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /usuarios/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
-      allow write: if false;
+      allow create: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.rol == "usuario"
+        && request.resource.data.keys().hasOnly(["nombre", "telefono", "dni", "email", "rol", "socio"])
+        && request.resource.data.socio == false;
+      allow update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.rol == resource.data.rol
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["telefono", "dni"])
+        && request.resource.data.telefono is string
+        && request.resource.data.telefono.matches('^9[0-9]{8}$')
+        && request.resource.data.dni is string
+        && request.resource.data.dni.matches('^[0-9]{8}$');
+      allow delete: if false;
+
+      match /reservas/{reservaId} {
+        allow read: if request.auth != null && request.auth.uid == uid;
+        allow create: if request.auth != null
+          && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(["movieTitle", "venue", "format", "date", "time", "seats", "total", "createdAt"])
+          && request.resource.data.movieTitle is string
+          && request.resource.data.venue is string
+          && request.resource.data.format is string
+          && request.resource.data.seats is list
+          && request.resource.data.seats.size() > 0
+          && request.resource.data.seats.size() <= 5
+          && request.resource.data.total is number;
+        allow update, delete: if false;
+      }
     }
   }
 }

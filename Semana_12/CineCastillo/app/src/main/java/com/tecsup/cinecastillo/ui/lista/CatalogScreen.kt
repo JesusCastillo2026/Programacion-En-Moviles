@@ -1,6 +1,10 @@
 package com.tecsup.cinecastillo.ui.lista
 
 import androidx.compose.foundation.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,30 +13,35 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import coil.compose.AsyncImage
 import com.tecsup.cinecastillo.domain.model.Movie
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CatalogScreen(
  state: MovieListUiState,onSearch:(String)->Unit,onSort:(MovieSort)->Unit,
  onFavorites:(Boolean)->Unit,onSync:()->Unit,onDetail:(Int)->Unit,
- onFavorite:(Int,Boolean)->Unit,soloFavoritos:Boolean=false
+ onFavorite:(Int,Boolean)->Unit,soloFavoritos:Boolean=false,onShowtimes:()->Unit={}
 ){
  LazyColumn(Modifier.fillMaxSize(),contentPadding=PaddingValues(horizontal=20.dp,vertical=18.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){
   item {
    Text(if(soloFavoritos) "Tu colección" else "Descubre",style=MaterialTheme.typography.headlineLarge)
    Text(if(soloFavoritos) "Historias que quieres volver a ver" else "Una historia para cada momento",style=MaterialTheme.typography.bodyMedium,color=MaterialTheme.colorScheme.onSurfaceVariant)
+   if(!soloFavoritos) TextButton(onClick=onShowtimes){Text("Explorar cartelera y horarios  →")}
    Spacer(Modifier.height(18.dp))
-   if(!soloFavoritos && state.movies.isNotEmpty()) FeaturedMovie(state.movies.first(),onDetail)
+   if(!soloFavoritos && state.movies.isNotEmpty()) FeaturedCarousel(state.movies,onDetail)
    if(!soloFavoritos){
     Spacer(Modifier.height(18.dp))
     OutlinedTextField(state.query,onSearch,modifier=Modifier.fillMaxWidth(),singleLine=true,shape=RoundedCornerShape(18.dp),label={Text("Buscar películas")})
@@ -58,15 +67,44 @@ fun CatalogScreen(
   items(state.visible,key={it.id}) { movie -> MovieCard(movie,{onDetail(movie.id)},{onFavorite(movie.id,!movie.favorite)}) }
  }
 }
-@Composable private fun FeaturedMovie(movie:Movie,onDetail:(Int)->Unit){
- Card(Modifier.fillMaxWidth().clickable { onDetail(movie.id) },shape=RoundedCornerShape(26.dp),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surfaceContainerHigh)){
-  Row(Modifier.fillMaxWidth().height(172.dp),verticalAlignment=Alignment.CenterVertically){
-   AsyncImage(movie.posterUrl,"Póster de ${movie.title}",Modifier.width(112.dp).fillMaxHeight().clip(RoundedCornerShape(topStart=26.dp,bottomStart=26.dp)),contentScale=ContentScale.Crop)
-   Column(Modifier.weight(1f).padding(16.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){
-    Text("DESTACADA",style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.secondary)
-    Text(movie.title,style=MaterialTheme.typography.titleLarge,maxLines=3,overflow=TextOverflow.Ellipsis)
-    Text("${movie.releaseDate.take(4)}  ·  ★ ${"%.1f".format(movie.rating)}",style=MaterialTheme.typography.bodyMedium,color=MaterialTheme.colorScheme.onSurfaceVariant)
-    Text("Ver detalle  →",style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.primary)
+@OptIn(ExperimentalFoundationApi::class)
+@Composable private fun FeaturedCarousel(movies: List<Movie>, onDetail: (Int) -> Unit) {
+ val featured = movies.sortedByDescending { it.releaseDate }.take(3)
+ val pager = rememberPagerState(pageCount = { featured.size })
+ LaunchedEffect(featured.size) {
+  if (featured.size > 1) while (true) {
+   delay(4000)
+   pager.animateScrollToPage((pager.currentPage + 1) % featured.size)
+  }
+ }
+ Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+  Text("Destacadas", style = MaterialTheme.typography.titleLarge)
+  HorizontalPager(
+   state = pager,
+   pageSize = PageSize.Fill,
+   pageSpacing = 10.dp,
+   modifier = Modifier.fillMaxWidth().height(260.dp)
+  ) { page ->
+   val movie = featured[page]
+   val distance = kotlin.math.abs(pager.getOffsetDistanceInPages(page)).coerceIn(0.00f, 1.00f)
+   Card(
+    Modifier.fillMaxSize().graphicsLayer { scaleX = 1.00f - distance * 0.04f; scaleY = 1.00f - distance * 0.04f }.clickable { onDetail(movie.id) },
+    shape = RoundedCornerShape(26.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+   ) {
+    Box {
+     AsyncImage(movie.posterUrl, "Póster de ${movie.title}", Modifier.fillMaxSize().clip(RoundedCornerShape(26.dp)), contentScale = ContentScale.Crop)
+     Box(Modifier.fillMaxWidth().height(150.dp).align(Alignment.BottomCenter).background(Brush.verticalGradient(listOf(Color.Transparent, Color(0xE60D1018)))))
+     Column(Modifier.align(Alignment.BottomStart).padding(18.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+      Text("EN CARTELERA", style = MaterialTheme.typography.labelSmall, color = Color(0xFFFF6B78))
+      Text(movie.title, style = MaterialTheme.typography.headlineSmall, maxLines = 2, overflow = TextOverflow.Ellipsis, color = Color.White, fontWeight = FontWeight.Bold)
+      Text("${movie.releaseDate.take(4)} · ★ ${"%.1f".format(movie.rating)}", style = MaterialTheme.typography.bodyMedium, color = Color.White)
+     }
+    }
+   }
+  }
+  Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+   featured.indices.forEach { index ->
+    Text(if (index == pager.currentPage) "●" else "○", Modifier.padding(horizontal = 4.dp), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelSmall)
    }
   }
  }

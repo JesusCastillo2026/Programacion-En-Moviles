@@ -26,6 +26,8 @@ class AuthViewModelTest {
                     } finally { observadores-- }
                 }
                 override suspend fun iniciarSesion(correo: String, clave: String): Result<Session> = error("No se debe autenticar al reintentar")
+                override suspend fun registrarUsuario(nombre: String, telefono: String, dni: String, correo: String, clave: String): Result<Unit> = Result.success(Unit)
+                override suspend fun perfilActual(): Result<UserProfile> = Result.success(UserProfile())
                 override suspend fun sesionActual(): Session? = null
                 override fun cerrarSesion() {}
             }

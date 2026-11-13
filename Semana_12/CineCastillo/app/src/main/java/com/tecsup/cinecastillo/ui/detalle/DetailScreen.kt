@@ -22,7 +22,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,9 +31,8 @@ import coil.compose.AsyncImage
 import com.tecsup.cinecastillo.ui.detalle.MovieDetailUiState
 
 @Composable
-fun DetailScreen(state: MovieDetailUiState, onBack: () -> Unit, onRefresh: () -> Unit, onFavorite: (Boolean) -> Unit) {
+fun DetailScreen(state: MovieDetailUiState, onRefresh: () -> Unit, onFavorite: (Boolean) -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-        TextButton(onClick = onBack) { Text("← Volver") }
         val movie = state.movie
         if (movie == null) {
             if (state.loading) CircularProgressIndicator()

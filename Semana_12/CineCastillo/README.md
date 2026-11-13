@@ -12,7 +12,7 @@ Aplicación de películas del **Laboratorio 12 de Programación en Móviles**. D
 
 ## Funciones
 
-- Firebase Authentication y roles `usuario` / `admin` consultados en Firestore.
+- Firebase Authentication con registro por correo y contraseña; cada registro crea en Firestore un perfil propio con rol fijo `usuario`. Los roles `admin` se asignan por consola.
 - Catálogo y detalle desde dos endpoints TMDB. Carteles, título, fecha, valoración y sinopsis.
 - Búsqueda local y orden por título, valoración o fecha sobre la copia disponible.
 - Room como fuente de la interfaz; favoritas persistentes que se conservan al sincronizar.
@@ -22,6 +22,13 @@ Aplicación de películas del **Laboratorio 12 de Programación en Móviles**. D
 - Canal y permiso de notificaciones; aviso con cantidad guardada que abre la app al tocarlo.
 - Estado conservado al girar y encabezado desplazable para mantener visibles las tarjetas en horizontal.
 - Créditos y atribución de TMDB dentro de la aplicación.
+- Flujo de reserva de demostración: sede → película → cantidad de entradas y butacas → formato compatible → fecha y horario → resumen y ticket estimado. Se limita a cinco asientos y se deshabilitan fechas pasadas y funciones que ya iniciaron.
+- Cartelera con tres estrenos en un carrusel automático; tocar un póster abre el detalle TMDB.
+- Perfil con nombre, correo, teléfono, DNI y estado de socio; la afiliación y sus puntos son demostrativos.
+- Menú lateral con información del proyecto, créditos y guía ilustrada de salas 2D, 3D, IMAX y 4DX.
+- Login centrado con logo original de Cine Castillo y tarjeta de acceso adaptada al tema oscuro rojo.
+
+La reserva es una simulación local para ampliar la experiencia de Cine Castillo. Las sedes, compatibilidad, horarios, aforo, tarifas, estado de socio y ticket son demostrativos; no se bloquean butacas en servidores ni se procesa un pago.
 
 ## Estructura
 
@@ -44,6 +51,8 @@ app/src/main/java/com/tecsup/cinecastillo/
     ├── detalle/       pantalla y ViewModel
     ├── favoritos/     pantalla y ViewModel
     ├── admin/         pantalla y ViewModel
+    ├── booking/       flujo simulado de compra y guía de salas
+    ├── profile/       perfil y membresía demostrativa
     ├── components/    Cargando y ErrorView
     └── theme/         tema Compose
 ```
@@ -54,8 +63,10 @@ app/src/main/java/com/tecsup/cinecastillo/
 
 ```text
 Firebase Auth → usuarios/{uid} en Firestore → sesión con rol
-Login → Catálogo → Detalle → Favoritos
-                ↘ Admin (solo administrador)
+Login ↔ Registro Firebase → Catálogo → Detalle → Favoritos
+                                  ↘ Entradas: Sede → Película → Fecha y horario → Butacas → Formato → Confirmación guardada
+                                  ↘ Perfil · Menú: Quiénes somos, Formatos y Créditos
+                                  ↘ Admin (solo administrador)
 TMDB → Retrofit → Repositorio → Room → ViewModel → Compose
 ```
 
@@ -65,8 +76,8 @@ Los ViewModel reciben interfaces mediante factories y publican `StateFlow<UiStat
 
 1. Abre **esta carpeta** en Android Studio y utiliza JDK 17 o el JDK compatible configurado por Android Studio.
 2. Registra en Firebase el paquete `com.tecsup.cinecastillo` y copia `google-services.json` dentro de `app/`.
-3. Habilita Correo/contraseña en Authentication. Crea las cuentas de prueba desde la consola.
-4. Crea `usuarios/{uid}` en Firestore con `rol` de texto: `admin` o `usuario`. Publica [firestore.rules](firestore.rules); la aplicación no modifica su rol.
+3. Habilita Correo/contraseña en Authentication. Los usuarios pueden registrarse desde la aplicación; el documento `usuarios/{uid}` se crea con rol `usuario`.
+4. Publica [firestore.rules](firestore.rules) en Firebase → Firestore → Reglas. Las reglas permiten que cada persona cree su documento con `rol: usuario`, editar únicamente su teléfono y DNI con formato válido, y leer y crear sus propias reservas. El rol no se puede cambiar desde la app. Para crear una cuenta administradora, crea su usuario en Authentication y su documento `usuarios/{uid}` con `rol: admin` desde la consola.
 5. Añade `TMDB_API_KEY=tu_clave` a `local.properties`, además de la ruta local de Android SDK.
 6. Sincroniza Gradle y ejecuta `app` con Internet para el primer acceso y la descarga.
 
@@ -78,7 +89,7 @@ Firebase del laboratorio: `cine-castillo-semana-12`. El JSON debe pertenecer a e
 ./gradlew :app:assembleDebug :app:testDebugUnitTest
 ```
 
-En Windows se utiliza `gradlew.bat`. Las pruebas automatizadas cubren carga, fallos de red, caché, filtros, orden, notificaciones y recuperación de sesión. La matriz de las 14 pruebas reales, sus condiciones y capturas está en [PRUEBAS_ACEPTACION.md](PRUEBAS_ACEPTACION.md).
+En Windows se utiliza `gradlew.bat`. La compilación, las ocho pruebas unitarias y los catorce casos de aceptación corresponden a la revisión registrada el 11/11/2026. Los cambios de registro, perfil y reserva añadidos el 13/11/2026 aún requieren una nueva ejecución antes de considerarlos verificados. La matriz anterior está en [PRUEBAS_ACEPTACION.md](PRUEBAS_ACEPTACION.md).
 
 ## Capturas
 
@@ -95,6 +106,14 @@ En Windows se utiliza `gradlew.bat`. Las pruebas automatizadas cubren carga, fal
 La caché y las favoritas pertenecen al dispositivo. Firebase conserva la identidad y Firestore el rol; no se sincronizan favoritas entre teléfonos. Las imágenes remotas dependen de su caché de carga. La clave de lectura se mantiene fuera de Git, aunque puede extraerse del APK de demostración publicado con autorización.
 
 This product uses the TMDB API but is not endorsed or certified by TMDB.
+
+## Cartelera, reservas y perfil
+
+Cartelera y Reserva usan la misma lista de horarios, calculada desde la fecha actual y el horario de atención: de lunes a sábado de 10:00 a 18:00; domingos de 10:00 a 13:00. Al reservar desde Cartelera, la sede, la película, el día y la hora seleccionados se conservan. El mapa de butacas muestra disponibilidad simulada por función, y el máximo es de cinco entradas.
+
+Al confirmar, el resumen de entradas se guarda en `usuarios/{uid}/reservas` y se presenta en Mi perfil como historial personal. El perfil permite corregir teléfono y DNI luego de una confirmación. La membresía, los precios, horarios y ocupación de butacas son demostrativos; no hay pago ni bloqueo de asiento real.
+
+Las reglas nuevas están en [firestore.rules](firestore.rules). Deben publicarse en la consola Firebase del proyecto para que los cambios de perfil y las reservas funcionen en la nube. El APK se compiló localmente, pero estas reglas no se publicaron desde esta tarea.
 
 ## Diseño cinematográfico
 
