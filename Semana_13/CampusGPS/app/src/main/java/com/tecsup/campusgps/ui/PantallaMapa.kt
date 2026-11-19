@@ -45,6 +45,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     val masCercano by vm.masCercano.collectAsStateWithLifecycle()
     val categoria by vm.categoria.collectAsState()
     val radio by vm.radio.collectAsState()
+    val seguimientoActivo by vm.seguimientoActivo.collectAsState()
     val tienePermisoUbicacion = ContextCompat.checkSelfPermission(
         context,
         Manifest.permission.ACCESS_FINE_LOCATION
@@ -82,6 +83,12 @@ fun PantallaMapa(vm: MapaViewModel) {
                 onClick = { masCercano?.let { vm.seleccionar(it.id) } },
                 enabled = masCercano != null
             ) { Text("Ir al más cercano") }
+            OutlinedButton(
+                onClick = {
+                    if (seguimientoActivo) vm.detenerSeguimiento() else vm.iniciarSeguimiento()
+                },
+                enabled = tienePermisoUbicacion
+            ) { Text(if (seguimientoActivo) "Detener seguimiento" else "Iniciar seguimiento") }
             masCercano?.let { lugar ->
                 val metros = lugares.firstOrNull { it.lugar.id == lugar.id }?.metros
                 Text("Más cercano: ${lugar.nombre} (${metros?.let { "${it.toInt()} m" } ?: "Sin calcular"})")

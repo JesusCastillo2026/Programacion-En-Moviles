@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class MapaViewModel(
@@ -39,6 +41,9 @@ class MapaViewModel(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
     private val _seleccionado = MutableStateFlow<Int?>(null)
     val seleccionado = _seleccionado.asStateFlow()
+    private val _seguimientoActivo = MutableStateFlow(false)
+    val seguimientoActivo = _seguimientoActivo.asStateFlow()
+    private var seguimientoJob: Job? = null
 
     fun seleccionar(id: Int?) {
         _seleccionado.value = id
@@ -51,6 +56,34 @@ class MapaViewModel(
 
     fun seleccionarRadio(metros: Int?) {
         _radio.value = metros
+    }
+
+    fun iniciarSeguimiento() {
+        if (seguimientoJob?.isActive == true) return
+        seguimientoJob = viewModelScope.launch {
+            _seguimientoActivo.value = true
+            try {
+                ubicacionRepo.seguirUbicacion().collect { posicion ->
+                    actualizarDistancias(posicion)
+                    _estado.value = UbicacionUi.Lista(posicion)
+                }
+            } catch (error: SecurityException) {
+                _estado.value = UbicacionUi.Error("Falta el permiso de ubicación.", TipoError.SIN_PERMISO)
+            } catch (error: Exception) {
+                _estado.value = UbicacionUi.Error(
+                    error.message ?: "No se pudo continuar el seguimiento.",
+                    TipoError.OTRO
+                )
+            } finally {
+                _seguimientoActivo.value = false
+            }
+        }
+    }
+
+    fun detenerSeguimiento() {
+        seguimientoJob?.cancel()
+        seguimientoJob = null
+        _seguimientoActivo.value = false
     }
 
     fun buscar() {
