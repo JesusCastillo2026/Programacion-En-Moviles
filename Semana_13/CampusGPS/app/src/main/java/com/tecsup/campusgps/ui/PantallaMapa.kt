@@ -21,10 +21,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +43,7 @@ import com.tecsup.campusgps.viewmodel.MapaViewModel
 @Composable
 fun PantallaMapa(vm: MapaViewModel) {
     val context = LocalContext.current
+    var mapaOscuro by rememberSaveable { mutableStateOf(false) }
     val estado by vm.estado.collectAsStateWithLifecycle()
     val lugares by vm.lugares.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
@@ -136,6 +141,14 @@ fun PantallaMapa(vm: MapaViewModel) {
                     )
                 }
             }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Mapa oscuro")
+                Switch(checked = mapaOscuro, onCheckedChange = { mapaOscuro = it })
+            }
             MapaUbicacion(
                 estado = estado,
                 lugares = lugares,
@@ -143,6 +156,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 masCercanoId = masCercano?.id,
                 radioMetros = radio,
                 mostrarPuntoAzul = tienePermisoUbicacion,
+                mapaOscuro = mapaOscuro,
                 modifier = Modifier.weight(1f)
             )
             ListaLugares(
