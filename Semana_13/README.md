@@ -1,3 +1,3 @@
-# Semana 13 · Pendiente
+# Semana 13 - Localización geográfica
 
-Esta carpeta queda reservada para el material y la entrega de la Semana 13. Aún no hay un proyecto o laboratorio publicado en este repositorio.
+Proyecto CampusGPS. La aplicación y su documentación están en [CampusGPS](CampusGPS/README.md).
