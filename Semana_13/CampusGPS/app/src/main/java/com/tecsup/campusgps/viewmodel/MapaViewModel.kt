@@ -21,6 +21,12 @@ class MapaViewModel(
         lugaresRepository.obtenerLugares().map { com.tecsup.campusgps.model.LugarConDistancia(it, null) }
     )
     val lugares = _lugares.asStateFlow()
+    private val _seleccionado = MutableStateFlow<Int?>(null)
+    val seleccionado = _seleccionado.asStateFlow()
+
+    fun seleccionar(id: Int?) {
+        _seleccionado.value = id
+    }
 
     fun buscar() {
         _estado.value = UbicacionUi.Buscando

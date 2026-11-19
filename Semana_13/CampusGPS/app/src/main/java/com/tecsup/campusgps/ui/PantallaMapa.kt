@@ -34,6 +34,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     val context = LocalContext.current
     val estado by vm.estado.collectAsStateWithLifecycle()
     val lugares by vm.lugares.collectAsState()
+    val seleccionado by vm.seleccionado.collectAsState()
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { resultado ->
@@ -71,8 +72,14 @@ fun PantallaMapa(vm: MapaViewModel) {
             MapaUbicacion(
                 estado = estado,
                 lugares = lugares,
-                seleccionado = null,
+                seleccionado = seleccionado,
                 modifier = Modifier.weight(1f)
+            )
+            ListaLugares(
+                lugares = lugares,
+                seleccionado = seleccionado,
+                onClick = vm::seleccionar,
+                modifier = Modifier.height(220.dp)
             )
         }
     }
