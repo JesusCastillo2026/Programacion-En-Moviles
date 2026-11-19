@@ -10,7 +10,11 @@ data class Lugar(
     val longitud: Double
 )
 
-data class LugarConDistancia(val lugar: Lugar, val metros: Float?)
+data class LugarConDistancia(
+    val lugar: Lugar,
+    val metros: Float?,
+    val dentroDelRadio: Boolean? = null
+)
 
 sealed interface UbicacionUi {
     data object Inicial : UbicacionUi

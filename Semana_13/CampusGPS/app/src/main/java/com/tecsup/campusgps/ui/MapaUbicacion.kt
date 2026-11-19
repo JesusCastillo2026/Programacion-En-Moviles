@@ -8,6 +8,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
@@ -20,6 +21,7 @@ fun MapaUbicacion(
     lugares: List<LugarConDistancia>,
     seleccionado: Int?,
     masCercanoId: Int? = null,
+    radioMetros: Int? = null,
     modifier: Modifier = Modifier
 ) {
     val camara = rememberCameraPositionState {
@@ -51,6 +53,15 @@ fun MapaUbicacion(
     GoogleMap(modifier = modifier, cameraPositionState = camara) {
         if (estado is UbicacionUi.Lista) {
             val location = estado.posicion
+            radioMetros?.let { radio ->
+                Circle(
+                    center = LatLng(location.latitud, location.longitud),
+                    radius = radio.toDouble(),
+                    fillColor = androidx.compose.ui.graphics.Color(0x223F51B5),
+                    strokeColor = androidx.compose.ui.graphics.Color(0xFF3F51B5),
+                    strokeWidth = 2f
+                )
+            }
             Marker(
                 state = rememberUpdatedMarkerState(LatLng(location.latitud, location.longitud)),
                 title = "Estás aquí"

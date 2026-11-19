@@ -44,6 +44,9 @@ fun ListaLugares(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(item.lugar.nombre, style = MaterialTheme.typography.titleSmall)
                         Text(item.lugar.categoria, style = MaterialTheme.typography.bodySmall)
+                        item.dentroDelRadio?.let { dentro ->
+                            Text(if (dentro) "Dentro del radio" else "Fuera del radio")
+                        }
                     }
                     Text(item.metros?.let(::formatearDistancia) ?: "Sin calcular")
                 }

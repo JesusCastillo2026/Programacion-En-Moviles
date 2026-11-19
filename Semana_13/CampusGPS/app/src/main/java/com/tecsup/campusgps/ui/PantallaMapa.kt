@@ -44,6 +44,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsStateWithLifecycle()
     val categoria by vm.categoria.collectAsState()
+    val radio by vm.radio.collectAsState()
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { resultado ->
@@ -108,11 +109,24 @@ fun PantallaMapa(vm: MapaViewModel) {
                     )
                 }
             }
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(null, 100, 200, 500).forEach { opcion ->
+                    FilterChip(
+                        selected = radio == opcion,
+                        onClick = { vm.seleccionarRadio(opcion) },
+                        label = { Text(opcion?.let { "${it} m" } ?: "Sin radio") }
+                    )
+                }
+            }
             MapaUbicacion(
                 estado = estado,
                 lugares = lugares,
                 seleccionado = seleccionado,
                 masCercanoId = masCercano?.id,
+                radioMetros = radio,
                 modifier = Modifier.weight(1f)
             )
             ListaLugares(
