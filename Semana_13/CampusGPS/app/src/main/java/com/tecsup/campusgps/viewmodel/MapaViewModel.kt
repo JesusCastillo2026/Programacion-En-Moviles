@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.tecsup.campusgps.data.UbicacionRepository
 import com.tecsup.campusgps.data.LugaresRepository
 import com.tecsup.campusgps.model.UbicacionUi
+import com.tecsup.campusgps.model.TipoError
 import com.tecsup.campusgps.model.LugarConDistancia
 import com.tecsup.campusgps.model.Lugar
 import com.tecsup.campusgps.util.distanciaMetros
@@ -36,6 +37,20 @@ class MapaViewModel(
     }
 
     fun buscar() {
+        if (!ubicacionRepo.playServicesDisponible()) {
+            _estado.value = UbicacionUi.Error(
+                "Este dispositivo no tiene Google Play Services.",
+                TipoError.SIN_PLAY_SERVICES
+            )
+            return
+        }
+        if (!ubicacionRepo.ubicacionActiva()) {
+            _estado.value = UbicacionUi.Error(
+                "Activa el GPS e intenta de nuevo.",
+                TipoError.GPS_APAGADO
+            )
+            return
+        }
         _estado.value = UbicacionUi.Buscando
         viewModelScope.launch {
             ubicacionRepo.obtenerPosicion()
@@ -43,12 +58,20 @@ class MapaViewModel(
                     actualizarDistancias(it)
                     _estado.value = UbicacionUi.Lista(it)
                 }
-                .onFailure { _estado.value = UbicacionUi.Error(it.message ?: "No se pudo obtener la ubicación") }
+                .onFailure {
+                    val tipo = if (it is SecurityException) TipoError.SIN_PERMISO else TipoError.OTRO
+                    val mensaje = if (tipo == TipoError.SIN_PERMISO) "Falta el permiso de ubicación."
+                    else it.message ?: "No se pudo obtener la ubicación."
+                    _estado.value = UbicacionUi.Error(mensaje, tipo)
+                }
         }
     }
 
     fun permisoDenegado() {
-        _estado.value = UbicacionUi.Error("Sin permiso de ubicación no puedo mostrar dónde estás")
+        _estado.value = UbicacionUi.Error(
+            "Sin permiso de ubicación no puedo mostrar dónde estás.",
+            TipoError.SIN_PERMISO
+        )
     }
 
     private fun actualizarDistancias(posicion: com.tecsup.campusgps.model.Posicion) {
