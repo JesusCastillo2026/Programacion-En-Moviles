@@ -10,6 +10,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.tecsup.campusgps.model.LugarConDistancia
@@ -22,6 +24,7 @@ fun MapaUbicacion(
     seleccionado: Int?,
     masCercanoId: Int? = null,
     radioMetros: Int? = null,
+    mostrarPuntoAzul: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val camara = rememberCameraPositionState {
@@ -50,7 +53,12 @@ fun MapaUbicacion(
         }
     }
 
-    GoogleMap(modifier = modifier, cameraPositionState = camara) {
+    GoogleMap(
+        modifier = modifier,
+        cameraPositionState = camara,
+        properties = MapProperties(isMyLocationEnabled = mostrarPuntoAzul),
+        uiSettings = MapUiSettings(myLocationButtonEnabled = mostrarPuntoAzul)
+    ) {
         if (estado is UbicacionUi.Lista) {
             val location = estado.posicion
             radioMetros?.let { radio ->
