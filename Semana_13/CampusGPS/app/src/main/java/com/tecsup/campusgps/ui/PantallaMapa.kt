@@ -5,7 +5,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.weight
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -35,6 +35,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsStateWithLifecycle()
     val lugares by vm.lugares.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
+    val masCercano by vm.masCercano.collectAsStateWithLifecycle()
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { resultado ->
@@ -60,6 +61,14 @@ fun PantallaMapa(vm: MapaViewModel) {
             Button(onClick = ::alPulsar, enabled = estado !is UbicacionUi.Buscando) {
                 Text("Obtener mi ubicación")
             }
+            OutlinedButton(
+                onClick = { masCercano?.let { vm.seleccionar(it.id) } },
+                enabled = masCercano != null
+            ) { Text("Ir al más cercano") }
+            masCercano?.let { lugar ->
+                val metros = lugares.firstOrNull { it.lugar.id == lugar.id }?.metros
+                Text("Más cercano: ${lugar.nombre} (${metros?.let { "${it.toInt()} m" } ?: "Sin calcular"})")
+            }
             when (val current = estado) {
                 UbicacionUi.Inicial -> Text("Pulsa el botón para encontrar tu ubicación.")
                 UbicacionUi.Buscando -> CircularProgressIndicator()
@@ -73,6 +82,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 estado = estado,
                 lugares = lugares,
                 seleccionado = seleccionado,
+                masCercanoId = masCercano?.id,
                 modifier = Modifier.weight(1f)
             )
             ListaLugares(
