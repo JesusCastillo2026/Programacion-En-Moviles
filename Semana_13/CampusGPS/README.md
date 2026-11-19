@@ -1,13 +1,15 @@
 # CampusGPS
 
-Aplicación Android para consultar la ubicación del usuario en un mapa y ordenar cinco puntos ficticios del campus por cercanía. Está desarrollada con Kotlin, Jetpack Compose y Material 3.
+Aplicación Android para consultar la ubicación del dispositivo en un mapa y ordenar cinco puntos ficticios del campus por cercanía. Está desarrollada con Kotlin, Jetpack Compose y Material 3.
 
 ## Preparar el proyecto
 
 1. Abre esta carpeta en Android Studio y sincroniza Gradle.
-2. En Google Cloud habilita Maps SDK for Android y crea una clave restringida al paquete `com.tecsup.campusgps` y a la huella SHA-1 del equipo.
-3. Guarda la clave solo en el archivo local `local.properties`, con el formato `MAPS_API_KEY=tu_clave`. Ese archivo está excluido de Git.
-4. Usa un emulador que incluya Google Play y establece la ubicación de prueba en `-12.0464, -77.0428`.
+2. No necesitas crear una clave de Google Maps ni editar `local.properties` para mostrar el mapa.
+3. El mapa usa MapLibre Native para Android y estilos de OpenFreeMap basados en datos de OpenStreetMap. La carga del estilo y los mosaicos necesita conexión a Internet.
+4. Para obtener la ubicación del dispositivo, usa un emulador con Google Play Services y establece una ubicación de prueba, por ejemplo `-12.0464, -77.0428`.
+
+OpenFreeMap ofrece el servicio público “tal cual”; puede cambiar o dejar de estar disponible. Para distribuir la aplicación a gran escala, conviene evaluar un proveedor con condiciones de servicio y disponibilidad adecuadas.
 
 ## Estructura
 
@@ -28,7 +30,7 @@ PantallaMapa -> MapaViewModel -> UbicacionRepository -> FusedLocationProviderCli
 PantallaMapa <- StateFlow <- MapaViewModel <- distancias ordenadas
 ```
 
-La pantalla solo representa el estado observable. El ViewModel usa interfaces de repositorio y calcula las distancias; no recibe `Context`. La implementación de ubicación encapsula Google Play Services.
+La pantalla representa el estado observable. El ViewModel usa interfaces de repositorio y calcula las distancias; no recibe `Context`. El repositorio encapsula Google Play Services para obtener el GPS. MapLibre Native dibuja el mapa y carga los estilos públicos de OpenFreeMap. La ubicación y el proveedor visual del mapa son piezas independientes.
 
 ## Puntos de prueba
 
@@ -42,31 +44,24 @@ La pantalla solo representa el estado observable. El ViewModel usa interfaces de
 
 ## Evidencias visuales
 
-Las capturas reales disponibles están en `docs/evidencias/`. Como todavía falta una clave de Maps, las imágenes identifican esa limitación y no simulan el mapa con marcadores:
-
-1. Solicitud de permiso (`01_permiso.png`).
-2. Ubicación y lista calculada; mosaicos pendientes de la clave (`02_ubicacion_mapa_sin_clave.png`).
-3. Filtro por categoría (`06_filtro_comida.png`).
-4. Radio de proximidad (`07_radio_100m.png`).
-5. Denegación de permiso (`04_error_permiso.png`); también se incluye GPS desactivado (`10_gps_desactivado.png`).
+Las capturas reales están en `docs/evidencias/`. Las imágenes de mapa que se tomaron antes de cambiar el proveedor se conservan como historial y todavía no demuestran que OpenFreeMap cargue correctamente. Debe guardarse una captura nueva después de validar la pantalla en el emulador.
 
 ## Reflexión
 
 1. `FusedLocationProviderClient` vive en el repositorio porque es una integración de plataforma; así el ViewModel depende de una interfaz y se puede sustituir la fuente.
-2. El permiso autoriza a la app a leer la posición del dispositivo. La clave identifica y autoriza el uso de Maps SDK. Si falta el permiso, no se obtiene ubicación; si falla la clave, el mapa no carga sus mosaicos.
-3. `local.properties` evita subir la clave con el código. Si se expusiera, debe revocarse y crearse otra en Google Cloud.
+2. El permiso de ubicación autoriza el acceso a la posición del dispositivo. MapLibre y OpenFreeMap se encargan de representar el mapa y requieren conexión a Internet, pero no una clave de Google Maps.
+3. La aplicación no almacena claves del proveedor del mapa. La disponibilidad del servicio público no está garantizada.
 4. La distancia se calcula en el ViewModel mediante una función utilitaria para que la pantalla no contenga lógica de negocio.
-5. Si el permiso se deniega, se informa al usuario y se ofrece abrir los ajustes de la app para habilitarlo.
+5. Si el permiso se deniega, se informa al usuario y se ofrece abrir los ajustes de la aplicación para habilitarlo.
 
 ## Pruebas
 
-El estado individual de los doce casos está en [PRUEBAS_ACEPTACION.md](PRUEBAS_ACEPTACION.md). No se presentan como aprobados los pasos que dependen de una clave de Maps o de una comprobación que todavía no se ejecutó.
+El resultado de los doce casos está en [PRUEBAS_ACEPTACION.md](PRUEBAS_ACEPTACION.md). Los casos que necesitan ver el mapa, sus marcadores o la cámara se deben volver a ejecutar con la implementación nueva antes de marcarlos como aprobados.
 
 ## Mejoras de la rama `mejora-ia`
 
-La segunda versión conserva la base del laboratorio y añade seis opciones: filtro por categoría, círculo y marca de radio de 100/200/500 metros, punto azul nativo con control para volver a la ubicación, seguimiento que se puede iniciar y detener, recuerdo del último punto seleccionado mediante DataStore y estilo oscuro del mapa.
+La segunda versión conserva la base del laboratorio y añade seis opciones: filtro por categoría, círculo y marca de radio de 100/200/500 metros, punto azul con control para volver a la ubicación, seguimiento que se puede iniciar y detener, recuerdo del último punto seleccionado mediante DataStore y estilo oscuro del mapa. La vista usa estilos claro y oscuro de OpenFreeMap a través de MapLibre Native.
 
-Las mejoras se mantienen dentro de las capas previstas: las preferencias y la ubicación se consultan desde repositorios; el ViewModel publica el estado; la pantalla solo presenta controles y resultados. La selección de categoría y la regla de proximidad tienen pruebas unitarias en `app/src/test/`.
+Las preferencias y la ubicación se consultan desde repositorios; el ViewModel publica el estado y la pantalla representa controles y resultados. La selección de categoría y la regla de proximidad tienen pruebas unitarias en `app/src/test/`.
 
-El registro de prompts de la fase de mejora está en [PROMPTS.md](PROMPTS.md). Incluye el resumen de lo propuesto, la adaptación realizada y el criterio aplicado.
-
+El registro de prompts de la fase de mejora está en [PROMPTS.md](PROMPTS.md).
