@@ -10,6 +10,8 @@ import com.tecsup.campusgps.model.TipoError
 import com.tecsup.campusgps.model.LugarConDistancia
 import com.tecsup.campusgps.model.Lugar
 import com.tecsup.campusgps.util.distanciaMetros
+import com.tecsup.campusgps.util.filtrarPorCategoria
+import com.tecsup.campusgps.util.dentroDelRadio
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,8 +37,8 @@ class MapaViewModel(
     private val _radio = MutableStateFlow<Int?>(null)
     val radio = _radio.asStateFlow()
     val lugares = combine(_lugares, _categoria, _radio) { lista, filtro, metros ->
-        lista.filter { filtro == null || it.lugar.categoria == filtro }
-            .map { item -> item.copy(dentroDelRadio = metros?.let { item.metros != null && item.metros <= it }) }
+        filtrarPorCategoria(lista, filtro)
+            .map { item -> item.copy(dentroDelRadio = metros?.let { dentroDelRadio(item.metros, it) }) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _lugares.value)
     val masCercano = lugares.map { lista ->
         lista.firstOrNull { it.metros != null }?.lugar

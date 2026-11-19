@@ -42,13 +42,13 @@ La pantalla solo representa el estado observable. El ViewModel usa interfaces de
 
 ## Evidencias visuales
 
-La guía solicita cinco capturas hechas en el emulador. Se añadirán a `docs/evidencias/` al ejecutar el proyecto con una clave válida de Maps:
+Las capturas reales disponibles están en `docs/evidencias/`. Como todavía falta una clave de Maps, las imágenes identifican esa limitación y no simulan el mapa con marcadores:
 
-1. Solicitud de permiso.
-2. Mapa con la ubicación actual.
-3. Los cinco marcadores y sus etiquetas.
-4. Lista ordenada por distancia.
-5. Mensaje de error con la acción correspondiente.
+1. Solicitud de permiso (`01_permiso.png`).
+2. Ubicación y lista calculada; mosaicos pendientes de la clave (`02_ubicacion_mapa_sin_clave.png`).
+3. Filtro por categoría (`06_filtro_comida.png`).
+4. Radio de proximidad (`07_radio_100m.png`).
+5. Denegación de permiso (`04_error_permiso.png`); también se incluye GPS desactivado (`10_gps_desactivado.png`).
 
 ## Reflexión
 
@@ -60,4 +60,13 @@ La guía solicita cinco capturas hechas en el emulador. Se añadirán a `docs/ev
 
 ## Pruebas
 
-El estado de ejecución de los doce casos está en [PRUEBAS_ACEPTACION.md](PRUEBAS_ACEPTACION.md). No se consideran aprobados hasta verificarlos en el emulador.
+El estado individual de los doce casos está en [PRUEBAS_ACEPTACION.md](PRUEBAS_ACEPTACION.md). No se presentan como aprobados los pasos que dependen de una clave de Maps o de una comprobación que todavía no se ejecutó.
+
+## Mejoras de la rama `mejora-ia`
+
+La segunda versión conserva la base del laboratorio y añade seis opciones: filtro por categoría, círculo y marca de radio de 100/200/500 metros, punto azul nativo con control para volver a la ubicación, seguimiento que se puede iniciar y detener, recuerdo del último punto seleccionado mediante DataStore y estilo oscuro del mapa.
+
+Las mejoras se mantienen dentro de las capas previstas: las preferencias y la ubicación se consultan desde repositorios; el ViewModel publica el estado; la pantalla solo presenta controles y resultados. La selección de categoría y la regla de proximidad tienen pruebas unitarias en `app/src/test/`.
+
+El registro de prompts de la fase de mejora está en [PROMPTS.md](PROMPTS.md). Incluye el resumen de lo propuesto, la adaptación realizada y el criterio aplicado.
+
