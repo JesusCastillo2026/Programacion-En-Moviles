@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.weight
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -65,7 +66,12 @@ fun PantallaMapa(vm: MapaViewModel) {
                 )
                 is UbicacionUi.Error -> Text(current.mensaje, color = MaterialTheme.colorScheme.error)
             }
-            Spacer(Modifier.height(4.dp))
+            MapaUbicacion(
+                estado = estado,
+                lugares = emptyList(),
+                seleccionado = null,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }
