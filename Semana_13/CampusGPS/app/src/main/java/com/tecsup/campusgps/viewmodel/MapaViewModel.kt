@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.campusgps.data.UbicacionRepository
 import com.tecsup.campusgps.data.LugaresRepository
+import com.tecsup.campusgps.data.PreferenciasLugarRepository
 import com.tecsup.campusgps.model.UbicacionUi
 import com.tecsup.campusgps.model.TipoError
 import com.tecsup.campusgps.model.LugarConDistancia
@@ -21,7 +22,8 @@ import kotlinx.coroutines.launch
 
 class MapaViewModel(
     private val ubicacionRepo: UbicacionRepository,
-    lugaresRepository: LugaresRepository
+    lugaresRepository: LugaresRepository,
+    private val preferenciasRepository: PreferenciasLugarRepository
 ) : ViewModel() {
     private val _estado = MutableStateFlow<UbicacionUi>(UbicacionUi.Inicial)
     val estado = _estado.asStateFlow()
@@ -45,8 +47,19 @@ class MapaViewModel(
     val seguimientoActivo = _seguimientoActivo.asStateFlow()
     private var seguimientoJob: Job? = null
 
+    init {
+        viewModelScope.launch {
+            preferenciasRepository.observarUltimoLugar().collect { id ->
+                if (_seleccionado.value == null && _lugares.value.any { it.lugar.id == id }) {
+                    _seleccionado.value = id
+                }
+            }
+        }
+    }
+
     fun seleccionar(id: Int?) {
         _seleccionado.value = id
+        if (id != null) viewModelScope.launch { preferenciasRepository.guardarUltimoLugar(id) }
     }
 
     fun seleccionarCategoria(categoria: String?) {

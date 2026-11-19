@@ -48,5 +48,6 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2")
     implementation("com.google.maps.android:maps-compose:8.4.0")
+    implementation("androidx.datastore:datastore-preferences:1.2.1")
     debugImplementation("androidx.compose.ui:ui-tooling")
 }

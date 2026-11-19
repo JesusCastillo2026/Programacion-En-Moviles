@@ -11,6 +11,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tecsup.campusgps.data.UbicacionRepositoryGoogle
 import com.tecsup.campusgps.data.LugaresRepositoryLocal
+import com.tecsup.campusgps.data.PreferenciasLugarRepositoryDataStore
 import com.tecsup.campusgps.ui.PantallaMapa
 import com.tecsup.campusgps.viewmodel.CampusViewModelFactory
 import com.tecsup.campusgps.viewmodel.MapaViewModel
@@ -24,7 +25,8 @@ class MainActivity : ComponentActivity() {
                     val vm: MapaViewModel = viewModel(
                         factory = CampusViewModelFactory(
                             UbicacionRepositoryGoogle(applicationContext),
-                            LugaresRepositoryLocal()
+                            LugaresRepositoryLocal(),
+                            PreferenciasLugarRepositoryDataStore(applicationContext)
                         )
                     )
                     PantallaMapa(vm)
