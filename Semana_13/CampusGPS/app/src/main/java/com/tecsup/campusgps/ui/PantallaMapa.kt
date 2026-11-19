@@ -27,7 +27,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -77,33 +77,55 @@ fun PantallaMapa(vm: MapaViewModel) {
 
     Scaffold(topBar = { TopAppBar(title = { Text("CampusGPS") }) }) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(20.dp),
+            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(7.dp)
         ) {
-            Button(onClick = ::alPulsar, enabled = estado !is UbicacionUi.Buscando) {
-                Text("Obtener mi ubicación")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = ::alPulsar,
+                    enabled = estado !is UbicacionUi.Buscando
+                ) { Text("Obtener ubicación") }
+                OutlinedButton(
+                    modifier = Modifier.weight(1f),
+                    onClick = { masCercano?.let { vm.seleccionar(it.id) } },
+                    enabled = masCercano != null
+                ) { Text("Ir al más cercano") }
             }
-            OutlinedButton(
-                onClick = { masCercano?.let { vm.seleccionar(it.id) } },
-                enabled = masCercano != null
-            ) { Text("Ir al más cercano") }
-            OutlinedButton(
-                onClick = {
-                    if (seguimientoActivo) vm.detenerSeguimiento() else vm.iniciarSeguimiento()
-                },
-                enabled = tienePermisoUbicacion
-            ) { Text(if (seguimientoActivo) "Detener seguimiento" else "Iniciar seguimiento") }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedButton(
+                    onClick = {
+                        if (seguimientoActivo) vm.detenerSeguimiento() else vm.iniciarSeguimiento()
+                    },
+                    enabled = tienePermisoUbicacion
+                ) { Text(if (seguimientoActivo) "Detener seguimiento" else "Iniciar seguimiento") }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Mapa oscuro", style = MaterialTheme.typography.bodySmall)
+                    Switch(checked = mapaOscuro, onCheckedChange = { mapaOscuro = it })
+                }
+            }
             masCercano?.let { lugar ->
                 val metros = lugares.firstOrNull { it.lugar.id == lugar.id }?.metros
-                Text("Más cercano: ${lugar.nombre} (${metros?.let { "${it.toInt()} m" } ?: "Sin calcular"})")
+                Text(
+                    "Más cercano: ${lugar.nombre} · ${metros?.let { "${it.toInt()} m" } ?: "Sin calcular"}",
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
             when (val current = estado) {
-                UbicacionUi.Inicial -> Text("Pulsa el botón para encontrar tu ubicación.")
-                UbicacionUi.Buscando -> CircularProgressIndicator()
+                UbicacionUi.Inicial -> Text("Encuentra tu ubicación y los puntos cercanos.", style = MaterialTheme.typography.bodySmall)
+                UbicacionUi.Buscando -> CircularProgressIndicator(modifier = Modifier.height(22.dp))
                 is UbicacionUi.Lista -> Text(
                     "Latitud: ${current.posicion.latitud}\nLongitud: ${current.posicion.longitud}",
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodySmall
                 )
                 is UbicacionUi.Error -> MensajeError(
                     error = current,
@@ -141,14 +163,6 @@ fun PantallaMapa(vm: MapaViewModel) {
                     )
                 }
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Mapa oscuro")
-                Switch(checked = mapaOscuro, onCheckedChange = { mapaOscuro = it })
-            }
             MapaUbicacion(
                 estado = estado,
                 lugares = lugares,
@@ -163,7 +177,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 lugares = lugares,
                 seleccionado = seleccionado,
                 onClick = vm::seleccionar,
-                modifier = Modifier.height(220.dp)
+                modifier = Modifier.height(180.dp)
             )
         }
     }
