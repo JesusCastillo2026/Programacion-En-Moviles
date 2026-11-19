@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,6 +33,7 @@ import com.tecsup.campusgps.viewmodel.MapaViewModel
 fun PantallaMapa(vm: MapaViewModel) {
     val context = LocalContext.current
     val estado by vm.estado.collectAsStateWithLifecycle()
+    val lugares by vm.lugares.collectAsState()
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { resultado ->
@@ -68,7 +70,7 @@ fun PantallaMapa(vm: MapaViewModel) {
             }
             MapaUbicacion(
                 estado = estado,
-                lugares = emptyList(),
+                lugares = lugares,
                 seleccionado = null,
                 modifier = Modifier.weight(1f)
             )

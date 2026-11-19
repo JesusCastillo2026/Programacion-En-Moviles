@@ -3,6 +3,7 @@ package com.tecsup.campusgps.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -42,6 +43,15 @@ fun MapaUbicacion(
             Marker(
                 state = rememberUpdatedMarkerState(LatLng(location.latitud, location.longitud)),
                 title = "Estás aquí"
+            )
+        }
+        lugares.forEach { item ->
+            val lugar = item.lugar
+            Marker(
+                state = rememberUpdatedMarkerState(LatLng(lugar.latitud, lugar.longitud)),
+                title = lugar.nombre,
+                snippet = lugar.categoria,
+                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
             )
         }
     }
