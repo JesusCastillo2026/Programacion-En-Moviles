@@ -2,6 +2,8 @@
 
 CampusGPS es una aplicación Android que muestra siete puntos de interés del campus TECSUP Lima, permite buscarlos por nombre y calcula un recorrido peatonal desde la ubicación del dispositivo. La desarrollé para el Laboratorio 13 de Programación en Móviles, usando Kotlin, Jetpack Compose y una organización MVVM con Repository.
 
+Al abrir la app se reproduce la animación del logo de CampusGPS y, al terminar, aparece el mapa. El video se incluye dentro de la aplicación y también se puede omitir; si el reproductor no puede abrirlo, la app continúa directamente al mapa.
+
 La rama `main` contiene la versión base del laboratorio. En `mejora-ia` agregué filtros por categoría, radios de cercanía, seguimiento de ubicación, recuerdo del último punto y un estilo oscuro del mapa. Por indicación del docente, la rama mejorada muestra el mapa con MapLibre y estilos públicos de OpenFreeMap; la ubicación sigue obteniéndose con Google Play Services.
 
 ## Abrir y ejecutar
@@ -49,6 +51,7 @@ CampusGPS/
 │   ├── util/          Distancia, formato y reglas de filtro/proximidad
 │   ├── viewmodel/     Estado y coordinación de acciones
 │   └── MainActivity.kt Punto de entrada e inicialización del mapa
+├── app/src/main/res/raw/campusgps_intro.mp4 Video de apertura con el logo animado
 ├── app/src/test/      Pruebas unitarias de las reglas de filtro y radio
 └── docs/
     ├── evidencias/    Capturas registradas durante el desarrollo

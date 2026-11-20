@@ -9,6 +9,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.maplibre.android.MapLibre
@@ -17,6 +20,7 @@ import com.tecsup.campusgps.data.LugaresRepositoryLocal
 import com.tecsup.campusgps.data.PreferenciasLugarRepositoryDataStore
 import com.tecsup.campusgps.data.ValhallaRutasRepository
 import com.tecsup.campusgps.ui.PantallaMapa
+import com.tecsup.campusgps.ui.IntroVideo
 import com.tecsup.campusgps.viewmodel.CampusViewModelFactory
 import com.tecsup.campusgps.viewmodel.MapaViewModel
 
@@ -40,15 +44,20 @@ class MainActivity : ComponentActivity() {
                 )
             ) {
                 Surface {
-                    val vm: MapaViewModel = viewModel(
-                        factory = CampusViewModelFactory(
-                            UbicacionRepositoryGoogle(applicationContext),
-                            LugaresRepositoryLocal(),
-                            PreferenciasLugarRepositoryDataStore(applicationContext),
-                            ValhallaRutasRepository()
+                    var mostrarIntro by rememberSaveable { mutableStateOf(true) }
+                    if (mostrarIntro) {
+                        IntroVideo(onTerminar = { mostrarIntro = false })
+                    } else {
+                        val vm: MapaViewModel = viewModel(
+                            factory = CampusViewModelFactory(
+                                UbicacionRepositoryGoogle(applicationContext),
+                                LugaresRepositoryLocal(),
+                                PreferenciasLugarRepositoryDataStore(applicationContext),
+                                ValhallaRutasRepository()
+                            )
                         )
-                    )
-                    PantallaMapa(vm)
+                        PantallaMapa(vm)
+                    }
                 }
             }
         }
