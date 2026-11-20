@@ -43,6 +43,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material.icons.rounded.ArrowForwardIos
 import androidx.compose.material.icons.rounded.Explore
@@ -51,6 +52,7 @@ import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material.icons.rounded.NearMe
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -59,6 +61,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -266,6 +269,12 @@ private fun DestinationPanel(
     onRetry: () -> Unit,
     onOpenSettings: () -> Unit
 ) {
+    var consulta by rememberSaveable { mutableStateOf("") }
+    val lugaresVisibles = lugares.filter { item ->
+        val texto = consulta.trim()
+        texto.isEmpty() || item.lugar.nombre.contains(texto, ignoreCase = true) ||
+            item.lugar.categoria.contains(texto, ignoreCase = true)
+    }
     val destino = lugares.firstOrNull { it.lugar.id == seleccionado }
     val esSede = seleccionado == 0
     val nombreDestino = destino?.lugar?.nombre ?: if (esSede) "TECSUP · Sede Lima" else "Puntos de interés"
@@ -353,6 +362,24 @@ private fun DestinationPanel(
                 MensajeError(error = estado, onRetry = onRetry, onOpenSettings = onOpenSettings)
             }
 
+            OutlinedTextField(
+                value = consulta,
+                onValueChange = { consulta = it },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp),
+                placeholder = { Text("Buscar biblioteca, comedor…") },
+                leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
+                trailingIcon = {
+                    if (consulta.isNotEmpty()) {
+                        IconButton(onClick = { consulta = "" }) {
+                            Icon(Icons.Rounded.Close, contentDescription = "Limpiar búsqueda")
+                        }
+                    }
+                },
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+
             Row(
                 modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(7.dp)
@@ -363,12 +390,20 @@ private fun DestinationPanel(
                 }
             }
 
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                items(lugares, key = { it.lugar.id }) { item ->
-                    PlaceCard(item = item, selected = seleccionado == item.lugar.id) {
-                        onSeleccionar(item.lugar.id)
+            if (lugaresVisibles.isNotEmpty()) {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                    items(lugaresVisibles, key = { it.lugar.id }) { item ->
+                        PlaceCard(item = item, selected = seleccionado == item.lugar.id) {
+                            onSeleccionar(item.lugar.id)
+                        }
                     }
                 }
+            } else {
+                Text(
+                    "No encontré lugares con ese nombre.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             Row(
