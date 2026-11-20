@@ -1,3 +1,11 @@
-# Semana 14 · Pendiente
+# Semana 14 · Hilos en Android
 
-Esta carpeta queda reservada para el material y la entrega de la Semana 14. Aún no hay un proyecto o laboratorio publicado en este repositorio.
+`CentroTareas` implementa el laboratorio de concurrencia con Kotlin, Jetpack Compose y MVVM + Repository.
+
+- Proyecto Android: [`CentroTareas`](CentroTareas/)
+- Guía, arquitectura, instrucciones y registro de la versión base: [`CentroTareas/README.md`](CentroTareas/README.md)
+- Pruebas manuales en el emulador: [`CentroTareas/PRUEBAS_ACEPTACION.md`](CentroTareas/PRUEBAS_ACEPTACION.md)
+- Registro de indicaciones de la versión ampliada: [`CentroTareas/PROMPTS.md`](CentroTareas/PROMPTS.md)
+- Informe con las dos variantes y capturas auténticas del emulador: [`Informe_Laboratorio_14_CentroTareas.pdf`](Informe_Laboratorio_14_CentroTareas.pdf)
+
+`main` refleja las actividades y el orden visual de la guía. `mejora-ia` conserva ese comportamiento y añade progreso observable de primos, historial persistente, reintentos y límite temporal, más un diseño oscuro renovado.
