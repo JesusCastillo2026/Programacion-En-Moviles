@@ -8,3 +8,9 @@ Proyecto **CampusGPS**, desarrollado con Kotlin y Jetpack Compose para consultar
 - `mejora-ia`: versión ampliada con filtros, proximidad, seguimiento y preferencias.
 
 Abre el proyecto [CampusGPS](CampusGPS/) en Android Studio. Para ejecutar `mejora-ia`, no hace falta configurar una clave de mapas; sí se necesita Internet para cargar OpenFreeMap y Google Play Services para obtener la ubicación. Los pasos, la arquitectura y las diferencias entre versiones están en el [README del proyecto](CampusGPS/README.md).
+
+## Documentación de entrega
+
+- [Informe PDF del laboratorio](CampusGPS/docs/Informe_Laboratorio_13_CampusGPS.pdf): estructura, explicación de código, capturas, pruebas de aceptación, reflexión y conclusión.
+- [Pruebas de aceptación](CampusGPS/PRUEBAS_ACEPTACION.md): estado documentado de los doce casos y verificación automatizada.
+- [Prompts y decisiones de mejora](CampusGPS/PROMPTS.md): ampliaciones de `mejora-ia` y revisión personal.
