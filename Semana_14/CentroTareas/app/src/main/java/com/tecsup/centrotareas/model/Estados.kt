@@ -10,6 +10,8 @@ sealed interface PrimosUi {
 
 data class ResultadoGuardado(val categoria: String, val resumen: String, val milisegundos: Long)
 
+data class EventoActividad(val titulo: String, val detalle: String)
+
 sealed interface CargaUi {
     data object Inicial : CargaUi
     data object Cargando : CargaUi

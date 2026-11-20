@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.centrotareas.data.TareasRepository
 import com.tecsup.centrotareas.model.CargaUi
+import com.tecsup.centrotareas.model.EventoActividad
 import com.tecsup.centrotareas.model.PrimosUi
 import com.tecsup.centrotareas.model.ResultadoGuardado
 import com.tecsup.centrotareas.data.HistorialRepository
@@ -40,6 +41,8 @@ class TareasViewModel(private val repo: TareasRepository, private val historialR
     val progresoPrimos = _progresoPrimos.asStateFlow()
     private val _historial = MutableStateFlow<List<ResultadoGuardado>>(emptyList())
     val historial = _historial.asStateFlow()
+    private val _actividad = MutableStateFlow<List<EventoActividad>>(emptyList())
+    val actividad = _actividad.asStateFlow()
     private val tiempos = mutableMapOf<String, Long>()
     private val _diferencia = MutableStateFlow<Pair<Long, Long>?>(null)
     val diferencia = _diferencia.asStateFlow()
@@ -56,19 +59,29 @@ class TareasViewModel(private val repo: TareasRepository, private val historialR
 
     fun tocar() { _toques.value++ }
 
+    private fun registrarEvento(titulo: String, detalle: String) {
+        _actividad.value = (listOf(EventoActividad(titulo, detalle)) + _actividad.value).take(8)
+    }
+
     fun tareaLarga() {
         if (_corriendo.value) return
         trabajo = viewModelScope.launch {
             _corriendo.value = true
+            _progreso.value = 0f
             _mensaje.value = "Trabajando..."
+            registrarEvento("Tarea iniciada", "El trabajo se ejecuta fuera del hilo principal.")
             try {
                 Log.d("HILO", "Antes: ${Thread.currentThread().name}")
                 repeat(100) { paso ->
                     withContext(Dispatchers.Default) { delay(40) }
                     _progreso.value = (paso + 1) / 100f
+                    if ((paso + 1) % 25 == 0) {
+                        registrarEvento("Tarea en progreso", "Avance: ${paso + 1}%.")
+                    }
                 }
                 Log.d("HILO", "Regresa en ${Thread.currentThread().name}")
                 _mensaje.value = "Terminó"
+                registrarEvento("Tarea completada", "La interfaz siguió disponible durante la ejecución.")
             } finally {
                 _corriendo.value = false
             }
@@ -76,6 +89,7 @@ class TareasViewModel(private val repo: TareasRepository, private val historialR
     }
 
     fun cancelar() {
+        if (_corriendo.value) registrarEvento("Tarea cancelada", "Puedes iniciarla nuevamente cuando quieras.")
         trabajo?.cancel()
         _mensaje.value = "Cancelado"
     }
@@ -85,24 +99,33 @@ class TareasViewModel(private val repo: TareasRepository, private val historialR
         trabajoPrimos = viewModelScope.launch {
             _primos.value = PrimosUi.Calculando
             val inicio = System.currentTimeMillis()
+            registrarEvento("Cálculo de primos iniciado", "Buscando números primos hasta $hasta.")
             try {
                 _progresoPrimos.value = 0f
                 val cantidad = repo.contarPrimos(hasta) { valor -> _progresoPrimos.value = valor }
                 val tiempo = System.currentTimeMillis() - inicio
                 _primos.value = PrimosUi.Listo(cantidad, tiempo)
                 guardarResultado("Primos", "$cantidad hasta $hasta", tiempo)
+                registrarEvento("Cálculo completado", "$cantidad primos encontrados en ${tiempo} ms.")
             } catch (cancelacion: CancellationException) {
                 _primos.value = PrimosUi.Cancelado
+                registrarEvento("Cálculo cancelado", "La pantalla permaneció disponible.")
                 throw cancelacion
             }
         }
     }
 
     fun cancelarPrimos() {
+        if (_primos.value == PrimosUi.Calculando) {
+            registrarEvento("Cancelación solicitada", "Deteniendo el cálculo de números primos.")
+        }
         trabajoPrimos?.cancel()
     }
 
-    fun cambiarSimularError(valor: Boolean) { _simularError.value = valor }
+    fun cambiarSimularError(valor: Boolean) {
+        _simularError.value = valor
+        registrarEvento(if (valor) "Error de red activado" else "Error de red desactivado", "Modo de demostración.")
+    }
 
     private suspend fun guardarResultado(tipo: String, texto: String, tiempo: Long) {
         val resultado = ResultadoGuardado(tipo, texto, tiempo)
@@ -118,6 +141,8 @@ class TareasViewModel(private val repo: TareasRepository, private val historialR
         if (_carga.value == CargaUi.Cargando) return
         viewModelScope.launch {
             _carga.value = CargaUi.Cargando
+            val modo = if (paralelo) "paralela" else "secuencial"
+            registrarEvento("Carga $modo iniciada", if (paralelo) "Perfil y pedidos se solicitan al mismo tiempo." else "Perfil y pedidos se solicitan uno después del otro.")
             val inicio = System.currentTimeMillis()
             try {
                 val (perfil, pedidos) = withTimeout(8_000) {
@@ -141,12 +166,15 @@ class TareasViewModel(private val repo: TareasRepository, private val historialR
                 tiempos[if (paralelo) "A la vez" else "Una por una"] = tiempo
                 _diferencia.value = tiempos["Una por una"]?.let { secuencial -> tiempos["A la vez"]?.let { secuencial to it } }
                 guardarResultado("Carga", "${if (paralelo) "Paralela" else "Secuencial"}: ${pedidos.size} pedidos", tiempo)
+                registrarEvento("Carga completada", "Estrategia $modo · ${tiempo} ms.")
             } catch (_: TimeoutCancellationException) {
                 _carga.value = CargaUi.Error("Tardó demasiado. Intenta de nuevo.")
+                registrarEvento("Tiempo agotado", "La carga superó el límite de espera.")
             } catch (cancelacion: CancellationException) {
                 throw cancelacion
             } catch (error: Exception) {
                 _carga.value = CargaUi.Error("No se pudo cargar: ${error.message ?: "Error inesperado"}")
+                registrarEvento("Carga fallida", error.message ?: "Ocurrió un error inesperado.")
             }
         }
     }
