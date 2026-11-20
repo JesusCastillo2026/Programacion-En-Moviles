@@ -59,31 +59,35 @@ La pantalla se ocupa de mostrar controles y estado. El ViewModel coordina la bú
 
 ## Capturas del laboratorio
 
-Las capturas existentes documentan la versión anterior a la migración del proveedor del mapa. Se incluyen para mostrar los flujos que sí se observaron, pero no demuestran que OpenFreeMap cargue en el emulador. En `PRUEBAS_ACEPTACION.md` queda anotado este límite para no confundir evidencia histórica con una verificación actual.
+Las imágenes siguientes son capturas nuevas hechas desde el emulador Pixel 8 con la rama `mejora-ia`. Muestran la interfaz actual, MapLibre con OpenFreeMap y varios estados interactivos. Las imágenes anteriores se mantienen en la carpeta como historial, pero no se usan aquí como evidencia de la versión moderna.
 
-### Permiso de ubicación
+### Mapa y panel principal
 
-![Solicitud de permiso de Android](docs/evidencias/01_permiso.png)
-
-### Pantalla con ubicación y distancias, captura anterior
-
-![Estado de ubicación en versión anterior; el mapa no cargó mosaicos](docs/evidencias/02_ubicacion_mapa_sin_clave.png)
-
-### Manejo del permiso denegado
-
-![Mensaje al denegar ubicación](docs/evidencias/04_error_permiso.png)
+![Versión actual de CampusGPS con el mapa oscuro cargado y el destino seleccionado](docs/evidencias/13_version_actual_mapa.png)
 
 ### Filtro por categoría
 
-![Filtro de categoría Comida](docs/evidencias/06_filtro_comida.png)
+![Filtro Comida activo en CampusGPS](docs/evidencias/14_filtro_comida_actual.png)
 
-### Selección del radio de proximidad
+### Proximidad de 100 metros
 
-![Radio de 100 metros en la lista](docs/evidencias/07_radio_100m.png)
+![Radio de proximidad de 100 metros seleccionado](docs/evidencias/15_radio_100m_actual.png)
+
+### Alternancia del estilo del mapa
+
+![Mapa claro con la interfaz oscura de CampusGPS](docs/evidencias/16_mapa_claro_actual.png)
+
+### Ubicación recibida
+
+![Ubicación actual del emulador y distancia de 142 metros a la cafetería](docs/evidencias/17_mi_ubicacion_actual.png)
+
+### Seguimiento activo
+
+![Seguimiento de ubicación activo en la interfaz actual](docs/evidencias/18_seguimiento_actual.png)
 
 ## Pruebas y entrega
 
-La compilación limpia `clean testDebugUnitTest assembleDebug` terminó correctamente y las cinco pruebas unitarias pasaron. En esta sesión el emulador Pixel 8 no inició porque el entorno indicó que la virtualización/aceleración requerida no está disponible. Por eso los doce casos manuales no se presentan como aprobados: sus resultados y evidencias previas están en [PRUEBAS_ACEPTACION.md](PRUEBAS_ACEPTACION.md).
+La compilación limpia `clean testDebugUnitTest assembleDebug` terminó correctamente y las cinco pruebas unitarias pasaron. También pude ejecutar la versión actual en el emulador y tomar las capturas de esta sección. No todos los doce casos manuales están aprobados; sus resultados y pendientes están detallados en [PRUEBAS_ACEPTACION.md](PRUEBAS_ACEPTACION.md). Durante la revisión, detener el seguimiento mostró un mensaje de cancelación y quedó anotado para corregirlo.
 
 La versión base cuenta con diez commits de laboratorio en `main`. La versión ampliada está en `mejora-ia`, con su registro de decisiones en [PROMPTS.md](PROMPTS.md). La guía completa, con explicación de archivos y bloques importantes, se encuentra en el [informe PDF](docs/Informe_Laboratorio_13_CampusGPS.pdf).
 

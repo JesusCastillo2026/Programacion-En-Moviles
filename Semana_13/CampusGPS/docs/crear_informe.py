@@ -163,7 +163,7 @@ versions = [
 story += [make_table(versions, [29 * mm, 82 * mm, 59 * mm]), Spacer(1, 3 * mm)]
 story += [
     P("En mejora-ia, MapLibre dibuja el mapa y OpenFreeMap entrega estilos y mosaicos por Internet. La ubicación sigue viniendo de Fused Location Provider. Son servicios diferentes: cambiar el proveedor visual no reemplaza el permiso ni el GPS.", "BodyX"),
-    P("La compilación limpia <b>clean testDebugUnitTest assembleDebug</b> terminó correctamente el 19 de noviembre. Pasaron cinco pruebas unitarias. El emulador Pixel 8 no llegó a iniciar porque el entorno informó que no estaba disponible la aceleración de hardware que necesita; por eso este documento no presenta los doce casos visuales como aprobados.", "BodyX"),
+    P("La compilación limpia <b>clean testDebugUnitTest assembleDebug</b> terminó correctamente y pasaron cinco pruebas unitarias. Después pude iniciar el Pixel 8 y tomar capturas de la versión actual: el mapa carga, la ubicación se obtiene y se ven el filtro, el radio y el seguimiento. Estas capturas documentan estados concretos; no significan que los doce casos manuales estén todos aprobados.", "BodyX"),
     PageBreak(),
 ]
 
@@ -332,23 +332,22 @@ story += [
 # 7 evidence
 story += [
     P("7. Capturas de la aplicación", "SectionX"),
-    P("Las imágenes siguientes sí son capturas de CampusGPS, pero se tomaron antes de cambiar a MapLibre. Las incluyo para explicar los controles y estados que se observaron. En la captura del mapa no se ven mosaicos; no la presento como prueba de carga del proveedor actual.", "BodyX"),
+    P("Estas imágenes se tomaron desde el emulador Pixel 8 con la versión actual de mejora-ia. Ya se aprecia MapLibre con OpenFreeMap, el diseño oscuro renovado y el mapa cargado. Las capturas anteriores están guardadas como historial en la carpeta de evidencias, pero no se usan aquí como prueba de la interfaz nueva.", "BodyX"),
 ]
 image_pairs = [
-    (("01_permiso.png", "1. Android solicita permiso de ubicación. El diálogo pertenece al sistema; la app solo inicia la solicitud."),
-     ("02_ubicacion_mapa_sin_clave.png", "2. La app muestra la posición y distancias calculadas. El mapa no cargó mosaicos en esta ejecución anterior.")),
-    (("04_error_permiso.png", "3. Al negar el permiso, la app sigue abierta y ofrece abrir los ajustes."),
-     ("06_filtro_comida.png", "4. El filtro Comida conserva en la lista los lugares de esa categoría.")),
-    (("07_radio_100m.png", "5. El selector de proximidad permite consultar el radio de 100 metros."),
-     ("08_seguimiento_en_vivo.png", "6. Se observó el seguimiento activado y el cambio de distancias con una ubicación distinta.")),
-    (("10_gps_desactivado.png", "7. Con la ubicación desactivada, la app muestra un aviso y permite reintentar."), None),
+    (("13_version_actual_mapa.png", "1. Pantalla principal actual. El mapa carga con el tema oscuro y muestra un destino elegido junto con la ubicación del emulador."),
+     ("14_filtro_comida_actual.png", "2. Al elegir Comida, la lista se limita a la cafetería y la selección queda resaltada en verde agua.")),
+    (("15_radio_100m_actual.png", "3. El radio de 100 m aparece seleccionado en el panel inferior; la interfaz mantiene los filtros y el mapa visibles."),
+     ("16_mapa_claro_actual.png", "4. El control del encabezado cambia al estilo claro de OpenFreeMap sin alterar la identidad visual de las tarjetas.")),
+    (("17_mi_ubicacion_actual.png", "5. El emulador entregó la posición; la app mostró 142 m hasta la cafetería y dibujó el círculo del radio activo."),
+     ("18_seguimiento_actual.png", "6. Con el seguimiento activo, el estado superior lo indica y el control cambia a Detener.")),
 ]
 for pair in image_pairs:
     cells = []
     captions = []
     for item in pair:
         if item:
-            visual, caption = evidence_image(item[0], item[1], 55 * mm, 88 * mm)
+            visual, caption = evidence_image(item[0], item[1], 64 * mm, 132 * mm)
             cells.append(visual)
             captions.append(caption)
         else:
@@ -367,19 +366,19 @@ for pair in image_pairs:
 # 8 acceptance tests
 story += [
     P("8. Doce pruebas de aceptación", "SectionX"),
-    P("La guía pide recorrer estos casos en el emulador. Las capturas previas aportan evidencia histórica de algunas pantallas; los casos visuales deben repetirse después de la migración. El estado distingue lo visto, lo revisado en código y lo que no se pudo comprobar en este equipo.", "BodyX"),
+    P("La guía pide recorrer estos casos en el emulador. Ya registré capturas de la versión actual para el mapa cargado, la ubicación, los filtros, el radio y el seguimiento. La tabla separa esos resultados visuales de los casos que todavía no recorrí o que necesitan otra comprobación.", "BodyX"),
 ]
 acceptance = [
-    ("1", "Solicitar permiso", "Captura previa; repetir tras migración"),
-    ("2", "Aceptar y mostrar ubicación", "No verificado en mapa actual"),
-    ("3", "Negar permiso y abrir ajustes", "Captura previa; repetir tras migración"),
-    ("4", "Mostrar cinco puntos en mapa", "Código presente; sin validación visual actual"),
-    ("5", "Tocar marcador y ver nombre/categoría", "Código presente; sin validación visual actual"),
-    ("6", "Lista ordenada con distancias", "Captura previa; repetir tras migración"),
+    ("1", "Solicitar permiso", "No repetido en esta sesión"),
+    ("2", "Aceptar y mostrar ubicación", "Verificado; captura 17 muestra ubicación y distancia"),
+    ("3", "Negar permiso y abrir ajustes", "Pendiente de repetir en versión actual"),
+    ("4", "Mostrar cinco puntos en mapa", "Mapa actual carga; no se confirmó que los cinco estén a la vista"),
+    ("5", "Tocar marcador y ver nombre/categoría", "Captura 13 muestra el destino seleccionado"),
+    ("6", "Lista ordenada con distancias", "Captura 17 muestra 142 m; falta revisar orden de todos"),
     ("7", "Seleccionar tarjeta y centrar cámara", "Código presente; sin validación visual actual"),
     ("8", "Centrar en el lugar más cercano", "Código presente; sin validación visual actual"),
-    ("9", "Cambiar ubicación y recalcular", "Captura previa; repetir tras migración"),
-    ("10", "Apagar GPS y reintentar", "Captura previa; repetir tras migración"),
+    ("9", "Cambiar ubicación y recalcular", "Ubicación obtenida; no se hizo cambio controlado"),
+    ("10", "Apagar GPS y reintentar", "Pendiente de repetir en versión actual"),
     ("11", "Rotar y conservar estado", "Sin evidencia válida; pendiente"),
     ("12", "Revisar que no se publique una clave", "Verificado por inspección de Git")
 ]
@@ -388,9 +387,9 @@ for number, case, result in acceptance:
     rows.append([P(number, "CellX"), P(case, "CellX"), P(result, "CellX")])
 story += [make_table(rows, [12 * mm, 69 * mm, 89 * mm]), Spacer(1, 3 * mm)]
 story += [
-    P("No se registran los doce recorridos como aprobados. La compilación y las reglas unitarias sí están comprobadas; para cerrar las pruebas manuales hay que iniciar el emulador con aceleración habilitada o conectar un teléfono, repetir los doce casos y reemplazar las capturas históricas por imágenes actuales.", "SmallX"),
+    P("No se registran los doce recorridos como aprobados: algunos se verificaron con capturas actuales y otros siguen pendientes. Al detener el seguimiento durante la revisión apareció el texto `StandaloneCoroutine was cancelled`; por eso el apagado limpio del seguimiento requiere una comprobación y corrección aparte.", "SmallX"),
     P("Resultado del emulador", "SubX"),
-    P("Al intentar iniciar Pixel 8, Android Emulator informó: \"x86_64 emulation currently requires hardware acceleration\". El intento con aceleración de software tampoco dejó el dispositivo en estado disponible para ADB. Por eso no instalé ni ejecuté la versión actual en una sesión funcional de emulador.", "BodyX"),
+    P("El Pixel 8 quedó conectado a ADB y permitió abrir CampusGPS y guardar capturas de la interfaz actual. El permiso de ubicación estaba concedido y el emulador entregó una posición; la cafetería quedó a 142 m en la captura correspondiente. Al detener el seguimiento apareció un mensaje de cancelación, así que ese comportamiento no se presenta como correcto.", "BodyX"),
     PageBreak(),
 ]
 
@@ -412,9 +411,9 @@ story += [
     P("10. Conclusión", "SectionX"),
     P("Al desarrollar CampusGPS entendí que una app de ubicación no consiste solo en colocar un pin sobre un mapa. Primero hay que pedir permiso, esperar una respuesta del sistema y contemplar que el usuario puede negarlo o tener el GPS apagado. Después, el dato obtenido tiene que recorrer la arquitectura sin mezclar la interfaz con los servicios de Android.", "BodyX"),
     P("En la versión base separé la pantalla, el ViewModel y los repositorios. El ViewModel transforma una posición en distancias ordenadas y estados que Compose puede mostrar. En mejora-ia amplié ese recorrido con filtros, radios de proximidad, seguimiento en vivo y una preferencia local. También cambié la representación del mapa a MapLibre con estilos de OpenFreeMap, manteniendo Fused Location Provider para obtener la posición.", "BodyX"),
-    P("La compilación limpia de la rama mejorada terminó y pasaron las cinco pruebas unitarias de filtro y radio. Eso confirma la construcción del APK y las reglas de cálculo que cubren esas pruebas. No confirma todavía que el mapa migrado cargue correctamente en pantalla, que sus marcadores respondan al toque o que la rotación conserve todos los datos: el emulador no arrancó por la falta de aceleración de hardware y las capturas disponibles son anteriores al cambio de proveedor.", "BodyX"),
+    P("La compilación limpia de la rama mejorada terminó y pasaron las cinco pruebas unitarias de filtro y radio. En el emulador comprobé que el mapa migrado carga, que la ubicación se obtiene y que responden los controles de filtro, proximidad, estilo y seguimiento activo. Todavía falta recorrer los doce casos completos, comprobar todos los marcadores y rotación, y corregir el mensaje que aparece al detener el seguimiento.", "BodyX"),
     P("También debo distinguir entre el centro real del campus y los puntos de prueba. El mapa se centra en TECSUP Santa Anita, pero la biblioteca, la cafetería, el laboratorio, el auditorio y el estacionamiento usan coordenadas de demostración. Antes de presentarlos como ubicaciones exactas, tengo que contrastarlos con el plano satelital y corregir sus coordenadas según las marcas del campus.", "BodyX"),
-    P("Con esas comprobaciones pendientes, la entrega deja una base que compila, una separación clara de responsabilidades y pruebas unitarias que protegen las reglas principales. El siguiente paso para cerrar el laboratorio es repetir los doce casos en un emulador con aceleración habilitada o en un teléfono Android, guardar capturas nuevas del mapa actual y confirmar las coordenadas interiores. Así podré sustentar no solo cómo está organizada la app, sino también qué resultados observé al ejecutarla.", "BodyX"),
+    P("Con esas comprobaciones pendientes, la entrega deja una base que compila, una separación clara de responsabilidades, pruebas unitarias y evidencia visual auténtica de la versión mejorada. El siguiente paso para cerrar el laboratorio es recorrer los casos restantes, revisar la detención del seguimiento y confirmar las coordenadas interiores con el plano del campus. Así podré sustentar cómo está organizada la app y qué resultados observé al ejecutarla, diferenciando lo que ya comprobé de lo que todavía debo validar.", "BodyX"),
     Spacer(1, 7 * mm),
     P("Informe individual · Semana 13 · TECSUP", "SubCover"),
 ]
