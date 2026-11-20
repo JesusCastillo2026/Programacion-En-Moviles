@@ -30,6 +30,7 @@ import com.tecsup.campusgps.model.LugarConDistancia
 import com.tecsup.campusgps.model.TECSUP_LIMA_LATITUD
 import com.tecsup.campusgps.model.TECSUP_LIMA_LONGITUD
 import com.tecsup.campusgps.model.UbicacionUi
+import com.tecsup.campusgps.model.RutaPeatonal
 import org.maplibre.android.annotations.IconFactory
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.camera.CameraPosition
@@ -59,6 +60,7 @@ private const val OPEN_FREE_MAP_DARK = "https://tiles.openfreemap.org/styles/dar
 fun MapaUbicacion(
     estado: UbicacionUi,
     lugares: List<LugarConDistancia>,
+    rutaPeatonal: RutaPeatonal?,
     seleccionado: Int?,
     masCercanoId: Int? = null,
     radioMetros: Int? = null,
@@ -100,7 +102,7 @@ fun MapaUbicacion(
     }
 
     LaunchedEffect(
-        map, styleLoaded, estado, lugares, seleccionado, masCercanoId, radioMetros,
+        map, styleLoaded, estado, lugares, rutaPeatonal, seleccionado, masCercanoId, radioMetros,
         mostrarPuntoAzul, onSeleccionarLugar
     ) {
         val currentMap = map ?: return@LaunchedEffect
@@ -115,7 +117,8 @@ fun MapaUbicacion(
                 .snippet("Av. Cascanueces 2221, Santa Anita")
                 .icon(createMarkerIcon(
                     context,
-                    if (seleccionado == 0) Color.rgb(255, 48, 75) else Color.rgb(105, 119, 124)
+                    if (seleccionado == 0) Color.rgb(255, 48, 75) else Color.rgb(105, 119, 124),
+                    if (seleccionado == 0) 90 else 64
                 ))
         )
         val style = currentMap.style
@@ -125,12 +128,9 @@ fun MapaUbicacion(
         if (style?.getSource(RADIUS_SOURCE) != null) style.removeSource(RADIUS_SOURCE)
         val userPosition = (estado as? UbicacionUi.Lista)?.posicion
         val selectedPlace = lugares.firstOrNull { it.lugar.id == seleccionado }?.lugar
-        if (style != null && userPosition != null && selectedPlace != null) {
+        if (style != null && rutaPeatonal != null && rutaPeatonal.puntos.size > 1) {
             val route = LineString.fromLngLats(
-                listOf(
-                    Point.fromLngLat(userPosition.longitud, userPosition.latitud),
-                    Point.fromLngLat(selectedPlace.longitud, selectedPlace.latitud)
-                )
+                rutaPeatonal.puntos.map { Point.fromLngLat(it.longitud, it.latitud) }
             )
             style.addSource(GeoJsonSource(ROUTE_SOURCE, Feature.fromGeometry(route)))
             style.addLayer(
@@ -190,7 +190,8 @@ fun MapaUbicacion(
                             selected -> Color.rgb(255, 48, 75)
                             nearest -> Color.rgb(149, 158, 160)
                             else -> Color.rgb(105, 119, 124)
-                        }
+                        },
+                        if (selected) 90 else 64
                     ))
             )
         }
@@ -266,9 +267,9 @@ fun MapaUbicacion(
     }
 }
 
-private fun createMarkerIcon(context: android.content.Context, color: Int) =
+private fun createMarkerIcon(context: android.content.Context, color: Int, size: Int = 72) =
     IconFactory.getInstance(context).fromBitmap(
-        Bitmap.createBitmap(72, 72, Bitmap.Config.ARGB_8888).also { bitmap ->
+        Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888).also { bitmap ->
             val drawable = ContextCompat.getDrawable(context, R.drawable.ic_map_marker)?.mutate()
                 ?: return@also
             drawable.setTint(color)

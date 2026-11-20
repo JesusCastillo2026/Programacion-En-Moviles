@@ -5,6 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.tecsup.campusgps.data.UbicacionRepository
 import com.tecsup.campusgps.data.LugaresRepository
 import com.tecsup.campusgps.data.PreferenciasLugarRepository
+import com.tecsup.campusgps.data.RutasRepository
+import com.tecsup.campusgps.model.RutaPeatonal
+import com.tecsup.campusgps.model.Posicion
+import com.tecsup.campusgps.model.TECSUP_LIMA_LATITUD
+import com.tecsup.campusgps.model.TECSUP_LIMA_LONGITUD
 import com.tecsup.campusgps.model.UbicacionUi
 import com.tecsup.campusgps.model.TipoError
 import com.tecsup.campusgps.model.LugarConDistancia
@@ -25,7 +30,8 @@ import kotlinx.coroutines.launch
 class MapaViewModel(
     private val ubicacionRepo: UbicacionRepository,
     lugaresRepository: LugaresRepository,
-    private val preferenciasRepository: PreferenciasLugarRepository
+    private val preferenciasRepository: PreferenciasLugarRepository,
+    private val rutasRepository: RutasRepository
 ) : ViewModel() {
     private val _estado = MutableStateFlow<UbicacionUi>(UbicacionUi.Inicial)
     val estado = _estado.asStateFlow()
@@ -48,6 +54,13 @@ class MapaViewModel(
     private val _seguimientoActivo = MutableStateFlow(false)
     val seguimientoActivo = _seguimientoActivo.asStateFlow()
     private var seguimientoJob: Job? = null
+    private var rutaJob: Job? = null
+    private val _ruta = MutableStateFlow<RutaPeatonal?>(null)
+    val ruta = _ruta.asStateFlow()
+    private val _rutaCargando = MutableStateFlow(false)
+    val rutaCargando = _rutaCargando.asStateFlow()
+    private val _errorRuta = MutableStateFlow<String?>(null)
+    val errorRuta = _errorRuta.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -62,11 +75,48 @@ class MapaViewModel(
     fun seleccionar(id: Int?) {
         _seleccionado.value = id
         if (id != null) viewModelScope.launch { preferenciasRepository.guardarUltimoLugar(id) }
+        if (id == null) {
+            rutaJob?.cancel()
+            _ruta.value = null
+            _errorRuta.value = null
+            _rutaCargando.value = false
+        } else {
+            calcularRuta()
+        }
+    }
+
+    fun calcularRuta() {
+        val origen = (_estado.value as? UbicacionUi.Lista)?.posicion ?: run {
+            _ruta.value = null
+            _errorRuta.value = "Pulsa Mi ubicación para obtener el punto de partida y calcular la ruta."
+            return
+        }
+        val id = _seleccionado.value ?: return
+        val destino = if (id == 0) Posicion(TECSUP_LIMA_LATITUD, TECSUP_LIMA_LONGITUD)
+        else _lugares.value.firstOrNull { it.lugar.id == id }?.lugar?.let {
+            Posicion(it.latitud, it.longitud)
+        } ?: return
+
+        rutaJob?.cancel()
+        rutaJob = viewModelScope.launch {
+            _ruta.value = null
+            _errorRuta.value = null
+            _rutaCargando.value = true
+            try {
+                _ruta.value = rutasRepository.obtenerRuta(origen, destino)
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                _errorRuta.value = error.message ?: "No se pudo obtener la ruta. Revisa tu conexión e inténtalo otra vez."
+            } finally {
+                _rutaCargando.value = false
+            }
+        }
     }
 
     fun seleccionarCategoria(categoria: String?) {
         _categoria.value = categoria
-        _seleccionado.value = null
+        seleccionar(null)
     }
 
     fun seleccionarRadio(metros: Int?) {
@@ -81,6 +131,9 @@ class MapaViewModel(
                 ubicacionRepo.seguirUbicacion().collect { posicion ->
                     actualizarDistancias(posicion)
                     _estado.value = UbicacionUi.Lista(posicion)
+                    if (_seleccionado.value != null && _ruta.value == null && rutaJob?.isActive != true) {
+                        calcularRuta()
+                    }
                 }
             } catch (error: SecurityException) {
                 _estado.value = UbicacionUi.Error("Falta el permiso de ubicación.", TipoError.SIN_PERMISO)
@@ -122,6 +175,7 @@ class MapaViewModel(
                 .onSuccess {
                     actualizarDistancias(it)
                     _estado.value = UbicacionUi.Lista(it)
+                    if (_seleccionado.value != null) calcularRuta()
                 }
                 .onFailure {
                     val tipo = if (it is SecurityException) TipoError.SIN_PERMISO else TipoError.OTRO

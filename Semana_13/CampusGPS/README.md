@@ -1,6 +1,6 @@
 # CampusGPS
 
-CampusGPS es una aplicación Android que muestra siete puntos de interés del campus TECSUP Lima y permite comparar su distancia con la ubicación del dispositivo. La desarrollé para el Laboratorio 13 de Programación en Móviles, usando Kotlin, Jetpack Compose y una organización MVVM con Repository.
+CampusGPS es una aplicación Android que muestra siete puntos de interés del campus TECSUP Lima, permite buscarlos por nombre y calcula un recorrido peatonal desde la ubicación del dispositivo. La desarrollé para el Laboratorio 13 de Programación en Móviles, usando Kotlin, Jetpack Compose y una organización MVVM con Repository.
 
 La rama `main` contiene la versión base del laboratorio. En `mejora-ia` agregué filtros por categoría, radios de cercanía, seguimiento de ubicación, recuerdo del último punto y un estilo oscuro del mapa. Por indicación del docente, la rama mejorada muestra el mapa con MapLibre y estilos públicos de OpenFreeMap; la ubicación sigue obteniéndose con Google Play Services.
 
@@ -12,7 +12,7 @@ La cámara inicia en TECSUP Sede Lima, Av. Cascanueces 2221, Santa Anita, aproxi
 
 ## Qué lugares aparecen
 
-Los siete lugares ahora usan las coordenadas de los enlaces de Google Maps que compartió el estudiante. En la app los pines usan el color rojo de CampusGPS; los colores de la imagen satelital solo identificaban cada sitio.
+Los siete lugares ahora usan las coordenadas de los enlaces de Google Maps que compartió el estudiante. El destino seleccionado se muestra con un marcador rojo destacado y los demás se atenúan; los colores de la imagen satelital solo identificaban cada sitio.
 
 El zoom al seleccionar un lugar queda en 16 para conservar contexto y mantener los destinos cercanos del campus a la vista.
 
@@ -31,6 +31,12 @@ El zoom al seleccionar un lugar queda en 16 para conservar contexto y mantener l
 Al tocar uno de los siete marcadores del mapa se selecciona el sitio y aparece una galería flotante dentro del panel inferior. Cada ficha muestra las dos fotografías de la carpeta del lugar; se puede pasar de una a otra deslizando o con las flechas. También se muestra el nombre del sitio y el número de foto. La misma interacción funciona desde las tarjetas del panel. El marcador de TECSUP abre su propia galería con las imágenes de `Tecsup - Sede Lima`.
 
 Las imágenes se guardan como recursos locales en `app/src/main/res/drawable-nodpi`, así que las galerías no dependen de una descarga de fotos ni de una API externa.
+
+## Búsqueda y ruta peatonal
+
+El campo de búsqueda filtra las tarjetas al escribir el nombre de un lugar o su categoría. Al seleccionar un punto, ese destino queda destacado en el mapa y los demás marcadores se muestran atenuados. Con la ubicación disponible, CampusGPS solicita a Valhalla una ruta peatonal basada en datos de OpenStreetMap. La geometría recibida se dibuja sobre MapLibre y el panel presenta distancia, tiempo aproximado e instrucciones por pasos en español. Se puede volver a calcular la ruta desde el mismo panel.
+
+El servicio público de demostración necesita conexión a Internet y puede no estar disponible todo el tiempo. Para calcular el recorrido, las coordenadas de origen del dispositivo y del destino se envían a `valhalla1.openstreetmap.de`; si la solicitud falla, la app informa el problema y permite reintentar. El tiempo es una estimación del motor de rutas, no una medición en tiempo real.
 
 ## Estructura de carpetas
 
@@ -61,11 +67,12 @@ MapaViewModel
 UbicacionRepositoryGoogle ── FusedLocationProviderClient
 LugaresRepositoryLocal ───── siete puntos de Google Maps
 PreferenciasLugarRepositoryDataStore ─ último punto seleccionado
+ValhallaRutasRepository ───── ruta peatonal, distancia, duración y maniobras
         ↓
 MapaLibre Native ─────────── estilos públicos de OpenFreeMap
 ```
 
-La pantalla se ocupa de mostrar controles y estado. El ViewModel coordina la búsqueda, las distancias, los filtros y el seguimiento. Los repositorios esconden los detalles de Google Play Services, los datos locales y DataStore. El mapa es otra pieza: recibe el estado y dibuja los marcadores, la línea directa y el radio, sin consultar el GPS por su cuenta.
+La pantalla se ocupa de mostrar controles y estado. El ViewModel coordina la búsqueda de ubicación, las distancias, los filtros, la selección y la solicitud de ruta. Los repositorios esconden los detalles de Google Play Services, los datos locales, DataStore y el servicio de rutas. El mapa recibe el estado y dibuja la geometría peatonal recibida, los marcadores y el radio, sin consultar el GPS por su cuenta.
 
 ## Capturas del laboratorio
 

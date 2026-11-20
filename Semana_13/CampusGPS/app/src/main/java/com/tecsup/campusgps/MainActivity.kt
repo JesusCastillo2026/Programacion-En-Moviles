@@ -15,6 +15,7 @@ import org.maplibre.android.MapLibre
 import com.tecsup.campusgps.data.UbicacionRepositoryGoogle
 import com.tecsup.campusgps.data.LugaresRepositoryLocal
 import com.tecsup.campusgps.data.PreferenciasLugarRepositoryDataStore
+import com.tecsup.campusgps.data.ValhallaRutasRepository
 import com.tecsup.campusgps.ui.PantallaMapa
 import com.tecsup.campusgps.viewmodel.CampusViewModelFactory
 import com.tecsup.campusgps.viewmodel.MapaViewModel
@@ -43,7 +44,8 @@ class MainActivity : ComponentActivity() {
                         factory = CampusViewModelFactory(
                             UbicacionRepositoryGoogle(applicationContext),
                             LugaresRepositoryLocal(),
-                            PreferenciasLugarRepositoryDataStore(applicationContext)
+                            PreferenciasLugarRepositoryDataStore(applicationContext),
+                            ValhallaRutasRepository()
                         )
                     )
                     PantallaMapa(vm)

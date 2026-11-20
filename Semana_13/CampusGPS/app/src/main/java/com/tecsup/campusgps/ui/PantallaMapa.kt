@@ -89,6 +89,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tecsup.campusgps.R
 import com.tecsup.campusgps.model.LugarConDistancia
+import com.tecsup.campusgps.model.RutaPeatonal
 import com.tecsup.campusgps.model.UbicacionUi
 import com.tecsup.campusgps.util.formatearDistancia
 import com.tecsup.campusgps.viewmodel.MapaViewModel
@@ -109,6 +110,9 @@ fun PantallaMapa(vm: MapaViewModel) {
     val categoria by vm.categoria.collectAsState()
     val radio by vm.radio.collectAsState()
     val seguimientoActivo by vm.seguimientoActivo.collectAsState()
+    val ruta by vm.ruta.collectAsStateWithLifecycle()
+    val rutaCargando by vm.rutaCargando.collectAsStateWithLifecycle()
+    val errorRuta by vm.errorRuta.collectAsStateWithLifecycle()
     val tienePermisoUbicacion = ContextCompat.checkSelfPermission(
         context,
         Manifest.permission.ACCESS_FINE_LOCATION
@@ -143,6 +147,7 @@ fun PantallaMapa(vm: MapaViewModel) {
         MapaUbicacion(
             estado = estado,
             lugares = lugares,
+            rutaPeatonal = ruta,
             seleccionado = seleccionado,
             masCercanoId = masCercano?.id,
             radioMetros = radio,
@@ -207,6 +212,10 @@ fun PantallaMapa(vm: MapaViewModel) {
             radio = radio,
             estado = estado,
             seguimientoActivo = seguimientoActivo,
+            ruta = ruta,
+            rutaCargando = rutaCargando,
+            errorRuta = errorRuta,
+            onCalcularRuta = vm::calcularRuta,
             onObtenerUbicacion = { solicitarUbicacion() },
             onToggleSeguimiento = {
                 if (seguimientoActivo) vm.detenerSeguimiento() else solicitarUbicacion(seguimiento = true)
@@ -260,6 +269,10 @@ private fun DestinationPanel(
     radio: Int?,
     estado: UbicacionUi,
     seguimientoActivo: Boolean,
+    ruta: RutaPeatonal?,
+    rutaCargando: Boolean,
+    errorRuta: String?,
+    onCalcularRuta: () -> Unit,
     onObtenerUbicacion: () -> Unit,
     onToggleSeguimiento: () -> Unit,
     onSeleccionar: (Int) -> Unit,
@@ -278,7 +291,7 @@ private fun DestinationPanel(
     val destino = lugares.firstOrNull { it.lugar.id == seleccionado }
     val esSede = seleccionado == 0
     val nombreDestino = destino?.lugar?.nombre ?: if (esSede) "TECSUP · Sede Lima" else "Puntos de interés"
-    GlassPanel(modifier = modifier.heightIn(max = 380.dp)) {
+    GlassPanel(modifier = modifier.heightIn(max = 480.dp)) {
         Column(
             modifier = Modifier.verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(9.dp)
@@ -313,7 +326,7 @@ private fun DestinationPanel(
                     Text(
                         when {
                             estado is UbicacionUi.Lista && destino?.metros != null ->
-                                "A ${formatearDistancia(destino.metros)} de tu ubicación · conexión directa"
+                                "A ${formatearDistancia(destino.metros)} en línea recta · recorrido peatonal abajo"
                             esSede -> "Campus TECSUP · Santa Anita, Lima"
                             destino != null -> "Destino seleccionado · obtén tu ubicación para ver la conexión"
                             else -> "Selecciona biblioteca, cafetería, comedor u otro punto"
@@ -360,6 +373,15 @@ private fun DestinationPanel(
             }
             if (estado is UbicacionUi.Error) {
                 MensajeError(error = estado, onRetry = onRetry, onOpenSettings = onOpenSettings)
+            }
+
+            if (destino != null || esSede) {
+                RouteGuidance(
+                    ruta = ruta,
+                    cargando = rutaCargando,
+                    error = errorRuta,
+                    onCalcularRuta = onCalcularRuta
+                )
             }
 
             OutlinedTextField(
@@ -429,6 +451,72 @@ private fun DestinationPanel(
             )
         }
     }
+}
+
+@Composable
+private fun RouteGuidance(
+    ruta: RutaPeatonal?,
+    cargando: Boolean,
+    error: String?,
+    onCalcularRuta: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        color = Color.White.copy(alpha = 0.055f),
+        border = BorderStroke(1.dp, GlassBorder)
+    ) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("RUTA A PIE", style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
+                    Text(
+                        ruta?.let { "${formatearDistancia(it.distanciaMetros.toFloat())} · ${formatearDuracion(it.duracionSegundos)} aprox." }
+                            ?: "Recorrido por caminos peatonales",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                OutlinedButton(onClick = onCalcularRuta, enabled = !cargando, shape = RoundedCornerShape(14.dp)) {
+                    if (cargando) {
+                        CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                    } else {
+                        Icon(Icons.Rounded.NearMe, contentDescription = null, modifier = Modifier.size(16.dp))
+                    }
+                    Spacer(Modifier.width(6.dp))
+                    Text(if (ruta == null) "Trazar" else "Actualizar")
+                }
+            }
+            if (error != null) {
+                Text(error, style = MaterialTheme.typography.bodySmall, color = Color(0xFFFFA3A3))
+            }
+            ruta?.indicaciones?.forEachIndexed { index, paso ->
+                Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                    Surface(shape = CircleShape, color = Color(0xFF23413F), modifier = Modifier.size(25.dp)) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text("${index + 1}", style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFF65E0CC), fontWeight = FontWeight.Bold)
+                        }
+                    }
+                    Column(Modifier.weight(1f)) {
+                        Text(paso.instruccion, style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface)
+                        if (paso.distanciaMetros > 0) {
+                            Text(formatearDistancia(paso.distanciaMetros.toFloat()),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun formatearDuracion(segundos: Double): String {
+    val minutos = (segundos / 60.0).toInt().coerceAtLeast(1)
+    return if (minutos < 60) "$minutos min" else "${minutos / 60} h ${minutos % 60} min"
 }
 
 @Composable

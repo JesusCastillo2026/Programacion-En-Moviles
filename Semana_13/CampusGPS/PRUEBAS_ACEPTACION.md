@@ -19,6 +19,16 @@ Las capturas `01` a `10` corresponden a la interfaz anterior a la migración de 
 | 11 | Rotar la pantalla | Se conservan la posición y los datos de la lista | No hay captura válida de CampusGPS para esta prueba; pendiente de ejecutar |
 | 12 | Revisar la configuración y el repositorio | No se publica una clave secreta; la versión mejorada no requiere clave de Maps | La configuración actual de mejora-ia usa MapLibre/OpenFreeMap; `local.properties` no se incluye en Git |
 
+## Comprobaciones de las mejoras recientes
+
+| Función | Comportamiento esperado | Estado |
+|---|---|---|
+| Buscar lugares | El texto filtra las tarjetas por nombre o categoría y permite limpiar la consulta | Implementado; falta recorrido manual en emulador |
+| Resaltar destino | El marcador seleccionado se muestra rojo y los demás quedan atenuados | Implementado; falta recorrido manual en emulador |
+| Ruta peatonal | Con ubicación y destino, el mapa muestra una ruta de Valhalla; el panel indica pasos, distancia y tiempo estimado | Implementado; falta validar desde el emulador con ubicación autorizada |
+
+La ruta usa el servicio público `valhalla1.openstreetmap.de`, requiere Internet y transmite las coordenadas de origen y destino para calcular el trayecto. Si el servicio no responde, la aplicación presenta un error recuperable y no inventa una ruta alternativa.
+
 ## Verificación automatizada y compilación
 
 | Verificación | Resultado |
