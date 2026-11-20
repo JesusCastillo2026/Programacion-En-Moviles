@@ -5,6 +5,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import android.Manifest
 import android.content.Intent
@@ -16,6 +17,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +30,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -47,6 +51,8 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material.icons.rounded.ArrowForwardIos
 import androidx.compose.material.icons.rounded.Explore
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material.icons.rounded.NearMe
@@ -69,6 +75,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -283,6 +290,13 @@ private fun DestinationPanel(
     onOpenSettings: () -> Unit
 ) {
     var consulta by rememberSaveable { mutableStateOf("") }
+    var expansionPanel by rememberSaveable { mutableFloatStateOf(1f) }
+    val scope = rememberCoroutineScope()
+    val estadoArrastre = rememberDraggableState { delta ->
+        expansionPanel = (expansionPanel - delta / 235f).coerceIn(0f, 1f)
+    }
+    val panelExpandido = expansionPanel >= 0.5f
+    val alturaPanel = 245.dp + 235.dp * expansionPanel
     val lugaresVisibles = lugares.filter { item ->
         val texto = consulta.trim()
         texto.isEmpty() || item.lugar.nombre.contains(texto, ignoreCase = true) ||
@@ -291,17 +305,55 @@ private fun DestinationPanel(
     val destino = lugares.firstOrNull { it.lugar.id == seleccionado }
     val esSede = seleccionado == 0
     val nombreDestino = destino?.lugar?.nombre ?: if (esSede) "TECSUP · Sede Lima" else "Puntos de interés"
-    GlassPanel(modifier = modifier.heightIn(max = 480.dp)) {
+    GlassPanel(modifier = modifier.height(alturaPanel)) {
         Column(
             modifier = Modifier.verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(9.dp)
         ) {
             Box(
-                Modifier.align(Alignment.CenterHorizontally).width(34.dp).height(4.dp)
-                    .clip(CircleShape).background(Color.White.copy(alpha = 0.35f))
-            )
+                modifier = Modifier.fillMaxWidth().height(24.dp)
+                    .clickable {
+                        scope.launch {
+                            val target = if (panelExpandido) 0f else 1f
+                            animate(
+                                initialValue = expansionPanel,
+                                targetValue = target,
+                                animationSpec = tween(220)
+                            ) { value, _ -> expansionPanel = value }
+                        }
+                    }
+                    .draggable(
+                        state = estadoArrastre,
+                        orientation = Orientation.Vertical,
+                        onDragStopped = { velocity ->
+                            val target = when {
+                                velocity > 850f -> 0f
+                                velocity < -850f -> 1f
+                                expansionPanel >= 0.5f -> 1f
+                                else -> 0f
+                            }
+                            animate(
+                                initialValue = expansionPanel,
+                                targetValue = target,
+                                animationSpec = tween(220)
+                            ) { value, _ -> expansionPanel = value }
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    Modifier.align(Alignment.Center).width(34.dp).height(4.dp)
+                        .clip(CircleShape).background(Color.White.copy(alpha = 0.48f))
+                )
+                Icon(
+                    if (panelExpandido) Icons.Rounded.ExpandMore else Icons.Rounded.ExpandLess,
+                    contentDescription = if (panelExpandido) "Contraer controles y ver más mapa" else "Expandir controles del mapa",
+                    tint = Color.White.copy(alpha = 0.68f),
+                    modifier = Modifier.align(Alignment.CenterEnd).size(20.dp)
+                )
+            }
             AnimatedVisibility(
-                visible = seleccionado != null,
+                visible = seleccionado != null && panelExpandido,
                 enter = fadeIn(tween(260)) + expandVertically(expandFrom = Alignment.Top),
                 exit = fadeOut(tween(180)) + shrinkVertically(shrinkTowards = Alignment.Top)
             ) {
