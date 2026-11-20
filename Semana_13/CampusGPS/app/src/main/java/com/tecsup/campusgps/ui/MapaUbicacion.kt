@@ -10,8 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -29,8 +27,9 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.tecsup.campusgps.model.LugarConDistancia
+import com.tecsup.campusgps.model.TECSUP_LIMA_LATITUD
+import com.tecsup.campusgps.model.TECSUP_LIMA_LONGITUD
 import com.tecsup.campusgps.model.UbicacionUi
-import org.maplibre.android.MapLibre
 import org.maplibre.android.annotations.IconFactory
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.camera.CameraPosition
@@ -39,12 +38,16 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.style.layers.FillLayer
+import org.maplibre.android.style.layers.LineLayer
 import org.maplibre.android.style.layers.PropertyFactory.fillColor
 import org.maplibre.android.style.layers.PropertyFactory.fillOpacity
 import org.maplibre.android.style.layers.PropertyFactory.fillOutlineColor
+import org.maplibre.android.style.layers.PropertyFactory.lineColor
+import org.maplibre.android.style.layers.PropertyFactory.lineWidth
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
+import org.maplibre.geojson.LineString
 import org.maplibre.geojson.Point
 import org.maplibre.geojson.Polygon
 import com.tecsup.campusgps.R
@@ -61,6 +64,7 @@ fun MapaUbicacion(
     radioMetros: Int? = null,
     mostrarPuntoAzul: Boolean = false,
     mapaOscuro: Boolean = false,
+    onSeleccionarLugar: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -96,16 +100,46 @@ fun MapaUbicacion(
     }
 
     LaunchedEffect(
-        map, styleLoaded, estado, lugares, seleccionado, masCercanoId, radioMetros, mostrarPuntoAzul
+        map, styleLoaded, estado, lugares, seleccionado, masCercanoId, radioMetros,
+        mostrarPuntoAzul, onSeleccionarLugar
     ) {
         val currentMap = map ?: return@LaunchedEffect
         if (!styleLoaded) return@LaunchedEffect
 
         currentMap.clear()
+        val campus = LatLng(TECSUP_LIMA_LATITUD, TECSUP_LIMA_LONGITUD)
+        currentMap.addMarker(
+            MarkerOptions()
+                .position(campus)
+                .title("TECSUP · Sede Lima")
+                .snippet("Av. Cascanueces 2221, Santa Anita")
+                .icon(createMarkerIcon(
+                    context,
+                    if (seleccionado == 0) Color.rgb(255, 48, 75) else Color.rgb(105, 119, 124)
+                ))
+        )
         val style = currentMap.style
+        if (style?.getLayer(ROUTE_LAYER) != null) style.removeLayer(ROUTE_LAYER)
+        if (style?.getSource(ROUTE_SOURCE) != null) style.removeSource(ROUTE_SOURCE)
         if (style?.getLayer(RADIUS_LAYER) != null) style.removeLayer(RADIUS_LAYER)
         if (style?.getSource(RADIUS_SOURCE) != null) style.removeSource(RADIUS_SOURCE)
         val userPosition = (estado as? UbicacionUi.Lista)?.posicion
+        val selectedPlace = lugares.firstOrNull { it.lugar.id == seleccionado }?.lugar
+        if (style != null && userPosition != null && selectedPlace != null) {
+            val route = LineString.fromLngLats(
+                listOf(
+                    Point.fromLngLat(userPosition.longitud, userPosition.latitud),
+                    Point.fromLngLat(selectedPlace.longitud, selectedPlace.latitud)
+                )
+            )
+            style.addSource(GeoJsonSource(ROUTE_SOURCE, Feature.fromGeometry(route)))
+            style.addLayer(
+                LineLayer(ROUTE_LAYER, ROUTE_SOURCE).withProperties(
+                    lineColor(Color.rgb(83, 219, 197)),
+                    lineWidth(4f)
+                )
+            )
+        }
         if (userPosition != null) {
             val point = LatLng(userPosition.latitud, userPosition.longitud)
             if (mostrarPuntoAzul) {
@@ -137,23 +171,57 @@ fun MapaUbicacion(
         }
 
         lugares.forEach { item ->
+            val selected = item.lugar.id == seleccionado
             val nearest = item.lugar.id == masCercanoId
             currentMap.addMarker(
                 MarkerOptions()
                     .position(LatLng(item.lugar.latitud, item.lugar.longitud))
-                    .title(if (nearest) "Más cercano · ${item.lugar.nombre}" else item.lugar.nombre)
+                    .title(
+                        when {
+                            selected -> "Destino seleccionado · ${item.lugar.nombre}"
+                            nearest -> "Más cercano · ${item.lugar.nombre}"
+                            else -> item.lugar.nombre
+                        }
+                    )
                     .snippet(item.lugar.categoria)
                     .icon(createMarkerIcon(
                         context,
-                        if (nearest) Color.rgb(46, 125, 50) else Color.rgb(33, 150, 243)
+                        when {
+                            selected -> Color.rgb(255, 48, 75)
+                            nearest -> Color.rgb(149, 158, 160)
+                            else -> Color.rgb(105, 119, 124)
+                        }
                     ))
             )
         }
 
-        val target = lugares.firstOrNull { it.lugar.id == seleccionado }?.lugar
+        currentMap.setOnMarkerClickListener { marker ->
+            val lugarMarcado = lugares.firstOrNull {
+                kotlin.math.abs(it.lugar.latitud - marker.position.latitude) < 0.000001 &&
+                    kotlin.math.abs(it.lugar.longitud - marker.position.longitude) < 0.000001
+            }
+            when {
+                lugarMarcado != null -> {
+                    onSeleccionarLugar(lugarMarcado.lugar.id)
+                    true
+                }
+                kotlin.math.abs(TECSUP_LIMA_LATITUD - marker.position.latitude) < 0.000001 &&
+                    kotlin.math.abs(TECSUP_LIMA_LONGITUD - marker.position.longitude) < 0.000001 -> {
+                    onSeleccionarLugar(0)
+                    true
+                }
+                else -> false
+            }
+        }
+
         when {
-            target != null -> currentMap.animateCamera(
-                CameraUpdateFactory.newLatLngZoom(LatLng(target.latitud, target.longitud), 17.0),
+            selectedPlace != null -> currentMap.animateCamera(
+                // Mantiene contexto suficiente para distinguir los puntos cercanos del campus.
+                CameraUpdateFactory.newLatLngZoom(LatLng(selectedPlace.latitud, selectedPlace.longitud), 16.0),
+                700
+            )
+            seleccionado == 0 -> currentMap.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(campus, 16.0),
                 700
             )
             userPosition != null -> currentMap.animateCamera(
@@ -170,14 +238,13 @@ fun MapaUbicacion(
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { mapView ?: MapView(it).also { created ->
-                MapLibre.getInstance(it)
                 created.onCreate(null)
                 mapView = created
                 created.getMapAsync { readyMap ->
                     map = readyMap
                     readyMap.cameraPosition = CameraPosition.Builder()
-                        .target(LatLng(-12.0464, -77.0428))
-                        .zoom(12.0)
+                        .target(LatLng(TECSUP_LIMA_LATITUD, TECSUP_LIMA_LONGITUD))
+                        .zoom(15.0)
                         .build()
                 }
             } }
@@ -196,11 +263,6 @@ fun MapaUbicacion(
                 Icon(Icons.Default.MyLocation, contentDescription = "Volver a mi ubicación")
             }
         }
-        Text(
-            text = "© OpenStreetMap · © OpenFreeMap",
-            modifier = Modifier.align(Alignment.BottomStart).padding(6.dp),
-            style = MaterialTheme.typography.labelSmall
-        )
     }
 }
 
@@ -217,6 +279,8 @@ private fun createMarkerIcon(context: android.content.Context, color: Int) =
 
 private const val RADIUS_SOURCE = "campus-radius-source"
 private const val RADIUS_LAYER = "campus-radius-layer"
+private const val ROUTE_SOURCE = "campus-route-source"
+private const val ROUTE_LAYER = "campus-route-layer"
 
 private fun circlePolygon(center: LatLng, radiusMeters: Double): Polygon {
     val earthRadius = 6378137.0

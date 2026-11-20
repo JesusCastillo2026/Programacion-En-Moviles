@@ -1,6 +1,6 @@
 # CampusGPS
 
-CampusGPS es una aplicación Android que muestra cinco puntos de interés de prueba alrededor de TECSUP Lima y permite comparar su distancia con la ubicación del dispositivo. La desarrollé para el Laboratorio 13 de Programación en Móviles, usando Kotlin, Jetpack Compose y una organización MVVM con Repository.
+CampusGPS es una aplicación Android que muestra siete puntos de interés del campus TECSUP Lima y permite comparar su distancia con la ubicación del dispositivo. La desarrollé para el Laboratorio 13 de Programación en Móviles, usando Kotlin, Jetpack Compose y una organización MVVM con Repository.
 
 La rama `main` contiene la versión base del laboratorio. En `mejora-ia` agregué filtros por categoría, radios de cercanía, seguimiento de ubicación, recuerdo del último punto y un estilo oscuro del mapa. Por indicación del docente, la rama mejorada muestra el mapa con MapLibre y estilos públicos de OpenFreeMap; la ubicación sigue obteniéndose con Google Play Services.
 
@@ -12,15 +12,25 @@ La cámara inicia en TECSUP Sede Lima, Av. Cascanueces 2221, Santa Anita, aproxi
 
 ## Qué lugares aparecen
 
-Los cinco lugares son datos de demostración, con coordenadas relativas al punto central de TECSUP. Sus nombres describen áreas de prueba, pero la posición exacta de cada edificio aún debe confirmarse con el plano o la imagen satelital anotada por el estudiante.
+Los siete lugares ahora usan las coordenadas de los enlaces de Google Maps que compartió el estudiante. En la app los pines usan el color rojo de CampusGPS; los colores de la imagen satelital solo identificaban cada sitio.
+
+El zoom al seleccionar un lugar queda en 16 para conservar contexto y mantener los destinos cercanos del campus a la vista.
 
 | ID | Punto | Categoría | Estado de ubicación |
 |---:|---|---|---|
-| 1 | Biblioteca Central | Estudio | Demostración; por confirmar en el plano del campus |
-| 2 | Cafetería Campus | Comida | Demostración; por confirmar en el plano del campus |
-| 3 | Laboratorio de Cómputo | Estudio | Demostración; por confirmar en el plano del campus |
-| 4 | Auditorio Principal | Eventos | Demostración; por confirmar en el plano del campus |
-| 5 | Estacionamiento Norte | Servicios | Demostración; por confirmar en el plano del campus |
+| 1 | Biblioteca | Estudio | -12.045007, -76.952958 |
+| 2 | Cafetería | Comida | -12.044004, -76.952229 |
+| 3 | Comedor | Comida | -12.045004, -76.952453 |
+| 4 | Auditorio | Eventos | -12.044828, -76.952715 |
+| 5 | Estacionamiento | Servicios | -12.044541, -76.951658 |
+| 6 | Salones de cómputo | Estudio | -12.044376, -76.952827 |
+| 7 | Cancha de grass | Deporte | -12.043732, -76.953629 |
+
+## Ficha fotográfica de cada punto
+
+Al tocar uno de los siete marcadores del mapa se selecciona el sitio y aparece una galería flotante dentro del panel inferior. Cada ficha muestra las dos fotografías de la carpeta del lugar; se puede pasar de una a otra deslizando o con las flechas. También se muestra el nombre del sitio y el número de foto. La misma interacción funciona desde las tarjetas del panel. El marcador de TECSUP abre su propia galería con las imágenes de `Tecsup - Sede Lima`.
+
+Las imágenes se guardan como recursos locales en `app/src/main/res/drawable-nodpi`, así que las galerías no dependen de una descarga de fotos ni de una API externa.
 
 ## Estructura de carpetas
 
@@ -49,7 +59,7 @@ PantallaMapa (Compose)
 MapaViewModel
         ↓ interfaces
 UbicacionRepositoryGoogle ── FusedLocationProviderClient
-LugaresRepositoryLocal ───── cinco puntos de demostración
+LugaresRepositoryLocal ───── siete puntos de Google Maps
 PreferenciasLugarRepositoryDataStore ─ último punto seleccionado
         ↓
 MapaLibre Native ─────────── estilos públicos de OpenFreeMap

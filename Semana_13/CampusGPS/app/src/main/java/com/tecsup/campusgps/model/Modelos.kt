@@ -1,6 +1,22 @@
 package com.tecsup.campusgps.model
 
+const val TECSUP_LIMA_LATITUD = -12.04398
+const val TECSUP_LIMA_LONGITUD = -76.95291
+
 data class Posicion(val latitud: Double, val longitud: Double)
+
+data class IndicacionRuta(
+    val instruccion: String,
+    val distanciaMetros: Double,
+    val duracionSegundos: Double
+)
+
+data class RutaPeatonal(
+    val distanciaMetros: Double,
+    val duracionSegundos: Double,
+    val puntos: List<Posicion>,
+    val indicaciones: List<IndicacionRuta>
+)
 
 data class Lugar(
     val id: Int,

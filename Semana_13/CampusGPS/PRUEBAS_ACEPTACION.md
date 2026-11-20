@@ -9,10 +9,10 @@ Las capturas `01` a `10` corresponden a la interfaz anterior a la migración de 
 | 1 | Abrir la app y solicitar ubicación | Android muestra el diálogo de permiso | Observado antes de la migración; repetir en la versión actual |
 | 2 | Aceptar el permiso | Se obtiene la posición y aparece el marcador del usuario | Comprobado en Pixel 8; captura 17 muestra posición y distancia |
 | 3 | Denegar el permiso | Mensaje claro; la app sigue abierta y permite ir a Ajustes | Captura previa disponible; volver a comprobar el flujo en la versión actual |
-| 4 | Usar el punto base del campus | Se muestran los cinco puntos de interés sobre el mapa | El mapa actual carga; falta comprobar que se vean los cinco marcadores a la vez |
-| 5 | Tocar un marcador | Se muestran el nombre y la categoría | Captura 13 muestra un destino seleccionado con nombre y categoría |
-| 6 | Revisar la lista de lugares | La lista queda ordenada por distancia y muestra m o km | Captura 17 muestra la distancia de 142 m; falta verificar el orden de los cinco sitios |
-| 7 | Seleccionar una tarjeta | Se resalta y la cámara centra el mapa en el punto | Acción implementada; sin verificación visual actual |
+| 4 | Usar el punto base del campus | Se muestran los siete puntos de interés sobre el mapa | Los siete marcadores tienen coordenadas extraídas de los enlaces de Maps; falta comprobar en pantalla el encuadre completo |
+| 5 | Tocar un marcador | Se muestran el nombre, la categoría y la ficha de fotos | Verificado en Pixel 8: tocar Cancha de grass abre su foto correcta y actualiza la ficha |
+| 6 | Revisar la lista de lugares | La lista queda ordenada por distancia y muestra m o km | Regla existente; falta repetir el orden con las siete ubicaciones actuales |
+| 7 | Seleccionar una tarjeta | Se resalta, abre su galería y centra el mapa en el punto | Acción y ficha implementadas; sin verificación visual posterior al cambio |
 | 8 | Ir al lugar más cercano | El botón centra el punto verde; antes de calcular queda deshabilitado | Regla y marcador están implementados; falta verificación en emulador |
 | 9 | Cambiar la ubicación y buscar otra vez | Cambian las distancias, el orden y el punto más cercano | Se obtuvo una posición; falta repetir con una segunda ubicación controlada |
 | 10 | Apagar la ubicación del dispositivo | Mensaje de GPS desactivado y acción para reintentar | Captura previa disponible; repetir en la versión actual |
@@ -33,4 +33,8 @@ Las capturas `01` a `10` corresponden a la interfaz anterior a la migración de 
 1. Repetir los casos de permiso denegado, GPS apagado y rotación en la versión actual.
 2. Comprobar que los cinco marcadores aparezcan, seleccionar cada uno y revisar el destino más cercano.
 3. Durante esta revisión, al detener el seguimiento apareció `StandaloneCoroutine was cancelled`; verificar y corregir esa salida antes de marcar como probado el apagado del seguimiento.
-4. Confirmar con el estudiante las ubicaciones interiores de los cinco sitios. Las coordenadas actuales son datos de demostración derivados del centro del campus, no posiciones verificadas de cada edificio.
+4. Repetir el recorrido de fotos en las ubicaciones restantes y revisar la ficha en distintos tamaños de pantalla.
+
+## Mejora adicional: fotos por ubicación
+
+Se agregaron dos fotos locales para cada uno de los siete sitios y dos para el marcador principal de TECSUP. Al tocar un pin aparece la galería con nombre, contador, flechas y desplazamiento horizontal. En Pixel 8 se comprobó que tocar un marcador selecciona el sitio correcto, que la flecha cambia a la segunda foto y que el gesto lateral también avanza. `assembleDebug` terminó correctamente con esta función.
