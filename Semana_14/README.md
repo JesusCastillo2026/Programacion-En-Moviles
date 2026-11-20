@@ -8,4 +8,4 @@
 - Registro de indicaciones de la versión ampliada: [`CentroTareas/PROMPTS.md`](CentroTareas/PROMPTS.md)
 - Informe con las dos variantes y capturas auténticas del emulador: [`Informe_Laboratorio_14_CentroTareas.pdf`](Informe_Laboratorio_14_CentroTareas.pdf)
 
-`main` refleja las actividades y el orden visual de la guía. `mejora-ia` conserva los ejercicios y añade progreso independiente, cancelación visible, comparación explicada, registro de actividad e historial persistente, reintentos y límite temporal con una interfaz renovada.
+`main` refleja las actividades y el orden visual de la guía. `mejora-ia` conserva los ejercicios y añade un panel que ejecuta cuatro trabajos independientes a la vez, con progreso, cancelación y reintentos por tarea, además de comparación explicada, registro de actividad e historial persistente.

@@ -7,7 +7,8 @@ Aplicación Android del Laboratorio 14 de Programación en Móviles. Sirve para 
 1. **Tarea larga:** inicia una tarea con avance visible. Mientras corre, el contador continúa respondiendo. Se puede cancelar y volver a iniciar.
 2. **Números primos:** calcula los primos hasta un límite elegido, muestra el progreso y permite detener el cálculo.
 3. **Cargas secuencial y paralela:** compara la duración de dos estrategias con datos de demostración, muestra errores simulados y ofrece reintento.
-4. **Actividad reciente:** registra inicios, avances, cancelaciones y resultados. Los resultados recientes se conservan con DataStore.
+4. **Panel de concurrencia:** inicia a la vez cuatro trabajos independientes: progreso, primos hasta 2,000,000, carga de perfil y carga de pedidos. Cada uno tiene estado y progreso propios; se puede cancelar o reintentar uno sin detener los demás.
+5. **Actividad reciente:** registra inicios, avances, cancelaciones y resultados. Los resultados recientes se conservan con DataStore.
 
 Cada ejercicio presenta su propio estado y progreso. La comparación explica cuál estrategia terminó antes cuando se han ejecutado ambas.
 
@@ -32,6 +33,6 @@ Abre la carpeta `CentroTareas`, sincroniza Gradle y ejecuta la configuración `a
 ## Variantes
 
 - `main`: versión base del laboratorio, con el orden y la presentación de la guía.
-- `mejora-ia`: conserva los ejercicios y agrega una presentación más clara, estados por tarea, avance independiente, resumen comparativo y registro de actividad.
+- `mejora-ia`: conserva los ejercicios, agrega el panel que demuestra concurrencia real y actualiza la presentación con tipografía consistente, botones degradados y superficies oscuras con bordes translúcidos.
 
-La mejora adicional solicitada por el profesor se abordará después; esta versión se limita a mejorar la presentación y la comprensión de los ejercicios existentes.
+El panel de concurrencia es la mejora adicional del laboratorio. Las cargas de perfil y pedidos son simuladas para mostrar cómo se comporta cada trabajo cuando termina o falla.
