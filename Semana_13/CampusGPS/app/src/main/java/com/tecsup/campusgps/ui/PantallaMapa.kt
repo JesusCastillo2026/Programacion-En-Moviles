@@ -389,7 +389,7 @@ private fun DestinationPanel(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                IconButton(onClick = onMasCercano, enabled = lugares.isNotEmpty()) {
+                IconButton(onClick = onMasCercano, enabled = lugares.any { it.metros != null }) {
                     Icon(Icons.Rounded.NearMe, contentDescription = "Seleccionar el punto más cercano",
                         tint = MaterialTheme.colorScheme.secondary)
                 }
