@@ -15,7 +15,8 @@ data class RutaPeatonal(
     val distanciaMetros: Double,
     val duracionSegundos: Double,
     val puntos: List<Posicion>,
-    val indicaciones: List<IndicacionRuta>
+    val indicaciones: List<IndicacionRuta>,
+    val esReferencial: Boolean = false
 )
 
 data class Lugar(

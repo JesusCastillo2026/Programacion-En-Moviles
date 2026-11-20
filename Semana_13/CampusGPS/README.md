@@ -36,9 +36,9 @@ Las imágenes se guardan como recursos locales en `app/src/main/res/drawable-nod
 
 ## Búsqueda y ruta peatonal
 
-El campo de búsqueda filtra las tarjetas al escribir el nombre de un lugar o su categoría. Al seleccionar un punto, ese destino queda destacado en el mapa y los demás marcadores se muestran atenuados. Con la ubicación disponible, CampusGPS solicita a Valhalla una ruta peatonal basada en datos de OpenStreetMap. La geometría recibida se dibuja sobre MapLibre y el panel presenta distancia, tiempo aproximado e instrucciones por pasos en español. Se puede volver a calcular la ruta desde el mismo panel.
+El campo de búsqueda filtra las tarjetas al escribir el nombre de un lugar o su categoría. Al seleccionar un punto, ese destino queda destacado en el mapa y los demás marcadores se muestran atenuados. La ruta se limita al perímetro de TECSUP: la app revisa tanto los puntos como los tramos de la geometría antes de dibujarla. Si Valhalla propone salir del campus, falla o no está disponible, se calcula un trazado peatonal interno de referencia conectado a los puntos de interés. Este trazado aparece identificado como estimado. El panel presenta distancia, tiempo aproximado e indicaciones por pasos, y permite volver a calcular el recorrido.
 
-El servicio público de demostración necesita conexión a Internet y puede no estar disponible todo el tiempo. Para calcular el recorrido, las coordenadas de origen del dispositivo y del destino se envían a `valhalla1.openstreetmap.de`; si la solicitud falla, la app informa el problema y permite reintentar. El tiempo es una estimación del motor de rutas, no una medición en tiempo real.
+La consulta a `valhalla1.openstreetmap.de` requiere Internet y transmite las coordenadas del origen y del destino. Como los datos peatonales del perímetro no garantizan un recorrido interior, cualquier geometría que salga del límite se descarta. El trazado interno de respaldo usa una red aproximada elaborada a partir de la imagen del campus y las ubicaciones compartidas; no sustituye un levantamiento topográfico ni garantiza accesibilidad o que cada segmento coincida con un sendero transitable. El tiempo de ambos tipos de ruta es una estimación, no una medición en tiempo real. Si el dispositivo está fuera del campus, la app informa que la ruta estará disponible al ingresar.
 
 ## Estructura de carpetas
 
@@ -68,9 +68,10 @@ PantallaMapa (Compose)
 MapaViewModel
         ↓ interfaces
 UbicacionRepositoryGoogle ── FusedLocationProviderClient
-LugaresRepositoryLocal ───── siete puntos de Google Maps
+LugaresRepositoryLocal ───── siete puntos del campus
 PreferenciasLugarRepositoryDataStore ─ último punto seleccionado
-ValhallaRutasRepository ───── ruta peatonal, distancia, duración y maniobras
+ValhallaRutasRepository ───── ruta peatonal con validación del perímetro
+CampusRutas ───────────────── respaldo interno estimado y acotado al campus
         ↓
 MapaLibre Native ─────────── estilos públicos de OpenFreeMap
 ```

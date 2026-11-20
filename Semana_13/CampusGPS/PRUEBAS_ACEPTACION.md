@@ -25,9 +25,9 @@ Las capturas `01` a `10` corresponden a la interfaz anterior a la migración de 
 |---|---|---|
 | Buscar lugares | El texto filtra las tarjetas por nombre o categoría y permite limpiar la consulta | Implementado; falta recorrido manual en emulador |
 | Resaltar destino | El marcador seleccionado se muestra rojo y los demás quedan atenuados | Implementado; falta recorrido manual en emulador |
-| Ruta peatonal | Con ubicación y destino, el mapa muestra una ruta de Valhalla; el panel indica pasos, distancia y tiempo estimado | Implementado; falta validar desde el emulador con ubicación autorizada |
+| Ruta peatonal | El mapa solo muestra una ruta cuyo origen y recorrido están dentro del campus; incluye pasos, distancia y tiempo estimado | Validación de perímetro y trazado interno implementados; falta validación manual en el emulador |
 
-La ruta usa el servicio público `valhalla1.openstreetmap.de`, requiere Internet y transmite las coordenadas de origen y destino para calcular el trayecto. Si el servicio no responde, la aplicación presenta un error recuperable y no inventa una ruta alternativa.
+La ruta intenta usar `valhalla1.openstreetmap.de`, lo que requiere Internet y transmite las coordenadas de origen y destino. La app descarta las geometrías que cruzan el límite del campus y utiliza un trazado interno estimado como alternativa. Si el usuario está fuera del campus, informa que debe ingresar antes de calcularla. El trazado de respaldo es aproximado y queda pendiente contrastarlo con los senderos reales en el emulador/campus.
 
 ## Verificación automatizada y compilación
 

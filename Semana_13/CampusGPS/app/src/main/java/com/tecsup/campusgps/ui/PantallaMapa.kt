@@ -469,7 +469,9 @@ private fun RouteGuidance(
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("RUTA A PIE", style = MaterialTheme.typography.labelSmall,
+                    Text(
+                        if (ruta?.esReferencial == true) "RUTA INTERNA · ESTIMADA" else "RUTA A PIE",
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
                     Text(
                         ruta?.let { "${formatearDistancia(it.distanciaMetros.toFloat())} · ${formatearDuracion(it.duracionSegundos)} aprox." }
