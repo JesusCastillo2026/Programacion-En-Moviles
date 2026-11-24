@@ -8,9 +8,12 @@ Aplicación Android para consultar un muro de publicaciones REST. El laboratorio
 - Abrir una publicación y leer sus comentarios.
 - Filtrar el muro por usuario, desde Todos hasta Usuario 10.
 - Enviar una publicación con título y contenido; ambos campos se validan antes del envío.
+- Buscar publicaciones localmente por palabras del título sin volver a consultar el servicio.
+- Solicitar la eliminación de una publicación; la interfaz aclara que el resultado es demostrativo.
 - Presentar carga, éxito y error con una opción para reintentar.
 
 JSONPlaceholder simula el envío: responde con el identificador 101, pero no conserva la publicación después de volver a consultar la lista.
+La operación `DELETE` también es demostrativa: el servicio acepta la solicitud, pero no borra de forma persistente el registro.
 
 ## Estructura
 
@@ -60,6 +63,7 @@ flowchart LR
 | Leer comentarios | `GET /posts/{id}/comments` |
 | Filtrar | `GET /posts?userId={id}` |
 | Crear | `POST /posts` con los datos en el cuerpo JSON |
+| Eliminar (ampliación) | `DELETE /posts/{id}`; respuesta simulada, sin persistencia |
 
 ## Abrir en Android Studio
 
@@ -93,3 +97,7 @@ Las capturas solicitadas y los casos de comprobación también están en [EVIDEN
 ## Uso de asistencia
 
 Esta implementación se realizó con asistencia de Codex por solicitud del estudiante. Aunque la guía denomina a `main` fase SinIA, no se debe afirmar que esta versión se desarrolló sin apoyo de IA. El estudiante debe revisar y comprender el código antes de sustentarlo.
+
+## Ampliaciones de mejora-ia
+
+La rama `mejora-ia` añade búsqueda local por título, eliminación demostrativa y el encabezado `Accept: application/json` en las solicitudes. El alcance original del laboratorio se conserva.
