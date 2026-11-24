@@ -103,3 +103,10 @@ Esta implementación se realizó con asistencia de Codex por solicitud del estud
 ## Ampliaciones de mejora-ia
 
 La rama `mejora-ia` añade búsqueda local por título, eliminación demostrativa y el encabezado `Accept: application/json` en las solicitudes. El alcance original del laboratorio se conserva.
+
+## Informe para estudiar y sustentar
+
+El informe completo está en [docs/Informe_Laboratorio_09_MuroCampus.pdf](docs/Informe_Laboratorio_09_MuroCampus.pdf). Incluye el flujo, las capas, endpoints, bloques de código, evidencias de main y mejora-ia, y el estado real de validación. Las capturas disponibles documentan las funciones principales y la búsqueda local. La captura de las nuevas etiquetas por usuario queda pendiente: se compiló el cambio en ambas ramas, pero ADB no detectó el emulador al intentar actualizarlo.
+
+Las tarjetas distinguen los autores con colores estables por usuario, siguiendo la referencia visual del laboratorio. El cambio fue aplicado y compilado correctamente en ambas ramas. Falta capturar su ejecución en el emulador.
+

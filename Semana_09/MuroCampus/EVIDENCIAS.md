@@ -26,3 +26,9 @@ Las capturas se obtienen de la aplicación ejecutándose en el emulador. El PDF 
 | Capas | El ViewModel no usa Retrofit, PostApi ni HttpException | Revisado en el código |
 
 No marco como aprobadas las pruebas que no se hayan ejecutado realmente en el emulador.
+
+## Ajuste visual pendiente de captura
+
+Se aplicó una etiqueta de color estable por userId en las tarjetas de ambas ramas. La compilación de main y mejora-ia finalizó correctamente. No se pudo instalar el APK ni guardar la captura posterior porque ADB no detectó conectado el emulador Pixel 8. Las capturas existentes muestran la ejecución anterior a este ajuste.
+
+El informe de explicación está en [docs/Informe_Laboratorio_09_MuroCampus.pdf](docs/Informe_Laboratorio_09_MuroCampus.pdf).
