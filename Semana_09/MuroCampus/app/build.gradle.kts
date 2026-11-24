@@ -7,6 +7,21 @@ plugins {
 android {
     namespace = "com.tecsup.murocampus"
     compileSdk = 37
+    signingConfigs {
+        create("localDebug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+    buildTypes {
+        getByName("debug") {
+            if (file("debug.keystore").exists()) {
+                signingConfig = signingConfigs.getByName("localDebug")
+            }
+        }
+    }
     defaultConfig {
         applicationId = "com.tecsup.murocampus"
         minSdk = 24
