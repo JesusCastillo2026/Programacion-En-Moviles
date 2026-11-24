@@ -9,12 +9,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -29,8 +31,18 @@ fun PantallaLista(viewModel: PostsViewModel, onAbrirPost: (Int) -> Unit, onCrear
     val estado by viewModel.lista.collectAsStateWithLifecycle()
     val filtro by viewModel.usuarioFiltro.collectAsStateWithLifecycle()
     Scaffold(
-        topBar = { TopAppBar(title = { Text("MuroCampus") }) },
-        floatingActionButton = { FloatingActionButton(onClick = onCrear) { Text("+") } }
+        topBar = { TopAppBar(
+            title = { Text("MuroCampus") },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary
+            )
+        ) },
+        floatingActionButton = { FloatingActionButton(
+            onClick = onCrear,
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        ) { Text("+") } }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             LazyRow(
@@ -38,11 +50,27 @@ fun PantallaLista(viewModel: PostsViewModel, onAbrirPost: (Int) -> Unit, onCrear
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 item {
-                    FilterChip(selected = filtro == null, onClick = { viewModel.filtrar(null) }, label = { Text("Todos") })
+                    FilterChip(
+                        selected = filtro == null,
+                        onClick = { viewModel.filtrar(null) },
+                        label = { Text("Todos") },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    )
                 }
                 items(10) { index ->
                     val userId = index + 1
-                    FilterChip(selected = filtro == userId, onClick = { viewModel.filtrar(userId) }, label = { Text("Usuario $userId") })
+                    FilterChip(
+                        selected = filtro == userId,
+                        onClick = { viewModel.filtrar(userId) },
+                        label = { Text("Usuario $userId") },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    )
                 }
             }
             when (val actual = estado) {

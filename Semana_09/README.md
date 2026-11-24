@@ -1,12 +1,14 @@
-# Semana 09 · Consumo de API con Retrofit
+# Semana 09 · Consumo de API REST
 
-Laboratorio de integración de servicios REST en Android con Kotlin, Retrofit, Jetpack Compose y Room.
+La semana conserva dos proyectos porque el docente actualizó la guía después del primer trabajo.
 
-## Proyecto
+## Proyectos
 
-- `Laboratorio09/`: posts desde JSONPlaceholder, navegación a detalle por ID, favoritos persistidos localmente y un ejercicio adicional con el recurso `/todos`.
-- En `main` está la versión base. `mejora-ia` presenta la versión ampliada en la misma ruta.
+- `Laboratorio09/`: entrega anterior con publicaciones, favoritos en Room, recurso `/todos` y el catálogo de anfibios en la rama `mejora-ia`.
+- `MuroCampus/`: proyecto de la guía actualizada, con muro de publicaciones, comentarios, filtro por usuario y formulario para crear publicaciones.
+
+En `main` está la versión base de MuroCampus; `mejora-ia` mantiene las ampliaciones del nuevo laboratorio. El trabajo anterior sigue disponible en su carpeta y no se reemplaza.
 
 ## Abrir en Android Studio
 
-Abre `Laboratorio09/`, espera la sincronización de Gradle y ejecuta la configuración `app`. Se requiere conexión a Internet para consultar la API; los favoritos se guardan en la base local Room del dispositivo.
+Abre `Laboratorio09/` para ejecutar el proyecto anterior o `MuroCampus/` para ejecutar la guía actualizada. En ambos casos, sincroniza Gradle y ejecuta `app`. Se necesita conexión a Internet para cargar las APIs.
