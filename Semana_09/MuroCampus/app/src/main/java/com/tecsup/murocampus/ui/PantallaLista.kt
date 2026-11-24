@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Scaffold
@@ -30,6 +32,7 @@ import com.tecsup.murocampus.viewmodel.UiState
 fun PantallaLista(viewModel: PostsViewModel, onAbrirPost: (Int) -> Unit, onCrear: () -> Unit) {
     val estado by viewModel.lista.collectAsStateWithLifecycle()
     val filtro by viewModel.usuarioFiltro.collectAsStateWithLifecycle()
+    val busqueda by viewModel.busqueda.collectAsStateWithLifecycle()
     Scaffold(
         topBar = { TopAppBar(
             title = { Text("MuroCampus") },
@@ -73,10 +76,23 @@ fun PantallaLista(viewModel: PostsViewModel, onAbrirPost: (Int) -> Unit, onCrear
                     )
                 }
             }
+            OutlinedTextField(
+                value = busqueda,
+                onValueChange = viewModel::buscar,
+                modifier = Modifier
+                    .padding(horizontal = 12.dp)
+                    .fillMaxWidth(),
+                label = { Text("Buscar por título") },
+                singleLine = true
+            )
             when (val actual = estado) {
                 UiState.Cargando -> Cargando(modifier = Modifier.weight(1f))
                 is UiState.Error -> ErrorConReintento(actual.mensaje, viewModel::cargar)
-                is UiState.Exito -> if (actual.datos.isEmpty()) {
+                is UiState.Exito -> {
+                    val coincidencias = actual.datos.filter {
+                        it.title.contains(busqueda, ignoreCase = true)
+                    }
+                    if (coincidencias.isEmpty()) {
                     Text("Sin publicaciones", Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
                     LazyColumn(
@@ -84,10 +100,11 @@ fun PantallaLista(viewModel: PostsViewModel, onAbrirPost: (Int) -> Unit, onCrear
                         contentPadding = PaddingValues(12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(actual.datos, key = { it.id }) { post ->
+                        items(coincidencias, key = { it.id }) { post ->
                             TarjetaPost(post, onClick = { onAbrirPost(post.id) })
                         }
                     }
+                }
                 }
             }
         }

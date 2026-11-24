@@ -18,6 +18,8 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     val lista = _lista.asStateFlow()
     private val _usuarioFiltro = MutableStateFlow<Int?>(null)
     val usuarioFiltro = _usuarioFiltro.asStateFlow()
+    private val _busqueda = MutableStateFlow("")
+    val busqueda = _busqueda.asStateFlow()
 
     data class DetalleUi(val post: Post, val comentarios: List<Comentario>)
     private val _detalle = MutableStateFlow<UiState<DetalleUi>>(UiState.Error("Selecciona una publicación."))
@@ -45,6 +47,10 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
         if (_usuarioFiltro.value == userId) return
         _usuarioFiltro.value = userId
         cargar()
+    }
+
+    fun buscar(texto: String) {
+        _busqueda.value = texto
     }
 
     fun abrir(id: Int) {
