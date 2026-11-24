@@ -9,6 +9,7 @@ Las capturas se obtienen de la aplicación ejecutándose en el emulador. El PDF 
 | `docs/evidencias/03_filtro_usuario.png` | Usuario 2 seleccionado y sus publicaciones |
 | `docs/evidencias/04_crear_publicacion.png` | Formulario y respuesta `Publicado con id 101` |
 | `docs/evidencias/05_error_conexion.png` | Error de conexión y botón Reintentar |
+| `docs/evidencias/06_mejora_ia_busqueda.png` | Búsqueda local por el texto «qui» en la rama mejora-ia |
 
 ## Casos de comprobación del PDF
 

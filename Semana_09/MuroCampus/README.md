@@ -85,6 +85,8 @@ Las capturas solicitadas y los casos de comprobación también están en [EVIDEN
 
 ![Estado sin conexión](docs/evidencias/05_error_conexion.png)
 
+![Búsqueda local en mejora-ia](docs/evidencias/06_mejora_ia_busqueda.png)
+
 ### Respuestas breves para la sustentación
 
 1. `GET` consulta; `POST` envía datos. El formulario usa `@Body` para mandar el objeto y el filtro usa `@Query` para añadir `userId` a la URL.
