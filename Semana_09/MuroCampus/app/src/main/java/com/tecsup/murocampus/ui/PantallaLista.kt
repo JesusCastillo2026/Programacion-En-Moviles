@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -24,10 +25,13 @@ import com.tecsup.murocampus.viewmodel.UiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaLista(viewModel: PostsViewModel, onAbrirPost: (Int) -> Unit) {
+fun PantallaLista(viewModel: PostsViewModel, onAbrirPost: (Int) -> Unit, onCrear: () -> Unit) {
     val estado by viewModel.lista.collectAsStateWithLifecycle()
     val filtro by viewModel.usuarioFiltro.collectAsStateWithLifecycle()
-    Scaffold(topBar = { TopAppBar(title = { Text("MuroCampus") }) }) { padding ->
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("MuroCampus") }) },
+        floatingActionButton = { FloatingActionButton(onClick = onCrear) { Text("+") } }
+    ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),

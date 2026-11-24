@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import com.tecsup.murocampus.data.PostRepositoryRemote
 import com.tecsup.murocampus.data.remote.RetrofitClient
 import com.tecsup.murocampus.ui.PantallaDetalle
+import com.tecsup.murocampus.ui.PantallaCrear
 import com.tecsup.murocampus.ui.PantallaLista
 import com.tecsup.murocampus.ui.theme.MuroCampusTheme
 import com.tecsup.murocampus.viewmodel.PostsViewModel
@@ -27,11 +28,17 @@ class MainActivity : ComponentActivity() {
         setContent {
             MuroCampusTheme {
                 var postId by rememberSaveable { mutableStateOf<Int?>(null) }
-                if (postId == null) {
+                var crear by rememberSaveable { mutableStateOf(false) }
+                if (postId == null && !crear) {
                     PantallaLista(postsViewModel, onAbrirPost = { id ->
                         postId = id
                         postsViewModel.abrir(id)
+                    }, onCrear = {
+                        postsViewModel.limpiarResultadoCrear()
+                        crear = true
                     })
+                } else if (crear) {
+                    PantallaCrear(postsViewModel, onVolver = { crear = false })
                 } else {
                     PantallaDetalle(postsViewModel, onVolver = { postId = null })
                 }
