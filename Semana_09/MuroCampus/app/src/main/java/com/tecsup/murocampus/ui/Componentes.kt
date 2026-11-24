@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -14,11 +16,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tecsup.murocampus.model.Post
+
+private val coloresUsuario = listOf(
+    Color(0xFF2E86C1), Color(0xFFFFC928), Color(0xFF47A77A), Color(0xFF9B59B6),
+    Color(0xFFE67E22), Color(0xFF16A085), Color(0xFFE76F8A), Color(0xFF5C6BC0),
+    Color(0xFF8D6E63), Color(0xFF00A6A6)
+)
 
 @Composable
 fun TarjetaPost(post: Post, onClick: () -> Unit, modifier: Modifier = Modifier) {
@@ -30,7 +39,11 @@ fun TarjetaPost(post: Post, onClick: () -> Unit, modifier: Modifier = Modifier) 
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 "Usuario ${post.userId}",
-                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(coloresUsuario[(post.userId - 1).mod(coloresUsuario.size)])
+                    .padding(horizontal = 7.dp, vertical = 2.dp),
+                color = if (post.userId == 2) Color(0xFF262626) else Color.White,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold
             )
