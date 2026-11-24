@@ -16,6 +16,8 @@ import kotlinx.coroutines.launch
 class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private val _lista = MutableStateFlow<UiState<List<Post>>>(UiState.Cargando)
     val lista = _lista.asStateFlow()
+    private val _usuarioFiltro = MutableStateFlow<Int?>(null)
+    val usuarioFiltro = _usuarioFiltro.asStateFlow()
 
     data class DetalleUi(val post: Post, val comentarios: List<Comentario>)
     private val _detalle = MutableStateFlow<UiState<DetalleUi>>(UiState.Error("Selecciona una publicación."))
@@ -30,10 +32,17 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     fun cargar() {
         viewModelScope.launch {
             _lista.value = UiState.Cargando
-            repo.listar()
+            val userId = _usuarioFiltro.value
+            (if (userId == null) repo.listar() else repo.porUsuario(userId))
                 .onSuccess { _lista.value = UiState.Exito(it) }
                 .onFailure { _lista.value = UiState.Error(mensajeDe(it)) }
         }
+    }
+
+    fun filtrar(userId: Int?) {
+        if (_usuarioFiltro.value == userId) return
+        _usuarioFiltro.value = userId
+        cargar()
     }
 
     fun abrir(id: Int) {
