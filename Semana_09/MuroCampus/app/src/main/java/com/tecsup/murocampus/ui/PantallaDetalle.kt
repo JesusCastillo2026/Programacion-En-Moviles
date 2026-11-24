@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -31,6 +32,7 @@ import com.tecsup.murocampus.viewmodel.UiState
 fun PantallaDetalle(viewModel: PostsViewModel, onVolver: () -> Unit) {
     BackHandler(onBack = onVolver)
     val estado by viewModel.detalle.collectAsStateWithLifecycle()
+    val resultadoBorrar by viewModel.resultadoBorrar.collectAsStateWithLifecycle()
     Scaffold(topBar = {
         TopAppBar(
             title = { Text("MuroCampus") },
@@ -51,6 +53,24 @@ fun PantallaDetalle(viewModel: PostsViewModel, onVolver: () -> Unit) {
             ) {
                 item {
                     TarjetaPost(actual.datos.post, onClick = {})
+                    OutlinedButton(
+                        onClick = { viewModel.borrar(actual.datos.post.id) },
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) { Text("Eliminar publicación (demo)") }
+                    when (val borrado = resultadoBorrar) {
+                        UiState.Cargando -> Text("Enviando solicitud…", Modifier.padding(top = 4.dp))
+                        is UiState.Exito -> Text(
+                            "Solicitud DELETE aceptada. JSONPlaceholder no conserva cambios.",
+                            Modifier.padding(top = 4.dp),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        is UiState.Error -> Text(
+                            borrado.mensaje,
+                            Modifier.padding(top = 4.dp),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        null -> Unit
+                    }
                     Text("Comentarios (${actual.datos.comentarios.size})", Modifier.padding(top = 12.dp, bottom = 4.dp), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
                 items(actual.datos.comentarios, key = { it.id }) { comentario ->
