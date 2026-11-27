@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -189,7 +190,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
             }
 
             CardSection("Historial", Icons.Rounded.History, "Los avisos recientes se guardan en este dispositivo.") {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     listOf("Todos", "Botón", "Recordatorio", "Modo avión", "Cargador").forEach { tipo ->
                         FilterChip(selected = filtro == tipo, onClick = { filtro = tipo }, label = { Text(tipo) })
                     }
@@ -265,3 +266,5 @@ private fun CardSection(
         }
     }
 }
+
+

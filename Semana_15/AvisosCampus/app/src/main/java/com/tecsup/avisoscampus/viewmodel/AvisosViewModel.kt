@@ -38,7 +38,7 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
     private var trabajo: Job? = null
 
     val avisos = repo.avisos
-    private val ids = AtomicInteger(1)
+    private val ids = AtomicInteger((System.currentTimeMillis() % Int.MAX_VALUE).toInt())
 
     fun permisoRespondido(concedido: Boolean) {
         _permiso.value = if (concedido) PermisoUi.Concedido else PermisoUi.Denegado
@@ -116,6 +116,7 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
         urgente = origen == Origen.RECORDATORIO
     )
 }
+
 
 
 

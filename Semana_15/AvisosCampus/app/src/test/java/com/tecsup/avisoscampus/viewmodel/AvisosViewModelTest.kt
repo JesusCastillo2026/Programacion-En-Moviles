@@ -67,3 +67,4 @@ class AvisosViewModelTest {
         assertEquals(null, vm.faltan.value)
     }
 }
+

@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import com.tecsup.avisoscampus.MainActivity
 import com.tecsup.avisoscampus.R
 import com.tecsup.avisoscampus.model.Aviso
+import com.tecsup.avisoscampus.model.Origen
 import com.tecsup.avisoscampus.receiver.PosponerReceiver
 import com.tecsup.avisoscampus.worker.PosponerWorker
 
@@ -52,10 +53,24 @@ object Notificador {
             .setStyle(NotificationCompat.BigTextStyle().bigText(aviso.texto))
             .setPriority(if (aviso.urgente) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendiente)
+            .apply {
+                if (aviso.origen == Origen.RECORDATORIO) {
+                    val accion = Intent(context, PosponerReceiver::class.java)
+                        .putExtra(PosponerWorker.ID, aviso.id)
+                        .putExtra(PosponerWorker.TITULO, aviso.titulo)
+                        .putExtra(PosponerWorker.TEXTO, aviso.texto)
+                    val accionPendiente = PendingIntent.getBroadcast(
+                        context,
+                        aviso.id + 10_000,
+                        accion,
+                        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                    )
+                    addAction(R.drawable.ic_notificacion, "Posponer 10 s", accionPendiente)
+                }
+            }
             .setAutoCancel(true)
             .build()
         NotificationManagerCompat.from(context).notify(aviso.id, notificacion)
         return true
     }
 }
-
