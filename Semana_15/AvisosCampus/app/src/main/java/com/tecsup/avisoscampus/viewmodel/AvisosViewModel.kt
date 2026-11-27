@@ -95,7 +95,10 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
         titulo = titulo,
         texto = texto,
         origen = origen,
-        hora = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+        hora = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date()),
+        urgente = origen == Origen.RECORDATORIO
     )
 }
+
+
 
