@@ -3,10 +3,12 @@ package com.tecsup.avisoscampus.ui
 import android.Manifest
 import android.content.Intent
 import android.content.IntentFilter
+import android.provider.Settings
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -26,6 +28,7 @@ import kotlinx.coroutines.flow.collect
 fun PantallaAvisos(vm: AvisosViewModel) {
     val contexto = LocalContext.current
     val permiso by vm.permiso.collectAsState()
+    val mensaje by vm.mensaje.collectAsState()
     val faltan by vm.faltan.collectAsState()
     val escuchando by vm.escuchandoAvion.collectAsState()
     val avisos by vm.avisos.collectAsState()
@@ -71,6 +74,22 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                     if (Build.VERSION.SDK_INT >= 33) lanzador.launch(Manifest.permission.POST_NOTIFICATIONS)
                     else vm.permisoRespondido(true)
                 }) { Text("Permitir notificaciones") }
+                mensaje?.let { texto ->
+                    Column(
+                        Modifier.fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.errorContainer, androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(texto, color = MaterialTheme.colorScheme.error)
+                        OutlinedButton(onClick = {
+                            contexto.startActivity(
+                                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                    .putExtra(Settings.EXTRA_APP_PACKAGE, contexto.packageName)
+                            )
+                        }) { Text("Abrir ajustes") }
+                    }
+                }
             }
             CardSection("Avisos") { Button(onClick = vm::avisarAhora) { Text("Mostrar aviso") } }
             CardSection("Recordatorio") {
@@ -101,4 +120,6 @@ private fun CardSection(titulo: String, content: @Composable ColumnScope.() -> U
         })
     }
 }
+
+
 
