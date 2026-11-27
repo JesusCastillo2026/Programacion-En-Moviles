@@ -28,6 +28,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
     val permiso by vm.permiso.collectAsState()
     val faltan by vm.faltan.collectAsState()
     val escuchando by vm.escuchandoAvion.collectAsState()
+    val avisos by vm.avisos.collectAsState()
     val lanzador = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         vm.permisoRespondido(it)
     }
@@ -86,7 +87,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 }
                 Text("Activa o desactiva el modo avión del celular", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            CardSection("Historial") { Text("Sin avisos todavía") }
+            CardSection("Historial") { HistorialAvisos(avisos) }
         }
     }
 }
@@ -100,3 +101,4 @@ private fun CardSection(titulo: String, content: @Composable ColumnScope.() -> U
         })
     }
 }
+
