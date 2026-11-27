@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.collect
 fun PantallaAvisos(vm: AvisosViewModel) {
     val contexto = LocalContext.current
     val permiso by vm.permiso.collectAsState()
+    val faltan by vm.faltan.collectAsState()
     val lanzador = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         vm.permisoRespondido(it)
     }
@@ -55,7 +56,13 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 }) { Text("Permitir notificaciones") }
             }
             CardSection("Avisos") { Button(onClick = vm::avisarAhora) { Text("Mostrar aviso") } }
-            CardSection("Recordatorio") { Button(onClick = {}) { Text("Recordar en 10 s") } }
+            CardSection("Recordatorio") {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = { vm.recordarEn() }, enabled = faltan == null) { Text("Recordar en 10 s") }
+                    OutlinedButton(onClick = vm::cancelarRecordatorio, enabled = faltan != null) { Text("Cancelar") }
+                }
+                faltan?.let { Text("Faltan $it s", Modifier.fillMaxWidth(), style = MaterialTheme.typography.titleMedium) }
+            }
             CardSection("Receptor de anuncios") { Text("Escuchar el modo avión") }
             CardSection("Historial") { Text("Sin avisos todavía") }
         }
