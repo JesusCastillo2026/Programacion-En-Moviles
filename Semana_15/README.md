@@ -1,3 +1,10 @@
-# Semana 15 · Pendiente
+# Semana 15 · Notificaciones
 
-Esta carpeta queda reservada para el material y la entrega de la Semana 15. Aún no hay un proyecto o laboratorio publicado en este repositorio.
+Proyecto Android AvisosCampus para practicar notificaciones locales, permiso de Android 13, recordatorio con corrutinas y recepción de cambios del modo avión.
+
+- Aplicación: `AvisosCampus/`
+- Ramas de trabajo: `main` y `mejora-ia`
+- Guía de ejecución, estructura, flujo y preguntas de repaso: `AvisosCampus/README.md`
+- Evidencias: `AvisosCampus/capturas/` (pendientes de tomar al ejecutar el emulador)
+
+La implementación se preparó con asistencia de Codex; `main` no debe describirse como una versión hecha sin IA.
