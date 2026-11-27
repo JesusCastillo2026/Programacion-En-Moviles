@@ -10,6 +10,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -26,6 +28,10 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
     private val _eventos = MutableSharedFlow<Aviso>(extraBufferCapacity = 1)
     val eventos = _eventos.asSharedFlow()
 
+    private val _faltan = MutableStateFlow<Int?>(null)
+    val faltan = _faltan.asStateFlow()
+    private var trabajo: Job? = null
+
     val avisos = repo.avisos
     private val ids = AtomicInteger(1)
 
@@ -39,18 +45,42 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
     }
 
     fun avisarAhora() {
-        val aviso = Aviso(
-            id = ids.getAndIncrement(),
-            titulo = "Tarea lista",
-            texto = "Tu entrega fue registrada",
-            origen = Origen.BOTON,
-            hora = horaActual()
-        )
         viewModelScope.launch {
-            repo.registrar(aviso)
-            _eventos.emit(aviso)
+            registrarYEmitir(crearAviso("Tarea lista", "Tu entrega fue registrada", Origen.BOTON))
         }
     }
 
-    private fun horaActual(): String = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+    fun recordarEn(segundos: Int = 10) {
+        if (trabajo?.isActive == true) return
+        trabajo = viewModelScope.launch {
+            try {
+                for (s in segundos downTo 1) {
+                    _faltan.value = s
+                    delay(1_000L)
+                }
+                registrarYEmitir(
+                    crearAviso("Recordatorio", "Revisa tu laboratorio pendiente", Origen.RECORDATORIO)
+                )
+            } finally {
+                _faltan.value = null
+            }
+        }
+    }
+
+    fun cancelarRecordatorio() {
+        trabajo?.cancel()
+    }
+
+    private suspend fun registrarYEmitir(aviso: Aviso) {
+        repo.registrar(aviso)
+        _eventos.emit(aviso)
+    }
+
+    private fun crearAviso(titulo: String, texto: String, origen: Origen) = Aviso(
+        id = ids.getAndIncrement(),
+        titulo = titulo,
+        texto = texto,
+        origen = origen,
+        hora = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+    )
 }
