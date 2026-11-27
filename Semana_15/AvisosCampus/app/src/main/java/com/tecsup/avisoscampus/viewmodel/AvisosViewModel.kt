@@ -28,6 +28,9 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
     private val _eventos = MutableSharedFlow<Aviso>(extraBufferCapacity = 1)
     val eventos = _eventos.asSharedFlow()
 
+    private val _escuchandoAvion = MutableStateFlow(false)
+    val escuchandoAvion = _escuchandoAvion.asStateFlow()
+
     private val _faltan = MutableStateFlow<Int?>(null)
     val faltan = _faltan.asStateFlow()
     private var trabajo: Job? = null
@@ -67,6 +70,17 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
         }
     }
 
+    fun cambiarEscucha(valor: Boolean) {
+        _escuchandoAvion.value = valor
+    }
+
+    fun alCambiarModoAvion(activo: Boolean) {
+        viewModelScope.launch {
+            registrarYEmitir(
+                crearAviso("Modo avión", if (activo) "Activado" else "Desactivado", Origen.MODO_AVION)
+            )
+        }
+    }
     fun cancelarRecordatorio() {
         trabajo?.cancel()
     }
@@ -84,3 +98,4 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
         hora = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
     )
 }
+

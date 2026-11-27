@@ -1,6 +1,8 @@
 package com.tecsup.avisoscampus.ui
 
 import android.Manifest
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,8 +14,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import com.tecsup.avisoscampus.notificacion.Notificador
 import com.tecsup.avisoscampus.model.PermisoUi
+import com.tecsup.avisoscampus.receiver.ModoAvionReceiver
 import com.tecsup.avisoscampus.viewmodel.AvisosViewModel
 import kotlinx.coroutines.flow.collect
 
@@ -23,6 +27,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
     val contexto = LocalContext.current
     val permiso by vm.permiso.collectAsState()
     val faltan by vm.faltan.collectAsState()
+    val escuchando by vm.escuchandoAvion.collectAsState()
     val lanzador = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         vm.permisoRespondido(it)
     }
@@ -34,6 +39,17 @@ fun PantallaAvisos(vm: AvisosViewModel) {
         vm.eventos.collect { aviso ->
             if (!Notificador.mostrar(contexto, aviso)) vm.noSePudoMostrar()
         }
+    }
+    DisposableEffect(contexto, escuchando, vm) {
+        if (!escuchando) return@DisposableEffect onDispose { }
+        val receiver = ModoAvionReceiver(vm::alCambiarModoAvion)
+        ContextCompat.registerReceiver(
+            contexto,
+            receiver,
+            IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        onDispose { contexto.unregisterReceiver(receiver) }
     }
 
     Scaffold(topBar = { TopAppBar(title = { Text("AvisosCampus") }) }) { padding ->
@@ -63,7 +79,13 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 }
                 faltan?.let { Text("Faltan $it s", Modifier.fillMaxWidth(), style = MaterialTheme.typography.titleMedium) }
             }
-            CardSection("Receptor de anuncios") { Text("Escuchar el modo avión") }
+            CardSection("Receptor de anuncios") {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Escuchar el modo avión")
+                    Switch(checked = escuchando, onCheckedChange = vm::cambiarEscucha)
+                }
+                Text("Activa o desactiva el modo avión del celular", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
             CardSection("Historial") { Text("Sin avisos todavía") }
         }
     }
