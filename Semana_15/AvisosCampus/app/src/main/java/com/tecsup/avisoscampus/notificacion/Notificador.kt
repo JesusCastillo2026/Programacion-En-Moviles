@@ -15,6 +15,8 @@ import androidx.core.content.ContextCompat
 import com.tecsup.avisoscampus.MainActivity
 import com.tecsup.avisoscampus.R
 import com.tecsup.avisoscampus.model.Aviso
+import com.tecsup.avisoscampus.receiver.PosponerReceiver
+import com.tecsup.avisoscampus.worker.PosponerWorker
 
 object Notificador {
     const val CANAL = "avisos"
@@ -56,3 +58,4 @@ object Notificador {
         return true
     }
 }
+

@@ -6,6 +6,7 @@
         android:label="AvisosCampus"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
+        <receiver android:name=".receiver.PosponerReceiver" android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -16,3 +17,4 @@
         </activity>
     </application>
 </manifest>
+
