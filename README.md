@@ -29,7 +29,7 @@ Así, al cambiar de rama se ve el proyecto de esa versión sin carpetas duplicad
 | [12](Semana_12/README.md) | Cine Castillo: catálogo de películas con TMDB, Room y Firebase | Disponible |
 | [13](Semana_13/README.md) | CampusGPS: ubicación, mapa y puntos cercanos | Disponible |
 | [14](Semana_14/README.md) | Semana reservada para la siguiente entrega | Pendiente |
-| [15](Semana_15/README.md) | Semana reservada para la siguiente entrega | Pendiente |
+| [15](Semana_15/README.md) | AvisosCampus: notificaciones locales y BroadcastReceiver | Disponible |
 | [16](Semana_16/README.md) | Semana reservada para la siguiente entrega | Pendiente |
 
 ## Abrir un proyecto
@@ -49,3 +49,4 @@ Kotlin · Android Studio · Jetpack Compose · Material 3 · Navigation Compose 
 
 **Autor:** Jesús Castillo Sumire<br>
 **Institución:** TECSUP · **Curso:** Programación en Móviles
+
