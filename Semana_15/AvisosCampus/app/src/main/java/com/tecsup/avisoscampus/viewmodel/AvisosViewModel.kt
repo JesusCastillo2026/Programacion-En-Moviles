@@ -45,6 +45,10 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
         if (concedido) _mensaje.value = null
     }
 
+    fun limpiarHistorial() {
+        viewModelScope.launch { repo.limpiarHistorial() }
+    }
+
     fun noSePudoMostrar() {
         _mensaje.value = "Sin permiso: el aviso se guardó en el historial, pero no se mostró"
     }
@@ -112,6 +116,7 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
         urgente = origen == Origen.RECORDATORIO
     )
 }
+
 
 
 
