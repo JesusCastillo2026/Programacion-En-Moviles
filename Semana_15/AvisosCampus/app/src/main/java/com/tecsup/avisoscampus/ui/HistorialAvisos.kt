@@ -50,4 +50,5 @@ private fun colorOrigen(origen: Origen): Color = when (origen) {
     Origen.BOTON -> Color(0xFF1769AA)
     Origen.RECORDATORIO -> Color(0xFFB77900)
     Origen.MODO_AVION -> Color(0xFF7650A8)
+    Origen.CARGADOR -> Color(0xFF137C83)
 }

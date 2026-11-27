@@ -8,9 +8,15 @@ import androidx.compose.ui.graphics.Color
 private val Colores = lightColorScheme(
     primary = Color(0xFF1769AA),
     onPrimary = Color.White,
-    secondary = Color(0xFF4E6478),
-    background = Color(0xFFF5F7FA),
-    surface = Color.White
+    primaryContainer = Color(0xFFD5E8FA),
+    onPrimaryContainer = Color(0xFF102E46),
+    secondary = Color(0xFF137C83),
+    onSecondary = Color.White,
+    background = Color(0xFFF3F6FA),
+    surface = Color.White,
+    surfaceVariant = Color(0xFFE8EEF4),
+    error = Color(0xFFB3261E),
+    errorContainer = Color(0xFFFCE8E6)
 )
 
 @Composable
