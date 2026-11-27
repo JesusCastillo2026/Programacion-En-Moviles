@@ -31,6 +31,8 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
     private val _escuchandoAvion = MutableStateFlow(false)
     val escuchandoAvion = _escuchandoAvion.asStateFlow()
 
+    private val _escuchandoCargador = MutableStateFlow(false)
+    val escuchandoCargador = _escuchandoCargador.asStateFlow()
     private val _faltan = MutableStateFlow<Int?>(null)
     val faltan = _faltan.asStateFlow()
     private var trabajo: Job? = null
@@ -81,6 +83,17 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
             )
         }
     }
+    fun cambiarEscuchaCargador(valor: Boolean) {
+        _escuchandoCargador.value = valor
+    }
+
+    fun alCambiarCargador(conectado: Boolean) {
+        viewModelScope.launch {
+            registrarYEmitir(
+                crearAviso("Cargador", if (conectado) "Conectado" else "Desconectado", Origen.CARGADOR)
+            )
+        }
+    }
     fun cancelarRecordatorio() {
         trabajo?.cancel()
     }
@@ -99,6 +112,7 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
         urgente = origen == Origen.RECORDATORIO
     )
 }
+
 
 
 

@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import com.tecsup.avisoscampus.notificacion.Notificador
 import com.tecsup.avisoscampus.model.PermisoUi
 import com.tecsup.avisoscampus.receiver.ModoAvionReceiver
+import com.tecsup.avisoscampus.receiver.CargadorReceiver
 import com.tecsup.avisoscampus.viewmodel.AvisosViewModel
 import kotlinx.coroutines.flow.collect
 
@@ -31,6 +32,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
     val mensaje by vm.mensaje.collectAsState()
     val faltan by vm.faltan.collectAsState()
     val escuchando by vm.escuchandoAvion.collectAsState()
+    val escuchandoCargador by vm.escuchandoCargador.collectAsState()
     val avisos by vm.avisos.collectAsState()
     val lanzador = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         vm.permisoRespondido(it)
@@ -120,6 +122,7 @@ private fun CardSection(titulo: String, content: @Composable ColumnScope.() -> U
         })
     }
 }
+
 
 
 
