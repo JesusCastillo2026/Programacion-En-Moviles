@@ -176,7 +176,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text("Faltan ${faltan ?: 0} s", Modifier.fillMaxWidth(), fontWeight = FontWeight.SemiBold)
                         LinearProgressIndicator(
-                            progress = if (faltan == null) 0f else (segundosElegidos - faltan!!).toFloat() / segundosElegidos,
+                            progress = { if (faltan == null) 0f else (segundosElegidos - faltan!!).toFloat() / segundosElegidos },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -266,5 +266,6 @@ private fun CardSection(
         }
     }
 }
+
 
 
